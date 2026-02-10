@@ -1,13 +1,14 @@
 "use client"
 
 import { useState, useMemo } from "react"
-import { Plus, ChevronDown } from "lucide-react"
+import { Plus, ChevronDown, FileDown } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { PageHeader } from "@/components/shared/page-header"
 import { SearchBar } from "@/components/shared/search-bar"
 import { ReviewCard } from "@/components/shared/review-card"
 import { PaginationNav } from "@/components/shared/pagination-nav"
 import { reviews } from "@/lib/mock-data"
+import { useAuth } from "@/lib/auth-context"
 
 const programOptions = [
   { id: "all", label: "전체" },
@@ -20,6 +21,7 @@ const PAGE_SIZE = 6
 
 export default function Reviews() {
   const router = useRouter()
+  const { isAdmin } = useAuth()
   const [selectedProgram, setSelectedProgram] = useState("all")
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
   const [search, setSearch] = useState("")
@@ -60,13 +62,24 @@ export default function Reviews() {
         title="독서리뷰(서평)"
         description={`총 ${filtered.length}개의 리뷰`}
         action={
-          <button
-            onClick={() => router.push("/reviews/write")}
-            className="flex items-center gap-1.5 rounded-full bg-primary px-4 py-2 text-xs font-semibold text-primary-foreground shadow-md transition-all hover:shadow-lg hover:brightness-110"
-          >
-            <Plus size={14} />
-            글쓰기
-          </button>
+          <div className="flex items-center gap-2">
+            {isAdmin && (
+              <button
+                onClick={() => router.push("/reviews/export")}
+                className="flex items-center gap-1.5 rounded-full bg-amber-500 px-4 py-2 text-xs font-semibold text-white shadow-md transition-all hover:shadow-lg hover:brightness-110"
+              >
+                <FileDown size={14} />
+                데이터 추출
+              </button>
+            )}
+            <button
+              onClick={() => router.push("/reviews/write")}
+              className="flex items-center gap-1.5 rounded-full bg-primary px-4 py-2 text-xs font-semibold text-primary-foreground shadow-md transition-all hover:shadow-lg hover:brightness-110"
+            >
+              <Plus size={14} />
+              글쓰기
+            </button>
+          </div>
         }
       />
 

@@ -1,6 +1,7 @@
 import React from "react"
 import type { Metadata, Viewport } from 'next'
 import { Inter, Playfair_Display } from 'next/font/google'
+import { AuthProvider } from "@/lib/auth-context"
 
 import './globals.css'
 
@@ -28,7 +29,9 @@ export default function RootLayout({
   return (
     <html lang="ko">
       <body className={`${inter.variable} ${playfair.variable} font-sans antialiased`}>
-        {children}
+        <AuthProvider>
+          {children}
+        </AuthProvider>
       </body>
     </html>
   )

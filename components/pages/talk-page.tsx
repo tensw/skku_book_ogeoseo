@@ -14,8 +14,13 @@ import {
   ChevronRight,
   X,
   Camera,
+  Trash2,
+  EyeOff,
+  Eye,
+  Settings,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { useAuth } from "@/lib/auth-context"
 
 interface Post {
   id: number
@@ -179,10 +184,14 @@ function PhotoCarousel({ photos, postId }: { photos: string[]; postId: number })
 }
 
 export function TalkPage() {
+  const { isAdmin } = useAuth()
   const [posts, setPosts] = useState(initialPosts)
   const [newPost, setNewPost] = useState("")
   const [expandedComments, setExpandedComments] = useState<number[]>([])
   const [attachedPhotos, setAttachedPhotos] = useState<string[]>([])
+  const [hiddenPosts, setHiddenPosts] = useState<number[]>([])
+  const [showHidden, setShowHidden] = useState(false)
+  const [deleteConfirm, setDeleteConfirm] = useState<number | null>(null)
 
   const toggleLike = (postId: number) => {
     setPosts((prev) =>
@@ -231,12 +240,54 @@ export function TalkPage() {
     setAttachedPhotos([])
   }
 
+  const handleToggleHidden = (postId: number) => {
+    setHiddenPosts((prev) =>
+      prev.includes(postId) ? prev.filter((id) => id !== postId) : [...prev, postId]
+    )
+  }
+
+  const handleDelete = (postId: number) => {
+    setDeleteConfirm(postId)
+  }
+
+  const confirmDelete = () => {
+    if (deleteConfirm) {
+      setPosts(posts.filter((p) => p.id !== deleteConfirm))
+      setDeleteConfirm(null)
+    }
+  }
+
+  const visiblePosts = showHidden ? posts : posts.filter((p) => !hiddenPosts.includes(p.id))
+
   return (
     <div className="flex flex-col pb-6">
       {/* Header */}
       <header className="px-5 pb-3 pt-5 sm:px-8">
-        <h1 className="text-xl font-bold text-foreground">Talk Talk</h1>
-        <p className="mt-0.5 text-[11px] text-muted-foreground">지금 이 순간의 독서를 공유하세요</p>
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-xl font-bold text-foreground">Talk Talk</h1>
+            <p className="mt-0.5 text-[11px] text-muted-foreground">지금 이 순간의 독서를 공유하세요</p>
+          </div>
+          {isAdmin && (
+            <button
+              onClick={() => setShowHidden(!showHidden)}
+              className={cn(
+                "flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition-colors",
+                showHidden
+                  ? "bg-amber-100 text-amber-700"
+                  : "bg-muted text-muted-foreground hover:bg-border"
+              )}
+            >
+              {showHidden ? <Eye size={12} /> : <EyeOff size={12} />}
+              {showHidden ? "숨긴 글 표시 중" : "숨긴 글 보기"}
+              {hiddenPosts.length > 0 && (
+                <span className="rounded-full bg-amber-500 px-1.5 py-0.5 text-[10px] font-bold text-white">
+                  {hiddenPosts.length}
+                </span>
+              )}
+            </button>
+          )}
+        </div>
       </header>
 
       {/* Compose - Threads style */}
@@ -307,8 +358,10 @@ export function TalkPage() {
 
       {/* Feed - Threads style */}
       <div className="flex flex-col">
-        {posts.map((post) => (
-          <article key={post.id} className="border-b border-border">
+        {visiblePosts.map((post) => {
+          const isHidden = hiddenPosts.includes(post.id)
+          return (
+          <article key={post.id} className={cn("border-b border-border", isHidden && "opacity-50 bg-amber-50/50")}>
             <div className="flex gap-3 px-5 pt-4 sm:px-8">
               {/* Left thread line */}
               <div className="flex flex-col items-center">
@@ -331,9 +384,31 @@ export function TalkPage() {
                     </span>
                   )}
                   <span className="ml-auto text-[10px] text-muted-foreground">{post.time}</span>
-                  <button className="text-muted-foreground hover:text-foreground" aria-label="더보기">
-                    <MoreHorizontal size={14} />
-                  </button>
+                  {isAdmin ? (
+                    <div className="flex items-center gap-1">
+                      <button
+                        onClick={() => handleToggleHidden(post.id)}
+                        className={cn(
+                          "rounded-full p-1 transition-colors",
+                          isHidden ? "text-amber-600 hover:text-amber-700" : "text-muted-foreground hover:text-amber-600"
+                        )}
+                        title={isHidden ? "숨김 해제" : "숨기기"}
+                      >
+                        {isHidden ? <Eye size={14} /> : <EyeOff size={14} />}
+                      </button>
+                      <button
+                        onClick={() => handleDelete(post.id)}
+                        className="rounded-full p-1 text-muted-foreground transition-colors hover:text-red-500"
+                        title="삭제"
+                      >
+                        <Trash2 size={14} />
+                      </button>
+                    </div>
+                  ) : (
+                    <button className="text-muted-foreground hover:text-foreground" aria-label="더보기">
+                      <MoreHorizontal size={14} />
+                    </button>
+                  )}
                 </div>
 
                 <p className="mt-1.5 text-[13px] leading-relaxed text-foreground">{post.content}</p>
@@ -415,8 +490,46 @@ export function TalkPage() {
               </div>
             )}
           </article>
-        ))}
+        )})}
       </div>
+
+      {/* Delete Confirmation Modal */}
+      {deleteConfirm && (
+        <div
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-foreground/50 p-4 backdrop-blur-sm"
+          onClick={() => setDeleteConfirm(null)}
+        >
+          <div
+            className="w-full max-w-sm overflow-hidden rounded-2xl border border-border bg-card shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="px-6 py-6 text-center">
+              <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-red-100">
+                <Trash2 size={24} className="text-red-500" />
+              </div>
+              <h3 className="text-lg font-bold text-foreground">게시물 삭제</h3>
+              <p className="mt-2 text-sm text-muted-foreground">
+                정말 이 게시물을 삭제하시겠습니까?<br />
+                이 작업은 되돌릴 수 없습니다.
+              </p>
+            </div>
+            <div className="flex gap-3 border-t border-border bg-muted/30 px-6 py-4">
+              <button
+                onClick={() => setDeleteConfirm(null)}
+                className="flex-1 rounded-xl border border-border bg-card py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-muted"
+              >
+                취소
+              </button>
+              <button
+                onClick={confirmDelete}
+                className="flex-1 rounded-xl bg-red-500 py-2.5 text-sm font-bold text-white transition-all hover:bg-red-600"
+              >
+                삭제
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

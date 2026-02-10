@@ -16,7 +16,7 @@ import {
 const menuItems = [
   { href: "/notices", label: "공지사항" },
   { href: "/reviews", label: "독서리뷰" },
-  { href: "/discussions", label: "독토" },
+  { href: "/programs", label: "오거서 프로그램" },
   { href: "/guide", label: "오거서 도서추천" },
   { href: "/talk", label: "톡톡" },
   { href: "/library", label: "내 서재" },

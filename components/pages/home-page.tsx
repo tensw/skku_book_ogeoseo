@@ -174,8 +174,8 @@ export function HomePage() {
       {/* Hero Banner */}
       <section className="relative h-56 overflow-hidden sm:h-72">
         <img
-          src="https://picsum.photos/seed/hero-banner/1200/600"
-          alt="독서 라이프스타일"
+          src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=1200&h=600&fit=crop"
+          alt="함께 책 읽고 토론하는 사람들"
           className="h-full w-full object-cover"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-foreground/80 via-foreground/30 to-transparent" />

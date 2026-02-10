@@ -48,7 +48,7 @@ const kdcBadges: KDCBadgeData[] = [
     label: "총류",
     icon: <Key size={18} />,
     earned: true,
-    count: 3,
+    count: 1,
     gradient: "linear-gradient(135deg, #064E3B 0%, #0D7349 50%, #042F24 100%)",
     borderGradient: "linear-gradient(135deg, #34D399, #6EE7B7, #10B981)",
   },
@@ -57,7 +57,7 @@ const kdcBadges: KDCBadgeData[] = [
     label: "철학",
     icon: <Brain size={18} />,
     earned: true,
-    count: 7,
+    count: 2,
     gradient: "linear-gradient(135deg, #042F24 0%, #064E3B 50%, #021A14 100%)",
     borderGradient: "linear-gradient(135deg, #6EE7B7, #A7F3D0, #34D399)",
   },
@@ -75,7 +75,7 @@ const kdcBadges: KDCBadgeData[] = [
     label: "사회과학",
     icon: <Scale size={18} />,
     earned: true,
-    count: 5,
+    count: 2,
     gradient: "linear-gradient(135deg, #047857 0%, #059669 50%, #065F46 100%)",
     borderGradient: "linear-gradient(135deg, #A7F3D0, #D1FAE5, #6EE7B7)",
   },
@@ -84,7 +84,7 @@ const kdcBadges: KDCBadgeData[] = [
     label: "자연과학",
     icon: <Leaf size={18} />,
     earned: true,
-    count: 4,
+    count: 1,
     gradient: "linear-gradient(135deg, #022C1E 0%, #064E3B 50%, #011B12 100%)",
     borderGradient: "linear-gradient(135deg, #34D399, #6EE7B7, #10B981)",
   },
@@ -93,7 +93,7 @@ const kdcBadges: KDCBadgeData[] = [
     label: "기술과학",
     icon: <Cpu size={18} />,
     earned: true,
-    count: 5,
+    count: 1,
     gradient: "linear-gradient(135deg, #14532D 0%, #166534 50%, #0A3B1E 100%)",
     borderGradient: "linear-gradient(135deg, #4ADE80, #86EFAC, #22C55E)",
   },
@@ -102,7 +102,7 @@ const kdcBadges: KDCBadgeData[] = [
     label: "예술",
     icon: <Palette size={18} />,
     earned: true,
-    count: 3,
+    count: 1,
     gradient: "linear-gradient(135deg, #115E45 0%, #0D9065 50%, #0A4030 100%)",
     borderGradient: "linear-gradient(135deg, #5EEAD4, #99F6E4, #2DD4BF)",
   },
@@ -120,7 +120,7 @@ const kdcBadges: KDCBadgeData[] = [
     label: "문학",
     icon: <BookMarked size={18} />,
     earned: true,
-    count: 9,
+    count: 2,
     gradient: "linear-gradient(135deg, #064E3B 0%, #10B981 50%, #022C22 100%)",
     borderGradient: "linear-gradient(135deg, #6EE7B7, #D1FAE5, #34D399)",
   },
@@ -129,7 +129,7 @@ const kdcBadges: KDCBadgeData[] = [
     label: "역사",
     icon: <Landmark size={18} />,
     earned: true,
-    count: 6,
+    count: 1,
     gradient: "linear-gradient(135deg, #1B4D3E 0%, #2F7A5E 50%, #0E3328 100%)",
     borderGradient: "linear-gradient(135deg, #86EFAC, #D1FAE5, #4ADE80)",
   },
@@ -364,20 +364,27 @@ export function LibraryPage() {
         </div>
       </section>
 
-      {/* Stamp Board Section */}
-      <section className="mx-5 overflow-hidden rounded-3xl border border-border bg-card shadow-lg sm:mx-8">
+      {/* Stamp Board Section - Gold Ginkgo Leaf */}
+      <section className="mx-5 overflow-hidden rounded-3xl border border-amber-200 bg-gradient-to-br from-amber-50 to-yellow-50 shadow-lg sm:mx-8">
+        {/* Premium Gold Header */}
+        <div
+          className="h-1 w-full"
+          style={{
+            background: "linear-gradient(90deg, #D4A574, #F4D03F, #E6B800, #F4D03F, #D4A574)",
+          }}
+        />
         <div className="flex items-center justify-between px-5 pt-4">
-          <h2 className="flex items-center gap-2 text-sm font-bold text-foreground">
-            <Award size={16} className="text-tangerine" />
+          <h2 className="flex items-center gap-2 text-sm font-bold text-amber-800">
+            <Award size={16} className="text-amber-600" />
             서평 스탬프
           </h2>
-          <span className="text-[10px] text-muted-foreground">
+          <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-semibold text-amber-700">
             {totalReviews}/20개 수집
           </span>
         </div>
 
         {/* Stamp Grid */}
-        <div className="grid grid-cols-5 gap-2 p-4">
+        <div className="grid grid-cols-5 gap-3 p-4">
           {Array.from({ length: 20 }).map((_, index) => {
             const isFilled = index < totalReviews
             const isReward10 = index === 9
@@ -385,31 +392,84 @@ export function LibraryPage() {
             return (
               <div
                 key={index}
-                className={cn(
-                  "relative flex h-12 w-12 items-center justify-center rounded-full transition-all",
-                  isFilled
-                    ? "bg-gradient-to-br from-primary to-emerald-700 shadow-md"
-                    : "border-2 border-dashed border-border bg-muted/30"
-                )}
+                className="relative flex items-center justify-center"
               >
                 {isFilled ? (
-                  <svg viewBox="0 0 24 24" className="h-6 w-6 text-white" fill="currentColor">
-                    <path d="M12 2C12 2 8 6 8 12C8 16 10 20 12 22C14 20 16 16 16 12C16 6 12 2 12 2Z" />
-                    <path d="M12 2C12 2 6 8 6 14C6 18 9 21 12 22" opacity="0.7" />
-                    <path d="M12 2C12 2 18 8 18 14C18 18 15 21 12 22" opacity="0.7" />
-                  </svg>
+                  /* Gold Ginkgo Leaf - Filled */
+                  <div className="relative">
+                    <svg
+                      viewBox="0 0 40 48"
+                      className="h-12 w-10 drop-shadow-md"
+                      style={{ filter: "drop-shadow(0 2px 4px rgba(212, 165, 116, 0.4))" }}
+                    >
+                      <defs>
+                        <linearGradient id={`goldGradient-${index}`} x1="0%" y1="0%" x2="100%" y2="100%">
+                          <stop offset="0%" stopColor="#F4D03F" />
+                          <stop offset="30%" stopColor="#E6B800" />
+                          <stop offset="50%" stopColor="#F4D03F" />
+                          <stop offset="70%" stopColor="#D4A574" />
+                          <stop offset="100%" stopColor="#C9A227" />
+                        </linearGradient>
+                        <linearGradient id={`goldShine-${index}`} x1="0%" y1="0%" x2="100%" y2="0%">
+                          <stop offset="0%" stopColor="rgba(255,255,255,0)" />
+                          <stop offset="50%" stopColor="rgba(255,255,255,0.3)" />
+                          <stop offset="100%" stopColor="rgba(255,255,255,0)" />
+                        </linearGradient>
+                      </defs>
+                      {/* Ginkgo Leaf Shape */}
+                      <path
+                        d="M20 2 C20 2 8 10 6 22 C4 32 10 40 20 46 C30 40 36 32 34 22 C32 10 20 2 20 2 Z"
+                        fill={`url(#goldGradient-${index})`}
+                        stroke="#C9A227"
+                        strokeWidth="1"
+                      />
+                      {/* Center split */}
+                      <path
+                        d="M20 8 L20 42"
+                        stroke="#B8860B"
+                        strokeWidth="0.5"
+                        opacity="0.5"
+                      />
+                      {/* Leaf veins */}
+                      <path
+                        d="M20 15 C15 20 12 28 14 36"
+                        stroke="#B8860B"
+                        strokeWidth="0.3"
+                        fill="none"
+                        opacity="0.4"
+                      />
+                      <path
+                        d="M20 15 C25 20 28 28 26 36"
+                        stroke="#B8860B"
+                        strokeWidth="0.3"
+                        fill="none"
+                        opacity="0.4"
+                      />
+                      {/* Shine effect */}
+                      <ellipse
+                        cx="15"
+                        cy="18"
+                        rx="4"
+                        ry="6"
+                        fill="rgba(255,255,255,0.2)"
+                      />
+                    </svg>
+                  </div>
                 ) : (
-                  <span className="text-[10px] font-medium text-muted-foreground">{index + 1}</span>
+                  /* Empty Slot */
+                  <div className="flex h-12 w-10 items-center justify-center rounded-lg border-2 border-dashed border-amber-200 bg-amber-50/50">
+                    <span className="text-[10px] font-medium text-amber-300">{index + 1}</span>
+                  </div>
                 )}
                 {/* Reward markers */}
                 {isReward10 && (
-                  <div className="absolute -bottom-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-tangerine text-[8px] font-bold text-white">
-                    !
+                  <div className="absolute -bottom-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-gradient-to-br from-orange-400 to-orange-600 text-[8px] font-bold text-white shadow-sm">
+                    🎁
                   </div>
                 )}
                 {isReward20 && (
-                  <div className="absolute -bottom-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-[#7C3AED] text-[8px] font-bold text-white">
-                    !
+                  <div className="absolute -bottom-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-gradient-to-br from-purple-400 to-purple-600 text-[8px] font-bold text-white shadow-sm">
+                    🏆
                   </div>
                 )}
               </div>
@@ -418,38 +478,49 @@ export function LibraryPage() {
         </div>
 
         {/* Reward Info */}
-        <div className="border-t border-border bg-muted/30 px-4 py-3">
+        <div className="border-t border-amber-200 bg-gradient-to-r from-amber-100/50 to-yellow-100/50 px-4 py-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <div className={cn(
-                "flex h-6 w-6 items-center justify-center rounded-full text-[10px] font-bold",
-                totalReviews >= 10 ? "bg-tangerine text-white" : "bg-muted text-muted-foreground"
+                "flex h-7 w-7 items-center justify-center rounded-full text-[10px] font-bold shadow-sm",
+                totalReviews >= 10
+                  ? "bg-gradient-to-br from-orange-400 to-orange-600 text-white"
+                  : "bg-amber-100 text-amber-400"
               )}>
                 10
               </div>
               <span className={cn(
                 "text-xs",
-                totalReviews >= 10 ? "font-semibold text-tangerine" : "text-muted-foreground"
+                totalReviews >= 10 ? "font-semibold text-orange-600" : "text-amber-600"
               )}>
-                {totalReviews >= 10 ? "스타벅스 기프티콘 획득!" : "스타벅스 기프티콘"}
+                {totalReviews >= 10 ? "🎉 스타벅스 기프티콘 획득!" : "스타벅스 기프티콘"}
               </span>
             </div>
             <div className="flex items-center gap-2">
               <div className={cn(
-                "flex h-6 w-6 items-center justify-center rounded-full text-[10px] font-bold",
-                totalReviews >= 20 ? "bg-[#7C3AED] text-white" : "bg-muted text-muted-foreground"
+                "flex h-7 w-7 items-center justify-center rounded-full text-[10px] font-bold shadow-sm",
+                totalReviews >= 20
+                  ? "bg-gradient-to-br from-purple-400 to-purple-600 text-white"
+                  : "bg-amber-100 text-amber-400"
               )}>
                 20
               </div>
               <span className={cn(
                 "text-xs",
-                totalReviews >= 20 ? "font-semibold text-[#7C3AED]" : "text-muted-foreground"
+                totalReviews >= 20 ? "font-semibold text-purple-600" : "text-amber-600"
               )}>
-                {totalReviews >= 20 ? "도서 상품권 획득!" : "도서 상품권"}
+                {totalReviews >= 20 ? "🏆 도서 상품권 획득!" : "도서 상품권"}
               </span>
             </div>
           </div>
         </div>
+        {/* Bottom Gold Accent */}
+        <div
+          className="h-0.5 w-full"
+          style={{
+            background: "linear-gradient(90deg, transparent, #F4D03F, #E6B800, #F4D03F, transparent)",
+          }}
+        />
       </section>
 
       {/* Wishlist / Cart Section */}

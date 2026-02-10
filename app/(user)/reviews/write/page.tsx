@@ -105,7 +105,7 @@ export default function WriteReview() {
     if (currentStep === 1) return selectedBook !== null
     if (currentStep === 2) return selectedProgram !== null
     if (currentStep === 3) return selectedBadge !== null
-    if (currentStep === 4) return rating > 0 && reviewText.length >= 100
+    if (currentStep === 4) return rating > 0 && reviewText.length >= 400
     return true
   }
 
@@ -396,17 +396,17 @@ export default function WriteReview() {
               <textarea
                 value={reviewText}
                 onChange={(e) => setReviewText(e.target.value)}
-                placeholder="이 도서에 대한 감상을 나눠주세요 (최소 100자)..."
+                placeholder="이 도서에 대한 감상을 나눠주세요 (최소 400자)..."
                 className="h-40 w-full resize-none rounded-xl border border-border bg-card p-4 text-sm placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
               />
               <div className="mt-1 flex justify-end">
                 <span
                   className={cn(
                     "text-xs",
-                    reviewText.length >= 100 ? "text-primary" : "text-muted-foreground"
+                    reviewText.length >= 400 ? "text-primary" : "text-muted-foreground"
                   )}
                 >
-                  {reviewText.length}/100
+                  {reviewText.length}/400
                 </span>
               </div>
             </div>

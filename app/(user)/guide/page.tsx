@@ -48,7 +48,7 @@ export default function Guide() {
   return (
     <div className="flex flex-col gap-4 pb-6">
       <PageHeader
-        title="독서가이드"
+        title="오거서 도서추천"
         description="성균 고전 100선"
         action={
           <button

@@ -171,16 +171,6 @@ export function HomePage() {
 
   return (
     <div className="flex flex-col gap-0 pb-6">
-      {/* Top Bar */}
-      <header className="flex items-center justify-between px-5 py-3 sm:px-8">
-        <h1 className="font-serif text-xl font-bold tracking-tight text-primary">
-          오거서
-        </h1>
-        <span className="text-[11px] text-muted-foreground">
-          함께 읽고, 함께 나누는
-        </span>
-      </header>
-
       {/* Hero Banner */}
       <section className="relative h-56 overflow-hidden sm:h-72">
         <img

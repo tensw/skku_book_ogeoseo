@@ -389,10 +389,6 @@ export function DiscussionsPage() {
                       </button>
                     )}
                   </div>
-                  <div className="flex items-center gap-1.5">
-                    <span className="text-[10px] text-muted-foreground line-through">{discussion.originalPrice}원</span>
-                    <span className="text-sm font-bold text-primary">{discussion.price}원</span>
-                  </div>
                 </div>
               </div>
             </div>

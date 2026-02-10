@@ -354,6 +354,102 @@ export function LibraryPage() {
         <div className="mx-auto flex h-56 w-56 items-center justify-center p-2">
           <KDCRadarChart data={radarData} />
         </div>
+        {/* Preferred Category */}
+        <div className="border-t border-border bg-gradient-to-r from-primary/5 to-emerald/5 px-5 py-3">
+          <p className="text-center text-sm text-foreground">
+            <span className="font-medium">당신은 </span>
+            <span className="font-bold text-primary">&apos;800 문학&apos;</span>
+            <span className="font-medium"> 도서를 선호합니다.</span>
+          </p>
+        </div>
+      </section>
+
+      {/* Stamp Board Section */}
+      <section className="mx-5 overflow-hidden rounded-3xl border border-border bg-card shadow-lg sm:mx-8">
+        <div className="flex items-center justify-between px-5 pt-4">
+          <h2 className="flex items-center gap-2 text-sm font-bold text-foreground">
+            <Award size={16} className="text-tangerine" />
+            서평 스탬프
+          </h2>
+          <span className="text-[10px] text-muted-foreground">
+            {totalReviews}/20개 수집
+          </span>
+        </div>
+
+        {/* Stamp Grid */}
+        <div className="grid grid-cols-5 gap-2 p-4">
+          {Array.from({ length: 20 }).map((_, index) => {
+            const isFilled = index < totalReviews
+            const isReward10 = index === 9
+            const isReward20 = index === 19
+            return (
+              <div
+                key={index}
+                className={cn(
+                  "relative flex h-12 w-12 items-center justify-center rounded-full transition-all",
+                  isFilled
+                    ? "bg-gradient-to-br from-primary to-emerald-700 shadow-md"
+                    : "border-2 border-dashed border-border bg-muted/30"
+                )}
+              >
+                {isFilled ? (
+                  <svg viewBox="0 0 24 24" className="h-6 w-6 text-white" fill="currentColor">
+                    <path d="M12 2C12 2 8 6 8 12C8 16 10 20 12 22C14 20 16 16 16 12C16 6 12 2 12 2Z" />
+                    <path d="M12 2C12 2 6 8 6 14C6 18 9 21 12 22" opacity="0.7" />
+                    <path d="M12 2C12 2 18 8 18 14C18 18 15 21 12 22" opacity="0.7" />
+                  </svg>
+                ) : (
+                  <span className="text-[10px] font-medium text-muted-foreground">{index + 1}</span>
+                )}
+                {/* Reward markers */}
+                {isReward10 && (
+                  <div className="absolute -bottom-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-tangerine text-[8px] font-bold text-white">
+                    !
+                  </div>
+                )}
+                {isReward20 && (
+                  <div className="absolute -bottom-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-[#7C3AED] text-[8px] font-bold text-white">
+                    !
+                  </div>
+                )}
+              </div>
+            )
+          })}
+        </div>
+
+        {/* Reward Info */}
+        <div className="border-t border-border bg-muted/30 px-4 py-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <div className={cn(
+                "flex h-6 w-6 items-center justify-center rounded-full text-[10px] font-bold",
+                totalReviews >= 10 ? "bg-tangerine text-white" : "bg-muted text-muted-foreground"
+              )}>
+                10
+              </div>
+              <span className={cn(
+                "text-xs",
+                totalReviews >= 10 ? "font-semibold text-tangerine" : "text-muted-foreground"
+              )}>
+                {totalReviews >= 10 ? "스타벅스 기프티콘 획득!" : "스타벅스 기프티콘"}
+              </span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className={cn(
+                "flex h-6 w-6 items-center justify-center rounded-full text-[10px] font-bold",
+                totalReviews >= 20 ? "bg-[#7C3AED] text-white" : "bg-muted text-muted-foreground"
+              )}>
+                20
+              </div>
+              <span className={cn(
+                "text-xs",
+                totalReviews >= 20 ? "font-semibold text-[#7C3AED]" : "text-muted-foreground"
+              )}>
+                {totalReviews >= 20 ? "도서 상품권 획득!" : "도서 상품권"}
+              </span>
+            </div>
+          </div>
+        </div>
       </section>
 
       {/* Wishlist / Cart Section */}

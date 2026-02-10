@@ -20,11 +20,11 @@ import { ClubDetailModal } from "@/components/club-detail-modal"
 import type { ClubDetailData } from "@/components/club-detail-modal"
 
 const recommendedBooks = [
-  { id: 1, title: "아무튼, 메모", author: "김신회", cover: "/images/book-memo.jpg", category: "에세이", color: "bg-tangerine/10 text-tangerine" },
-  { id: 2, title: "사피엔스", author: "유발 하라리", cover: "/images/book-sapiens.jpg", category: "역사", color: "bg-mint/10 text-mint" },
-  { id: 3, title: "아주 작은 습관의 힘", author: "제임스 클리어", cover: "/images/book-atomic.jpg", category: "자기계발", color: "bg-emerald/10 text-emerald" },
-  { id: 4, title: "미드나이트 라이브러리", author: "매트 헤이그", cover: "/images/book-midnight.jpg", category: "문학", color: "bg-tangerine/10 text-tangerine" },
-  { id: 5, title: "생각에 관한 생각", author: "대니얼 카너먼", cover: "/images/book-thinking.jpg", category: "심리학", color: "bg-mint/10 text-mint" },
+  { id: 1, title: "아무튼, 메모", author: "김신회", cover: "https://picsum.photos/seed/book-memo/200/280", category: "에세이", color: "bg-tangerine/10 text-tangerine" },
+  { id: 2, title: "사피엔스", author: "유발 하라리", cover: "https://picsum.photos/seed/book-sapiens/200/280", category: "역사", color: "bg-mint/10 text-mint" },
+  { id: 3, title: "아주 작은 습관의 힘", author: "제임스 클리어", cover: "https://picsum.photos/seed/book-atomic/200/280", category: "자기계발", color: "bg-emerald/10 text-emerald" },
+  { id: 4, title: "미드나이트 라이브러리", author: "매트 헤이그", cover: "https://picsum.photos/seed/book-midnight/200/280", category: "문학", color: "bg-tangerine/10 text-tangerine" },
+  { id: 5, title: "생각에 관한 생각", author: "대니얼 카너먼", cover: "https://picsum.photos/seed/book-thinking/200/280", category: "심리학", color: "bg-mint/10 text-mint" },
 ]
 
 const liveTalkPosts = [
@@ -33,7 +33,7 @@ const liveTalkPosts = [
     author: "윤하나",
     avatar: "https://picsum.photos/seed/avatar3/80/80",
     content: "오늘 독서 모임에서 채식주의자 토론 완료! 한강 작가의 상징성에 대해 정말 깊은 이야기를 나눴어요.",
-    photos: ["/images/post-discussion.jpg"],
+    photos: ["https://picsum.photos/seed/post-discussion/800/600"],
     likes: 56,
     comments: 12,
     time: "30분 전",
@@ -43,7 +43,7 @@ const liveTalkPosts = [
     author: "김소은",
     avatar: "https://picsum.photos/seed/avatar5/80/80",
     content: "아침 독서 루틴 3주차! 습관의 힘을 읽으면서 진짜 나의 시스템이 바뀌고 있다는 걸 느껴요.",
-    photos: ["/images/post-reading.jpg", "/images/post-bookclub.jpg"],
+    photos: ["https://picsum.photos/seed/post-reading/800/600", "https://picsum.photos/seed/post-bookclub/800/600"],
     likes: 89,
     comments: 23,
     time: "2시간 전",
@@ -53,7 +53,7 @@ const liveTalkPosts = [
     author: "박민준",
     avatar: "https://picsum.photos/seed/avatar2/80/80",
     content: "카페에서 사피엔스 읽는 중. 커피 한 잔과 함께하는 일요일 오후가 최고네요.",
-    photos: ["/images/post-bookclub.jpg"],
+    photos: ["https://picsum.photos/seed/post-bookclub/800/600"],
     likes: 42,
     comments: 8,
     time: "4시간 전",
@@ -75,7 +75,7 @@ interface ActiveClub {
 const activeClubs: ActiveClub[] = [
   {
     id: 1, title: "숨겨둔 내 안의 이야기", leader: "OOO 학생", leaderType: "student",
-    members: 5, nextMeeting: "3/10 (화) 20:00", vibeImage: "/images/vibe-essay.jpg", tagColor: "bg-tangerine text-white",
+    members: 5, nextMeeting: "3/10 (화) 20:00", vibeImage: "https://picsum.photos/seed/vibe-essay/800/400", tagColor: "bg-tangerine text-white",
     detail: {
       id: 1, title: "숨겨둔 내 안의 이야기", leader: "OOO 학생", leaderType: "student",
       leaderDept: "중국어학과", leaderSchool: "성균관대학교", leaderYear: "2학년",
@@ -91,7 +91,7 @@ const activeClubs: ActiveClub[] = [
   },
   {
     id: 2, title: "철학 독서 모임", leader: "김지혜 교수", leaderType: "professor",
-    members: 12, nextMeeting: "3/18 (금) 19:00", vibeImage: "/images/vibe-history.jpg", tagColor: "bg-mint text-white",
+    members: 12, nextMeeting: "3/18 (금) 19:00", vibeImage: "https://picsum.photos/seed/vibe-history/800/400", tagColor: "bg-mint text-white",
     detail: {
       id: 2, title: "철학 독서 모임", leader: "김지혜 교수", leaderType: "professor",
       leaderDept: "철학과", leaderSchool: "서울대학교", leaderYear: "",
@@ -107,7 +107,7 @@ const activeClubs: ActiveClub[] = [
   },
   {
     id: 3, title: "현대 문학 클럽", leader: "박서연 작가", leaderType: "author",
-    members: 32, nextMeeting: "3/20 (일) 21:00", vibeImage: "/images/vibe-literature.jpg", tagColor: "bg-primary text-white",
+    members: 32, nextMeeting: "3/20 (일) 21:00", vibeImage: "https://picsum.photos/seed/vibe-literature/800/400", tagColor: "bg-primary text-white",
     detail: {
       id: 3, title: "현대 문학 클럽", leader: "박서연 작가", leaderType: "author",
       leaderDept: "소설가", leaderSchool: "", leaderYear: "",
@@ -123,7 +123,7 @@ const activeClubs: ActiveClub[] = [
   },
   {
     id: 4, title: "과학과 사회", leader: "최동우 학생", leaderType: "student",
-    members: 18, nextMeeting: "3/22 (화) 20:00", vibeImage: "/images/vibe-habit.jpg", tagColor: "bg-emerald text-white",
+    members: 18, nextMeeting: "3/22 (화) 20:00", vibeImage: "https://picsum.photos/seed/vibe-habit/800/400", tagColor: "bg-emerald text-white",
     detail: {
       id: 4, title: "과학과 사회", leader: "최동우 학생", leaderType: "student",
       leaderDept: "물리학과", leaderSchool: "KAIST", leaderYear: "3학년",
@@ -184,7 +184,7 @@ export function HomePage() {
       {/* Hero Banner */}
       <section className="relative h-56 overflow-hidden sm:h-72">
         <img
-          src="/images/hero-banner.jpg"
+          src="https://picsum.photos/seed/hero-banner/1200/600"
           alt="독서 라이프스타일"
           className="h-full w-full object-cover"
         />

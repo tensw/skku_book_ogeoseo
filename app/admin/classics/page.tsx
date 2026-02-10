@@ -111,7 +111,7 @@ export default function AdminClassicsPage() {
         year: Number(formYear) || new Date().getFullYear(),
         category: formCategory,
         description: formDescription,
-        cover: "/covers/classics/default.jpg",
+        cover: "https://picsum.photos/seed/classic-default/200/280",
       }
       setClassicList((prev) => [newClassic, ...prev])
     }

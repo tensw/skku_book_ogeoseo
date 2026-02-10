@@ -107,8 +107,8 @@ export const reviews: BookReview[] = [
   {
     id: 1,
     type: 'program',
-    user: { name: '김서윤', avatar: '/avatars/01.png', department: '국어국문학과' },
-    book: { title: '데미안', author: '헤르만 헤세', cover: '/covers/demian.jpg' },
+    user: { name: '김서윤', avatar: 'https://picsum.photos/seed/avatar01/80/80', department: '국어국문학과' },
+    book: { title: '데미안', author: '헤르만 헤세', cover: 'https://picsum.photos/seed/cover-demian/200/280' },
     rating: 5,
     text: '싱클레어의 자아 탐색 여정이 대학생인 지금 읽으니 더욱 깊이 와닿았습니다. "새는 알에서 나오려고 투쟁한다"는 문장이 아직도 마음에 남아있습니다. 독서토론에서 다른 학우들의 해석을 듣고 나니, 같은 책도 이렇게 다르게 읽힐 수 있다는 것이 놀라웠습니다.',
     likes: 72,
@@ -120,8 +120,8 @@ export const reviews: BookReview[] = [
   {
     id: 2,
     type: 'program',
-    user: { name: '이준혁', avatar: '/avatars/02.png', department: '경영학과' },
-    book: { title: '정의란 무엇인가', author: '마이클 샌델', cover: '/covers/justice.jpg' },
+    user: { name: '이준혁', avatar: 'https://picsum.photos/seed/avatar02/80/80', department: '경영학과' },
+    book: { title: '정의란 무엇인가', author: '마이클 샌델', cover: 'https://picsum.photos/seed/cover-justice/200/280' },
     rating: 4,
     text: '공리주의와 자유주의, 공동체주의의 관점에서 정의를 바라보는 다양한 시각을 접할 수 있었습니다. 특히 트롤리 문제에 대한 토론이 흥미로웠고, 경영학을 공부하는 학생으로서 기업 윤리에 대해 다시 생각해 보는 계기가 되었습니다.',
     likes: 58,
@@ -133,8 +133,8 @@ export const reviews: BookReview[] = [
   {
     id: 3,
     type: 'program',
-    user: { name: '박지민', avatar: '/avatars/03.png', department: '생명과학과' },
-    book: { title: '이기적 유전자', author: '리처드 도킨스', cover: '/covers/selfish-gene.jpg' },
+    user: { name: '박지민', avatar: 'https://picsum.photos/seed/avatar03/80/80', department: '생명과학과' },
+    book: { title: '이기적 유전자', author: '리처드 도킨스', cover: 'https://picsum.photos/seed/cover-selfish-gene/200/280' },
     rating: 5,
     text: '유전자의 관점에서 생명 현상을 바라보는 도킨스의 통찰이 정말 인상적이었습니다. 이타적 행동도 결국 유전자의 이기적 전략이라는 설명은 생명과학을 전공하는 저에게도 새로운 시각을 제공했습니다. 밈(meme) 개념의 등장도 흥미로웠습니다.',
     likes: 65,
@@ -146,8 +146,8 @@ export const reviews: BookReview[] = [
   {
     id: 4,
     type: 'program',
-    user: { name: '최예린', avatar: '/avatars/04.png', department: '철학과' },
-    book: { title: '존재와 시간', author: '마르틴 하이데거', cover: '/covers/being-time.jpg' },
+    user: { name: '최예린', avatar: 'https://picsum.photos/seed/avatar04/80/80', department: '철학과' },
+    book: { title: '존재와 시간', author: '마르틴 하이데거', cover: 'https://picsum.photos/seed/cover-being-time/200/280' },
     rating: 4,
     text: '난해하기로 유명한 하이데거의 저작이지만, 교수님의 북 멘토링 덕분에 핵심 개념들을 이해할 수 있었습니다. 현존재(Dasein)의 개념과 시간성에 대한 분석은 철학 전공자로서 반드시 거쳐야 할 관문이라 느꼈습니다.',
     likes: 41,
@@ -159,8 +159,8 @@ export const reviews: BookReview[] = [
   {
     id: 5,
     type: 'program',
-    user: { name: '정민수', avatar: '/avatars/05.png', department: '컴퓨터공학과' },
-    book: { title: '코스모스', author: '칼 세이건', cover: '/covers/cosmos.jpg' },
+    user: { name: '정민수', avatar: 'https://picsum.photos/seed/avatar05/80/80', department: '컴퓨터공학과' },
+    book: { title: '코스모스', author: '칼 세이건', cover: 'https://picsum.photos/seed/cover-cosmos/200/280' },
     rating: 5,
     text: '칼 세이건의 우주에 대한 열정과 경외감이 그대로 전해져 오는 명저입니다. 과학적 사실을 시적인 문체로 풀어낸 것이 인상적이었고, 우주 속 인류의 위치에 대해 깊이 생각하게 되었습니다. 이공계 학생들에게 강력 추천합니다.',
     likes: 53,
@@ -172,8 +172,8 @@ export const reviews: BookReview[] = [
   {
     id: 6,
     type: 'program',
-    user: { name: '한소희', avatar: '/avatars/06.png', department: '사학과' },
-    book: { title: '삼국유사', author: '일연', cover: '/covers/samguk.jpg' },
+    user: { name: '한소희', avatar: 'https://picsum.photos/seed/avatar06/80/80', department: '사학과' },
+    book: { title: '삼국유사', author: '일연', cover: 'https://picsum.photos/seed/cover-samguk/200/280' },
     rating: 4,
     text: '한국 고전 중에서도 가장 풍부한 이야기를 담고 있는 삼국유사를 정독할 수 있어 좋았습니다. 단군신화부터 다양한 설화까지, 우리 민족의 정신세계를 엿볼 수 있었습니다. 사학 전공 수업에서 배운 내용과 연결지어 읽으니 더 의미 있었습니다.',
     likes: 38,
@@ -185,8 +185,8 @@ export const reviews: BookReview[] = [
   {
     id: 7,
     type: 'program',
-    user: { name: '윤태호', avatar: '/avatars/07.png', department: '경제학과' },
-    book: { title: '국부론', author: '애덤 스미스', cover: '/covers/wealth-nations.jpg' },
+    user: { name: '윤태호', avatar: 'https://picsum.photos/seed/avatar07/80/80', department: '경제학과' },
+    book: { title: '국부론', author: '애덤 스미스', cover: 'https://picsum.photos/seed/cover-wealth-nations/200/280' },
     rating: 4,
     text: '경제학의 아버지 애덤 스미스의 대표작을 드디어 완독했습니다. 보이지 않는 손의 원리뿐 아니라 분업, 자본 축적, 자유무역에 대한 그의 체계적인 논증이 인상적이었습니다. 현대 경제학 이론의 뿌리를 확인할 수 있는 소중한 경험이었습니다.',
     likes: 47,
@@ -198,8 +198,8 @@ export const reviews: BookReview[] = [
   {
     id: 8,
     type: 'program',
-    user: { name: '강하은', avatar: '/avatars/08.png', department: '영어영문학과' },
-    book: { title: '오만과 편견', author: '제인 오스틴', cover: '/covers/pride.jpg' },
+    user: { name: '강하은', avatar: 'https://picsum.photos/seed/avatar08/80/80', department: '영어영문학과' },
+    book: { title: '오만과 편견', author: '제인 오스틴', cover: 'https://picsum.photos/seed/cover-pride/200/280' },
     rating: 5,
     text: '원서로 읽으면서 오스틴의 위트와 아이러니를 더 깊이 느낄 수 있었습니다. 엘리자베스와 다아시의 관계가 단순한 로맨스가 아니라 계급, 편견, 자아에 대한 깊은 성찰을 담고 있다는 점을 토론을 통해 재발견했습니다.',
     likes: 61,
@@ -211,8 +211,8 @@ export const reviews: BookReview[] = [
   {
     id: 9,
     type: 'program',
-    user: { name: '서진우', avatar: '/avatars/09.png', department: '물리학과' },
-    book: { title: '시간의 역사', author: '스티븐 호킹', cover: '/covers/brief-history.jpg' },
+    user: { name: '서진우', avatar: 'https://picsum.photos/seed/avatar09/80/80', department: '물리학과' },
+    book: { title: '시간의 역사', author: '스티븐 호킹', cover: 'https://picsum.photos/seed/cover-brief-history/200/280' },
     rating: 4,
     text: '빅뱅부터 블랙홀까지, 우주의 시간에 대한 호킹의 설명은 명료하면서도 깊이가 있었습니다. 물리학 전공자로서 수식 없이 이렇게 명확하게 설명할 수 있다는 것 자체가 놀라웠습니다. 양자역학과 상대성이론의 통합에 대한 그의 비전이 인상적입니다.',
     likes: 34,
@@ -224,8 +224,8 @@ export const reviews: BookReview[] = [
   {
     id: 10,
     type: 'program',
-    user: { name: '임채원', avatar: '/avatars/10.png', department: '미술학과' },
-    book: { title: '서양미술사', author: 'E.H. 곰브리치', cover: '/covers/art-history.jpg' },
+    user: { name: '임채원', avatar: 'https://picsum.photos/seed/avatar10/80/80', department: '미술학과' },
+    book: { title: '서양미술사', author: 'E.H. 곰브리치', cover: 'https://picsum.photos/seed/cover-art-history/200/280' },
     rating: 5,
     text: '미술사의 바이블이라 불리는 이 책을 독서프로그램을 통해 체계적으로 읽을 수 있어 감사합니다. 곰브리치의 서술은 단순한 양식사를 넘어 각 시대의 예술가들이 왜 그렇게 표현했는지를 이해하게 해줍니다. 미술을 공부하는 모든 학생에게 필독서입니다.',
     likes: 45,
@@ -237,8 +237,8 @@ export const reviews: BookReview[] = [
   {
     id: 11,
     type: 'ogeoseo',
-    user: { name: '김도현', avatar: '/avatars/11.png', department: '소프트웨어학과' },
-    book: { title: '채식주의자', author: '한강', cover: '/covers/vegetarian.jpg' },
+    user: { name: '김도현', avatar: 'https://picsum.photos/seed/avatar11/80/80', department: '소프트웨어학과' },
+    book: { title: '채식주의자', author: '한강', cover: 'https://picsum.photos/seed/cover-vegetarian/200/280' },
     rating: 5,
     text: '한강 작가의 노벨문학상 수상작을 다시 읽었습니다. 영혜의 거부가 단순한 채식이 아니라 폭력적 세계에 대한 저항이라는 점이 다시 한번 가슴에 와닿았습니다. 세 부분으로 나뉜 서사 구조가 주제를 다층적으로 보여주는 방식이 탁월합니다.',
     likes: 78,
@@ -249,8 +249,8 @@ export const reviews: BookReview[] = [
   {
     id: 12,
     type: 'ogeoseo',
-    user: { name: '오수빈', avatar: '/avatars/12.png', department: '정치외교학과' },
-    book: { title: '사회계약론', author: '장 자크 루소', cover: '/covers/social-contract.jpg' },
+    user: { name: '오수빈', avatar: 'https://picsum.photos/seed/avatar12/80/80', department: '정치외교학과' },
+    book: { title: '사회계약론', author: '장 자크 루소', cover: 'https://picsum.photos/seed/cover-social-contract/200/280' },
     rating: 4,
     text: '"인간은 자유롭게 태어났으나 어디서나 쇠사슬에 묶여 있다"는 첫 문장부터 강렬합니다. 일반의지(volonté générale)라는 개념이 현대 민주주의에 어떤 영향을 미쳤는지 생각해 보게 되었고, 직접민주주의에 대한 루소의 이상이 오늘날에도 유효한지 고민하게 됩니다.',
     likes: 36,
@@ -261,8 +261,8 @@ export const reviews: BookReview[] = [
   {
     id: 13,
     type: 'ogeoseo',
-    user: { name: '장민재', avatar: '/avatars/13.png', department: '화학과' },
-    book: { title: '종의 기원', author: '찰스 다윈', cover: '/covers/origin-species.jpg' },
+    user: { name: '장민재', avatar: 'https://picsum.photos/seed/avatar13/80/80', department: '화학과' },
+    book: { title: '종의 기원', author: '찰스 다윈', cover: 'https://picsum.photos/seed/cover-origin-species/200/280' },
     rating: 4,
     text: '자연선택을 통한 진화론의 핵심을 다윈 자신의 문체로 읽는 것은 특별한 경험이었습니다. 갈라파고스 핀치새의 관찰에서 시작된 거대한 이론 체계가 얼마나 치밀한 논증 위에 세워졌는지 감탄하게 됩니다. 과학 고전 중 반드시 읽어야 할 책입니다.',
     likes: 29,
@@ -273,8 +273,8 @@ export const reviews: BookReview[] = [
   {
     id: 14,
     type: 'ogeoseo',
-    user: { name: '배서연', avatar: '/avatars/14.png', department: '교육학과' },
-    book: { title: '논어', author: '공자', cover: '/covers/analects.jpg' },
+    user: { name: '배서연', avatar: 'https://picsum.photos/seed/avatar14/80/80', department: '교육학과' },
+    book: { title: '논어', author: '공자', cover: 'https://picsum.photos/seed/cover-analects/200/280' },
     rating: 5,
     text: '동양 고전의 정수라 할 수 있는 논어를 완독했습니다. 인(仁)과 예(禮)에 대한 공자의 가르침이 2500년이 지난 지금도 울림이 있다는 것이 놀랍습니다. 교육학을 공부하는 학생으로서, "不憤不啓 不悱不發"(분발하지 않으면 깨우쳐 주지 않는다)이라는 교육 철학에 깊이 공감했습니다.',
     likes: 52,
@@ -285,8 +285,8 @@ export const reviews: BookReview[] = [
   {
     id: 15,
     type: 'ogeoseo',
-    user: { name: '홍지아', avatar: '/avatars/15.png', department: '의예과' },
-    book: { title: '엔트로피', author: '제레미 리프킨', cover: '/covers/entropy.jpg' },
+    user: { name: '홍지아', avatar: 'https://picsum.photos/seed/avatar15/80/80', department: '의예과' },
+    book: { title: '엔트로피', author: '제레미 리프킨', cover: 'https://picsum.photos/seed/cover-entropy/200/280' },
     rating: 3,
     text: '열역학 제2법칙을 사회과학적으로 확장한 시도는 흥미로웠으나, 일부 논증에서 과학적 개념을 지나치게 확대 해석한 부분이 아쉬웠습니다. 그럼에도 에너지와 환경 문제를 엔트로피의 관점에서 조망하는 독특한 시각은 충분히 읽을 가치가 있습니다.',
     likes: 18,
@@ -306,7 +306,7 @@ export const classics: Classic100[] = [
     year: 2020,
     category: '문학·예술',
     description: '동양 철학의 근간이 되는 고전으로, 공자와 그 제자들의 대화를 기록한 책입니다. 인(仁), 의(義), 예(禮), 지(智) 등 유교의 핵심 덕목을 배울 수 있으며, 오늘날에도 인간관계와 자기 수양에 대한 깊은 통찰을 제공합니다.',
-    cover: '/covers/classics/analects.jpg',
+    cover: 'https://picsum.photos/seed/classic-analects/200/280',
     isbn: '978-89-324-7380-5',
   },
   {
@@ -317,7 +317,7 @@ export const classics: Classic100[] = [
     year: 2018,
     category: '문학·예술',
     description: '중국 최초의 시가 총집으로, 주나라 초기부터 춘추시대까지의 시 305편을 수록하고 있습니다. 풍(風)·아(雅)·송(頌)으로 분류되며, 당시 민중의 삶과 감정, 사회상을 생생하게 보여주는 동양 문학의 원류입니다.',
-    cover: '/covers/classics/shijing.jpg',
+    cover: 'https://picsum.photos/seed/classic-shijing/200/280',
     isbn: '978-89-374-3456-7',
   },
   {
@@ -328,7 +328,7 @@ export const classics: Classic100[] = [
     year: 2022,
     category: '문학·예술',
     description: '2016년 맨부커 국제상, 2024년 노벨문학상을 수상한 한강의 대표작입니다. 고기를 거부하는 한 여성의 이야기를 통해 폭력, 욕망, 인간 존재의 근원적 문제를 탐구합니다. 세 편의 연작 소설로 구성된 독특한 서사 구조가 특징입니다.',
-    cover: '/covers/classics/vegetarian.jpg',
+    cover: 'https://picsum.photos/seed/classic-vegetarian/200/280',
     isbn: '978-89-364-7234-1',
   },
   {
@@ -339,7 +339,7 @@ export const classics: Classic100[] = [
     year: 2017,
     category: '문학·예술',
     description: '미술사 입문서의 바이블로 불리는 곰브리치의 대표작입니다. 고대 이집트부터 현대 미술까지 서양 미술의 흐름을 일관된 시각으로 서술하며, 왜 예술가들이 특정 방식으로 표현했는지를 이해하도록 돕습니다.',
-    cover: '/covers/classics/art-history.jpg',
+    cover: 'https://picsum.photos/seed/classic-art-history/200/280',
     isbn: '978-89-7084-456-2',
   },
   {
@@ -350,7 +350,7 @@ export const classics: Classic100[] = [
     year: 2019,
     category: '문학·예술',
     description: '고려 시대 승려 일연이 편찬한 역사서로, 한국 고대사와 설화, 불교 문화를 담고 있습니다. 단군신화를 비롯한 건국 설화와 다양한 민간 전승이 수록되어 있어, 한국 문화의 원형을 이해하는 데 필수적인 고전입니다.',
-    cover: '/covers/classics/samguk-yusa.jpg',
+    cover: 'https://picsum.photos/seed/classic-samguk-yusa/200/280',
     isbn: '978-89-356-1234-5',
   },
   {
@@ -361,7 +361,7 @@ export const classics: Classic100[] = [
     year: 2021,
     category: '문학·예술',
     description: '19세기 영국 사회를 배경으로 엘리자베스 베넷과 피츠윌리엄 다아시의 사랑 이야기를 그린 소설입니다. 위트 있는 대화와 섬세한 인물 묘사를 통해 계급, 결혼, 편견에 대한 날카로운 사회 비평을 담고 있습니다.',
-    cover: '/covers/classics/pride-prejudice.jpg',
+    cover: 'https://picsum.photos/seed/classic-pride-prejudice/200/280',
     isbn: '978-89-01-1234-5',
   },
   {
@@ -372,7 +372,7 @@ export const classics: Classic100[] = [
     year: 2020,
     category: '문학·예술',
     description: '소년 싱클레어의 자아 탐색과 성장을 그린 헤세의 대표적 성장소설입니다. 선과 악, 밝음과 어둠 사이에서 진정한 자아를 찾아가는 과정을 그리며, 청년기의 방황과 각성에 대한 보편적 메시지를 전달합니다.',
-    cover: '/covers/classics/demian.jpg',
+    cover: 'https://picsum.photos/seed/classic-demian/200/280',
     isbn: '978-89-374-6012-3',
   },
   {
@@ -383,7 +383,7 @@ export const classics: Classic100[] = [
     year: 2016,
     category: '문학·예술',
     description: '셰익스피어 4대 비극 중 하나로, 덴마크 왕자 햄릿의 복수극을 다룹니다. "사느냐 죽느냐 그것이 문제로다"라는 유명한 독백에서 드러나듯, 인간 존재의 근본적 질문과 결단의 문제를 깊이 탐구합니다.',
-    cover: '/covers/classics/hamlet.jpg',
+    cover: 'https://picsum.photos/seed/classic-hamlet/200/280',
     isbn: '978-89-329-1567-8',
   },
   {
@@ -394,7 +394,7 @@ export const classics: Classic100[] = [
     year: 2019,
     category: '문학·예술',
     description: '어느 날 아침 벌레로 변한 그레고르 잠자의 이야기를 통해 인간 소외와 부조리를 그린 카프카의 대표 중편소설입니다. 현대 사회에서 개인이 겪는 정체성의 위기와 가족 관계의 본질을 날카롭게 포착합니다.',
-    cover: '/covers/classics/metamorphosis.jpg',
+    cover: 'https://picsum.photos/seed/classic-metamorphosis/200/280',
     isbn: '978-89-546-3456-7',
   },
   {
@@ -405,7 +405,7 @@ export const classics: Classic100[] = [
     year: 2018,
     category: '문학·예술',
     description: '조선 후기 실학자 정약용이 저술한 목민관의 지침서입니다. 관리가 갖추어야 할 덕목과 백성을 위한 정치의 이상을 체계적으로 제시하며, 공직 윤리와 행정의 원칙에 대한 시대를 초월한 가르침을 담고 있습니다.',
-    cover: '/covers/classics/mongmin.jpg',
+    cover: 'https://picsum.photos/seed/classic-mongmin/200/280',
     isbn: '978-89-364-8901-2',
   },
   // 인문·사회 (10)
@@ -417,7 +417,7 @@ export const classics: Classic100[] = [
     year: 2017,
     category: '인문·사회',
     description: '경제학의 아버지 애덤 스미스의 대표작으로, 자유시장 경제의 이론적 토대를 확립한 고전입니다. 분업, 자본 축적, 자유무역의 원리를 체계적으로 분석하며, "보이지 않는 손"의 개념으로 시장경제의 자기 조절 메커니즘을 설명합니다.',
-    cover: '/covers/classics/wealth-nations.jpg',
+    cover: 'https://picsum.photos/seed/classic-wealth-nations/200/280',
     isbn: '978-89-376-0456-7',
   },
   {
@@ -428,7 +428,7 @@ export const classics: Classic100[] = [
     year: 2019,
     category: '인문·사회',
     description: '20세기 가장 영향력 있는 정치철학서로, "공정으로서의 정의" 개념을 제시합니다. 무지의 베일과 원초적 입장이라는 사고 실험을 통해 사회 정의의 원칙을 도출하며, 자유와 평등의 조화를 모색하는 현대 정치철학의 기념비적 저작입니다.',
-    cover: '/covers/classics/theory-justice.jpg',
+    cover: 'https://picsum.photos/seed/classic-theory-justice/200/280',
     isbn: '978-89-561-3456-7',
   },
   {
@@ -439,7 +439,7 @@ export const classics: Classic100[] = [
     year: 2015,
     category: '인문·사회',
     description: '자본주의 경제 체제를 분석한 마르크스의 대표작입니다. 상품, 화폐, 자본의 개념부터 잉여가치, 자본 축적, 공황에 이르기까지 자본주의의 운동 법칙을 체계적으로 해부하며, 현대 사회과학에 지대한 영향을 미쳤습니다.',
-    cover: '/covers/classics/capital.jpg',
+    cover: 'https://picsum.photos/seed/classic-capital/200/280',
     isbn: '978-89-376-0789-1',
   },
   {
@@ -450,7 +450,7 @@ export const classics: Classic100[] = [
     year: 2018,
     category: '인문·사회',
     description: '프랑스 혁명에 사상적 기초를 제공한 루소의 정치철학서입니다. 인민주권론과 일반의지(volonté générale)의 개념을 통해 정당한 정치 권력의 근거를 탐구하며, 자유와 평등을 실현하는 민주적 공동체의 이상을 제시합니다.',
-    cover: '/covers/classics/social-contract.jpg',
+    cover: 'https://picsum.photos/seed/classic-social-contract/200/280',
     isbn: '978-89-01-2345-6',
   },
   {
@@ -461,7 +461,7 @@ export const classics: Classic100[] = [
     year: 2016,
     category: '인문·사회',
     description: '20세기 존재론의 전환점이 된 하이데거의 주저입니다. 현존재(Dasein)의 존재 구조를 분석하며, 세계-내-존재, 불안, 죽음에 대한 깊은 철학적 성찰을 전개합니다. 실존주의와 해석학에 결정적인 영향을 미친 현대 철학의 기념비적 저작입니다.',
-    cover: '/covers/classics/being-time.jpg',
+    cover: 'https://picsum.photos/seed/classic-being-time/200/280',
     isbn: '978-89-7291-456-7',
   },
   {
@@ -472,7 +472,7 @@ export const classics: Classic100[] = [
     year: 2023,
     category: '인문·사회',
     description: '하버드대 마이클 샌델 교수의 정치철학 강의를 담은 책으로, 정의에 대한 다양한 철학적 접근을 탐구합니다. 공리주의, 자유주의, 공동체주의 등의 관점에서 현실 사례를 분석하며 독자 스스로 정의에 대해 사유하도록 이끕니다.',
-    cover: '/covers/classics/justice.jpg',
+    cover: 'https://picsum.photos/seed/classic-justice/200/280',
     isbn: '978-89-6217-123-4',
   },
   {
@@ -483,7 +483,7 @@ export const classics: Classic100[] = [
     year: 2020,
     category: '인문·사회',
     description: '르네상스 시대 피렌체의 정치사상가 마키아벨리의 대표작으로, 정치 권력의 획득과 유지에 관한 현실주의적 분석을 담고 있습니다. 도덕과 정치의 관계에 대한 파격적 주장은 근대 정치학의 출발점이 되었습니다.',
-    cover: '/covers/classics/prince.jpg',
+    cover: 'https://picsum.photos/seed/classic-prince/200/280',
     isbn: '978-89-7291-789-2',
   },
   {
@@ -494,7 +494,7 @@ export const classics: Classic100[] = [
     year: 2021,
     category: '인문·사회',
     description: '역사학의 본질과 방법론을 탐구한 E.H. 카의 명저입니다. "역사는 현재와 과거의 끊임없는 대화"라는 유명한 정의를 통해 역사적 사실과 해석의 관계, 역사가의 역할에 대한 근본적 성찰을 제시합니다.',
-    cover: '/covers/classics/what-is-history.jpg',
+    cover: 'https://picsum.photos/seed/classic-what-is-history/200/280',
     isbn: '978-89-7291-234-5',
   },
   {
@@ -505,7 +505,7 @@ export const classics: Classic100[] = [
     year: 2019,
     category: '인문·사회',
     description: '종교와 경제의 관계를 분석한 사회학의 고전입니다. 프로테스탄티즘의 금욕적 윤리가 근대 자본주의의 발전에 기여했다는 독창적 테제를 제시하며, 문화와 경제 발전의 관계에 대한 새로운 시각을 열어주었습니다.',
-    cover: '/covers/classics/protestant-ethic.jpg',
+    cover: 'https://picsum.photos/seed/classic-protestant-ethic/200/280',
     isbn: '978-89-310-0456-7',
   },
   {
@@ -516,7 +516,7 @@ export const classics: Classic100[] = [
     year: 2017,
     category: '인문·사회',
     description: '16세기 영국의 사상가 토머스 모어가 이상적 사회를 상상하여 그린 작품입니다. 사유재산이 없는 평등한 공동체를 묘사하며, 현실 사회의 부조리를 풍자하고 더 나은 사회에 대한 사유를 촉구합니다.',
-    cover: '/covers/classics/utopia.jpg',
+    cover: 'https://picsum.photos/seed/classic-utopia/200/280',
     isbn: '978-89-7483-456-7',
   },
   // 자연과학 (10)
@@ -528,7 +528,7 @@ export const classics: Classic100[] = [
     year: 2019,
     category: '자연과학',
     description: '자연선택에 의한 진화론을 체계적으로 제시한 생물학의 기념비적 저작입니다. 다윈은 방대한 관찰과 실험 자료를 바탕으로 생물 종의 변이와 적응, 자연선택의 메커니즘을 논증하며 생명과학의 패러다임을 근본적으로 전환시켰습니다.',
-    cover: '/covers/classics/origin-species.jpg',
+    cover: 'https://picsum.photos/seed/classic-origin-species/200/280',
     isbn: '978-89-8371-456-7',
   },
   {
@@ -539,7 +539,7 @@ export const classics: Classic100[] = [
     year: 2022,
     category: '자연과학',
     description: '천체물리학자 칼 세이건이 우주와 인류의 이야기를 담은 과학 교양서의 걸작입니다. 우주의 탄생부터 외계 생명의 가능성까지 과학적 사실을 시적이고 감동적인 문체로 서술하며, 우주 속 인류의 위치와 의미를 성찰합니다.',
-    cover: '/covers/classics/cosmos.jpg',
+    cover: 'https://picsum.photos/seed/classic-cosmos/200/280',
     isbn: '978-89-8371-789-1',
   },
   {
@@ -550,7 +550,7 @@ export const classics: Classic100[] = [
     year: 2023,
     category: '자연과학',
     description: '유전자의 관점에서 생명 현상을 재해석한 혁명적 저작입니다. 이타적 행동을 포함한 모든 생명 현상을 유전자의 자기 복제 전략으로 설명하며, 문화적 유전 단위로서의 밈(meme) 개념을 최초로 제안한 것으로도 유명합니다.',
-    cover: '/covers/classics/selfish-gene.jpg',
+    cover: 'https://picsum.photos/seed/classic-selfish-gene/200/280',
     isbn: '978-89-324-7456-7',
   },
   {
@@ -561,7 +561,7 @@ export const classics: Classic100[] = [
     year: 2021,
     category: '자연과학',
     description: '빅뱅부터 블랙홀, 시간의 본질까지 현대 물리학의 핵심 주제를 일반인도 이해할 수 있도록 풀어쓴 과학 교양서입니다. 우주의 기원과 구조, 양자역학과 상대성이론의 통합이라는 물리학의 궁극적 과제를 명쾌하게 소개합니다.',
-    cover: '/covers/classics/brief-history-time.jpg',
+    cover: 'https://picsum.photos/seed/classic-brief-history-time/200/280',
     isbn: '978-89-7291-567-8',
   },
   {
@@ -572,7 +572,7 @@ export const classics: Classic100[] = [
     year: 2020,
     category: '자연과학',
     description: '열역학 제2법칙인 엔트로피 법칙을 사회, 경제, 환경 문제에 적용한 독창적인 저작입니다. 에너지의 불가역적 소산이라는 물리적 원리를 통해 현대 산업문명의 위기를 진단하고 지속 가능한 사회로의 전환을 촉구합니다.',
-    cover: '/covers/classics/entropy.jpg',
+    cover: 'https://picsum.photos/seed/classic-entropy/200/280',
     isbn: '978-89-8407-456-7',
   },
   {
@@ -583,7 +583,7 @@ export const classics: Classic100[] = [
     year: 2018,
     category: '자연과학',
     description: '살충제의 무분별한 사용이 생태계에 미치는 영향을 고발한 환경 고전입니다. DDT 등 화학 살충제가 먹이 사슬을 통해 축적되어 조류와 생태계를 파괴하는 과정을 과학적으로 입증하며, 현대 환경 운동의 출발점이 된 기념비적 저작입니다.',
-    cover: '/covers/classics/silent-spring.jpg',
+    cover: 'https://picsum.photos/seed/classic-silent-spring/200/280',
     isbn: '978-89-6263-123-4',
   },
   {
@@ -594,7 +594,7 @@ export const classics: Classic100[] = [
     year: 2016,
     category: '자연과학',
     description: '양자역학의 창시자 중 한 명인 하이젠베르크의 자서전적 과학서입니다. 20세기 물리학의 혁명적 발견들이 어떤 대화와 논쟁을 통해 이루어졌는지를 생생하게 기록하며, 과학과 철학, 예술의 관계를 깊이 성찰합니다.',
-    cover: '/covers/classics/part-whole.jpg',
+    cover: 'https://picsum.photos/seed/classic-part-whole/200/280',
     isbn: '978-89-6578-123-4',
   },
   {
@@ -605,7 +605,7 @@ export const classics: Classic100[] = [
     year: 2020,
     category: '자연과학',
     description: '자연과학과 인문학의 통합을 주장한 사회생물학자 에드워드 윌슨의 대표작입니다. 물리학, 화학, 생물학, 사회과학, 인문학의 경계를 넘어 지식의 대통합을 제안하며, 학문 간 융합의 필요성과 가능성을 역설합니다.',
-    cover: '/covers/classics/consilience.jpg',
+    cover: 'https://picsum.photos/seed/classic-consilience/200/280',
     isbn: '978-89-8371-234-5',
   },
   {
@@ -616,7 +616,7 @@ export const classics: Classic100[] = [
     year: 2023,
     category: '자연과학',
     description: '신경외과 레지던트였던 저자가 폐암 진단을 받은 후 삶과 죽음, 의학의 의미를 성찰한 자전적 에세이입니다. 의사이자 환자로서의 이중적 시선을 통해 인간 존재의 유한성과 그 속에서 의미를 찾는 과정을 감동적으로 그려냅니다.',
-    cover: '/covers/classics/when-breath.jpg',
+    cover: 'https://picsum.photos/seed/classic-when-breath/200/280',
     isbn: '978-89-6596-234-5',
   },
   {
@@ -627,7 +627,7 @@ export const classics: Classic100[] = [
     year: 2017,
     category: '자연과학',
     description: '노벨물리학상 수상자 리처드 파인만의 전설적인 물리학 입문 강의를 정리한 책입니다. 역학, 전자기학, 양자역학의 핵심 개념을 파인만 특유의 직관적이고 명쾌한 방식으로 설명하며, 물리학의 아름다움과 재미를 전달합니다.',
-    cover: '/covers/classics/feynman-lectures.jpg',
+    cover: 'https://picsum.photos/seed/classic-feynman-lectures/200/280',
     isbn: '978-89-6139-123-4',
   },
 ]

@@ -51,7 +51,7 @@ const initialPosts: Post[] = [
     time: "30분 전",
     content: "오늘 독서 모임에서 채식주의자 토론 완료! 한강 작가의 상징성에 대해 정말 깊은 이야기를 나눴어요. 다음 주제는 소년이 온다!",
     bookMention: "채식주의자",
-    photos: ["/images/post-discussion.jpg", "/images/post-bookclub.jpg"],
+    photos: ["https://picsum.photos/seed/post-discussion/800/600", "https://picsum.photos/seed/post-bookclub/800/600"],
     likes: 56,
     comments: 12,
     shares: 7,
@@ -68,7 +68,7 @@ const initialPosts: Post[] = [
     time: "2시간 전",
     content: "아침 독서 루틴 3주차 인증! 습관의 힘 읽으면서 진짜 시스템이 바뀌고 있다는 걸 느껴요. 매일 30분씩 읽기 챌린지 같이 하실 분?",
     bookMention: "아주 작은 습관의 힘",
-    photos: ["/images/post-reading.jpg"],
+    photos: ["https://picsum.photos/seed/post-reading/800/600"],
     likes: 89,
     comments: 23,
     shares: 15,
@@ -98,7 +98,7 @@ const initialPosts: Post[] = [
     avatar: "https://picsum.photos/seed/avatar2/80/80",
     time: "6시간 전",
     content: "카페에서 사피엔스 읽는 중. 비 오는 일요일 오후에 커피 한 잔과 함께하는 독서가 최고네요. 이 분위기 그대로 가져가고 싶다.",
-    photos: ["/images/post-bookclub.jpg", "/images/post-reading.jpg", "/images/post-discussion.jpg"],
+    photos: ["https://picsum.photos/seed/post-bookclub/800/600", "https://picsum.photos/seed/post-reading/800/600", "https://picsum.photos/seed/post-discussion/800/600"],
     likes: 128,
     comments: 34,
     shares: 11,
@@ -201,7 +201,7 @@ export function TalkPage() {
   }
 
   const addDemoPhoto = () => {
-    const demoPhotos = ["/images/post-bookclub.jpg", "/images/post-reading.jpg", "/images/post-discussion.jpg"]
+    const demoPhotos = ["https://picsum.photos/seed/post-bookclub/800/600", "https://picsum.photos/seed/post-reading/800/600", "https://picsum.photos/seed/post-discussion/800/600"]
     if (attachedPhotos.length < 5) {
       setAttachedPhotos((prev) => [...prev, demoPhotos[prev.length % demoPhotos.length]])
     }

@@ -49,7 +49,7 @@ export function MobileMenu() {
 
   return (
     <>
-      <div className="fixed top-0 left-0 right-0 z-50 border-b border-border bg-card/95 backdrop-blur-xl lg:hidden">
+      <div className="fixed top-0 left-0 right-0 z-50 border-b border-border bg-card/95 pt-[env(safe-area-inset-top)] backdrop-blur-xl lg:hidden">
         <div className="flex h-14 items-center justify-between px-4">
           {/* Left: Hamburger + Logo */}
           <div className="flex items-center">

@@ -6,7 +6,7 @@ export default function UserLayout({ children }: { children: React.ReactNode }) 
     <>
       <GNB />
       <MobileMenu />
-      <main className="mx-auto min-h-screen max-w-2xl px-4 pt-0 lg:pt-16">
+      <main className="mx-auto min-h-screen max-w-2xl px-4 pt-[calc(3.5rem+env(safe-area-inset-top))] lg:pt-16">
         {children}
       </main>
     </>

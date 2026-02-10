@@ -4,6 +4,7 @@ import { useState } from "react"
 import { useRouter } from "next/navigation"
 import {
   BookOpen,
+  FileText,
   Tag,
   PenTool,
   Award,
@@ -22,6 +23,7 @@ import {
   Languages,
   BookMarked,
   Landmark,
+  ChevronDown,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 
@@ -33,6 +35,13 @@ const sampleBooks = [
   { id: 4, title: "미드나이트 라이브러리", author: "매트 헤이그", cover: "https://picsum.photos/seed/book-midnight/100/140" },
   { id: 5, title: "생각에 관한 생각", author: "대니얼 카너먼", cover: "https://picsum.photos/seed/book-thinking/100/140" },
   { id: 6, title: "1984", author: "조지 오웰", cover: "https://picsum.photos/seed/book-1984/100/140" },
+]
+
+// Program options
+const programOptions = [
+  { id: "free", label: "자유 서평" },
+  { id: "dokto", label: "독토 프로그램" },
+  { id: "classic100", label: "고전 100선" },
 ]
 
 // KDC Badge Categories
@@ -51,9 +60,10 @@ const kdcCategories = [
 
 const steps = [
   { id: 1, label: "도서 선택", icon: BookOpen },
-  { id: 2, label: "뱃지 선택", icon: Tag },
-  { id: 3, label: "서평 작성", icon: PenTool },
-  { id: 4, label: "스탬프 획득", icon: Award },
+  { id: 2, label: "프로그램 선택", icon: FileText },
+  { id: 3, label: "뱃지 선택", icon: Tag },
+  { id: 4, label: "서평 작성", icon: PenTool },
+  { id: 5, label: "스탬프 획득", icon: Award },
 ]
 
 // Ginkgo Leaf SVG Component
@@ -79,6 +89,8 @@ export default function WriteReview() {
   const [currentStep, setCurrentStep] = useState(1)
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedBook, setSelectedBook] = useState<typeof sampleBooks[0] | null>(null)
+  const [selectedProgram, setSelectedProgram] = useState<string | null>(null)
+  const [isProgramDropdownOpen, setIsProgramDropdownOpen] = useState(false)
   const [selectedBadge, setSelectedBadge] = useState<string | null>(null)
   const [rating, setRating] = useState(0)
   const [reviewText, setReviewText] = useState("")
@@ -91,13 +103,14 @@ export default function WriteReview() {
 
   const canProceed = () => {
     if (currentStep === 1) return selectedBook !== null
-    if (currentStep === 2) return selectedBadge !== null
-    if (currentStep === 3) return rating > 0 && reviewText.length >= 100
+    if (currentStep === 2) return selectedProgram !== null
+    if (currentStep === 3) return selectedBadge !== null
+    if (currentStep === 4) return rating > 0 && reviewText.length >= 100
     return true
   }
 
   const handleNext = () => {
-    if (currentStep < 4 && canProceed()) {
+    if (currentStep < 5 && canProceed()) {
       setCurrentStep(currentStep + 1)
     }
   }
@@ -111,6 +124,7 @@ export default function WriteReview() {
   }
 
   const selectedBadgeData = kdcCategories.find((c) => c.id === selectedBadge)
+  const selectedProgramData = programOptions.find((p) => p.id === selectedProgram)
 
   return (
     <div className="min-h-screen bg-background pb-24">
@@ -130,7 +144,7 @@ export default function WriteReview() {
         </div>
 
         {/* Progress Steps */}
-        <div className="flex items-center justify-between px-4 pb-4">
+        <div className="flex items-center justify-between px-2 pb-4">
           {steps.map((step, index) => {
             const Icon = step.icon
             const isCompleted = currentStep > step.id
@@ -140,7 +154,7 @@ export default function WriteReview() {
                 <div className="flex flex-col items-center">
                   <div
                     className={cn(
-                      "flex h-11 w-11 items-center justify-center rounded-full transition-all",
+                      "flex h-9 w-9 items-center justify-center rounded-full transition-all",
                       isCompleted
                         ? "bg-primary/20 text-primary"
                         : isCurrent
@@ -148,11 +162,11 @@ export default function WriteReview() {
                         : "bg-muted text-muted-foreground"
                     )}
                   >
-                    {isCompleted ? <Check size={18} /> : <Icon size={18} />}
+                    {isCompleted ? <Check size={16} /> : <Icon size={16} />}
                   </div>
                   <span
                     className={cn(
-                      "mt-1.5 text-[10px] font-medium",
+                      "mt-1 text-[9px] font-medium",
                       isCurrent ? "text-foreground" : "text-muted-foreground"
                     )}
                   >
@@ -162,7 +176,7 @@ export default function WriteReview() {
                 {index < steps.length - 1 && (
                   <div
                     className={cn(
-                      "mx-1 h-0.5 flex-1",
+                      "mx-0.5 h-0.5 flex-1",
                       currentStep > step.id ? "bg-primary" : "bg-border"
                     )}
                   />
@@ -224,8 +238,78 @@ export default function WriteReview() {
           </div>
         )}
 
-        {/* Step 2: Badge Selection */}
+        {/* Step 2: Program Selection */}
         {currentStep === 2 && (
+          <div className="flex flex-col gap-4">
+            <p className="text-sm text-muted-foreground">
+              서평을 등록할 프로그램을 선택하세요:
+            </p>
+
+            {/* Program Dropdown */}
+            <div className="relative">
+              <button
+                onClick={() => setIsProgramDropdownOpen(!isProgramDropdownOpen)}
+                className="flex w-full items-center justify-between rounded-xl border border-border bg-card px-4 py-4 text-sm font-medium text-foreground shadow-sm transition-all hover:border-primary/50"
+              >
+                <span>
+                  {selectedProgram
+                    ? `프로그램: ${selectedProgramData?.label}`
+                    : "프로그램을 선택하세요"}
+                </span>
+                <ChevronDown
+                  size={18}
+                  className={cn(
+                    "text-muted-foreground transition-transform",
+                    isProgramDropdownOpen && "rotate-180"
+                  )}
+                />
+              </button>
+
+              {isProgramDropdownOpen && (
+                <div className="absolute top-full left-0 right-0 z-50 mt-1 overflow-hidden rounded-xl border border-border bg-card shadow-lg">
+                  {programOptions.map((option) => (
+                    <button
+                      key={option.id}
+                      onClick={() => {
+                        setSelectedProgram(option.id)
+                        setIsProgramDropdownOpen(false)
+                      }}
+                      className={cn(
+                        "w-full px-4 py-4 text-left text-sm transition-colors hover:bg-muted",
+                        selectedProgram === option.id
+                          ? "bg-primary/10 font-semibold text-primary"
+                          : "text-foreground"
+                      )}
+                    >
+                      {option.label}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Selected Info */}
+            {selectedBook && (
+              <div className="mt-4 flex items-center gap-3 rounded-2xl bg-muted/50 p-3">
+                <div className="h-14 w-10 flex-shrink-0 overflow-hidden rounded-lg">
+                  <img
+                    src={selectedBook.cover}
+                    alt={selectedBook.title}
+                    className="h-full w-full object-cover"
+                    crossOrigin="anonymous"
+                  />
+                </div>
+                <div>
+                  <p className="text-sm font-bold text-foreground">{selectedBook.title}</p>
+                  <p className="text-xs text-muted-foreground">{selectedBook.author}</p>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Step 3: Badge Selection */}
+        {currentStep === 3 && (
           <div className="flex flex-col gap-4">
             <p className="text-sm text-muted-foreground">
               읽은 도서에 가장 알맞은 KDC 분류를 선택하세요:
@@ -261,8 +345,8 @@ export default function WriteReview() {
           </div>
         )}
 
-        {/* Step 3: Write Review */}
-        {currentStep === 3 && (
+        {/* Step 4: Write Review */}
+        {currentStep === 4 && (
           <div className="flex flex-col gap-4">
             {/* Selected Book Card */}
             {selectedBook && (
@@ -278,7 +362,7 @@ export default function WriteReview() {
                 <div>
                   <p className="text-sm font-bold text-foreground">{selectedBook.title}</p>
                   <p className="text-xs text-muted-foreground">
-                    뱃지: {selectedBadgeData?.label} ({selectedBadge})
+                    {selectedProgramData?.label} · {selectedBadgeData?.label} ({selectedBadge})
                   </p>
                 </div>
               </div>
@@ -329,8 +413,8 @@ export default function WriteReview() {
           </div>
         )}
 
-        {/* Step 4: Stamp Earned */}
-        {currentStep === 4 && (
+        {/* Step 5: Stamp Earned */}
+        {currentStep === 5 && (
           <div className="flex flex-col items-center gap-6 py-8">
             {/* Ginkgo Leaf Stamp */}
             <div className="relative">
@@ -346,6 +430,9 @@ export default function WriteReview() {
               <h2 className="text-xl font-bold text-foreground">스탬프를 획득했습니다!</h2>
               <p className="mt-1 text-sm text-muted-foreground">
                 {selectedBadgeData?.label} ({selectedBadge})
+              </p>
+              <p className="mt-1 text-xs text-primary font-medium">
+                {selectedProgramData?.label}
               </p>
               <p className="mt-2 text-xs text-muted-foreground">
                 서평이 성공적으로 등록되었습니다.
@@ -363,7 +450,7 @@ export default function WriteReview() {
       </div>
 
       {/* Bottom Action Button */}
-      {currentStep < 4 && (
+      {currentStep < 5 && (
         <div className="fixed bottom-0 left-0 right-0 border-t border-border bg-card/95 p-4 backdrop-blur-sm">
           <button
             onClick={handleNext}
@@ -375,7 +462,7 @@ export default function WriteReview() {
                 : "bg-muted text-muted-foreground"
             )}
           >
-            {currentStep === 3 ? "제출 후 스탬프 받기" : "다음"}
+            {currentStep === 4 ? "제출 후 스탬프 받기" : "다음"}
             <ChevronRight size={16} />
           </button>
         </div>

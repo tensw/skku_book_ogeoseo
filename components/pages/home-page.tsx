@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect, useCallback } from "react"
+import Link from "next/link"
 import {
   ChevronLeft,
   ChevronRight,
@@ -14,10 +15,19 @@ import {
   MessageCircle,
   ImageIcon,
   Flame,
+  Sun,
+  Sunset,
+  Moon,
+  Settings,
+  X,
+  Pencil,
+  Plus,
+  Trash2,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { ClubDetailModal } from "@/components/club-detail-modal"
 import type { ClubDetailData } from "@/components/club-detail-modal"
+import { useAuth } from "@/lib/auth-context"
 
 const recommendedBooks = [
   { id: 1, title: "아무튼, 메모", author: "김신회", cover: "https://picsum.photos/seed/book-memo/200/280", category: "에세이", color: "bg-tangerine/10 text-tangerine" },
@@ -25,6 +35,45 @@ const recommendedBooks = [
   { id: 3, title: "아주 작은 습관의 힘", author: "제임스 클리어", cover: "https://picsum.photos/seed/book-atomic/200/280", category: "자기계발", color: "bg-emerald/10 text-emerald" },
   { id: 4, title: "미드나이트 라이브러리", author: "매트 헤이그", cover: "https://picsum.photos/seed/book-midnight/200/280", category: "문학", color: "bg-tangerine/10 text-tangerine" },
   { id: 5, title: "생각에 관한 생각", author: "대니얼 카너먼", cover: "https://picsum.photos/seed/book-thinking/200/280", category: "심리학", color: "bg-mint/10 text-mint" },
+]
+
+const dokmoGroups = [
+  {
+    id: "yeomyeong",
+    name: "여명독",
+    description: "아침 6-9시",
+    book: "미움받을 용기",
+    bookAuthor: "기시미 이치로",
+    bookCover: "https://picsum.photos/seed/book-courage/100/140",
+    times: ["6:00", "7:00", "8:00"],
+    color: "bg-amber-500",
+    lightColor: "bg-amber-100 text-amber-700",
+    icon: Sun,
+  },
+  {
+    id: "yunseul",
+    name: "윤슬독",
+    description: "점심 12-14시",
+    book: "데미안",
+    bookAuthor: "헤르만 헤세",
+    bookCover: "https://picsum.photos/seed/book-demian/100/140",
+    times: ["12:00", "13:00"],
+    color: "bg-sky-500",
+    lightColor: "bg-sky-100 text-sky-700",
+    icon: Sunset,
+  },
+  {
+    id: "dalbit",
+    name: "달빛독",
+    description: "저녁 17-22시",
+    book: "아몬드",
+    bookAuthor: "손원평",
+    bookCover: "https://picsum.photos/seed/book-almond/100/140",
+    times: ["17:00", "18:00", "19:00", "20:00", "21:00"],
+    color: "bg-indigo-500",
+    lightColor: "bg-indigo-100 text-indigo-700",
+    icon: Moon,
+  },
 ]
 
 const liveTalkPosts = [
@@ -139,10 +188,35 @@ const activeClubs: ActiveClub[] = [
   },
 ]
 
+interface BannerForm {
+  imageUrl: string
+  title: string
+  subtitle: string
+}
+
+interface BookRecommendation {
+  id: number
+  title: string
+  author: string
+  cover: string
+  category: string
+  color: string
+}
+
 export function HomePage() {
+  const { isAdmin } = useAuth()
   const [currentSlide, setCurrentSlide] = useState(0)
   const [selectedClub, setSelectedClub] = useState<ClubDetailData | null>(null)
   const [joinedClubs, setJoinedClubs] = useState<number[]>([])
+  const [isAdminPanelOpen, setIsAdminPanelOpen] = useState(false)
+  const [editingBanner, setEditingBanner] = useState<BannerForm | null>(null)
+  const [books, setBooks] = useState<BookRecommendation[]>(recommendedBooks)
+  const [editingBook, setEditingBook] = useState<BookRecommendation | null>(null)
+  const [bannerData, setBannerData] = useState({
+    imageUrl: "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=1200&h=600&fit=crop",
+    title: "함께 읽고, 함께 나누는",
+    subtitle: "오거서에서 당신의 독서 라이프를 시작하세요",
+  })
 
   const handleApply = () => {
     if (selectedClub) {
@@ -153,28 +227,78 @@ export function HomePage() {
   }
 
   const nextSlide = useCallback(() => {
-    setCurrentSlide((prev) => (prev + 1) % recommendedBooks.length)
-  }, [])
+    setCurrentSlide((prev) => (prev + 1) % books.length)
+  }, [books.length])
 
   const prevSlide = useCallback(() => {
     setCurrentSlide(
-      (prev) => (prev - 1 + recommendedBooks.length) % recommendedBooks.length
+      (prev) => (prev - 1 + books.length) % books.length
     )
-  }, [])
+  }, [books.length])
+
+  const handleEditBanner = () => {
+    setEditingBanner({
+      imageUrl: bannerData.imageUrl,
+      title: bannerData.title,
+      subtitle: bannerData.subtitle,
+    })
+  }
+
+  const handleSaveBanner = () => {
+    if (editingBanner) {
+      setBannerData({
+        imageUrl: editingBanner.imageUrl,
+        title: editingBanner.title,
+        subtitle: editingBanner.subtitle,
+      })
+      setEditingBanner(null)
+    }
+  }
+
+  const handleEditBook = (book: BookRecommendation) => {
+    setEditingBook({ ...book })
+  }
+
+  const handleSaveBook = () => {
+    if (editingBook) {
+      if (editingBook.id) {
+        setBooks(books.map((b) => (b.id === editingBook.id ? editingBook : b)))
+      } else {
+        const newId = Math.max(...books.map((b) => b.id)) + 1
+        setBooks([...books, { ...editingBook, id: newId }])
+      }
+      setEditingBook(null)
+    }
+  }
+
+  const handleDeleteBook = (id: number) => {
+    setBooks(books.filter((b) => b.id !== id))
+  }
+
+  const handleAddBook = () => {
+    setEditingBook({
+      id: 0,
+      title: "",
+      author: "",
+      cover: "",
+      category: "",
+      color: "bg-primary/10 text-primary",
+    })
+  }
 
   useEffect(() => {
     const timer = setInterval(nextSlide, 4000)
     return () => clearInterval(timer)
   }, [nextSlide])
 
-  const currentBook = recommendedBooks[currentSlide]
+  const currentBook = books[currentSlide]
 
   return (
     <div className="flex flex-col gap-0 pb-6">
       {/* Hero Banner */}
       <section className="relative h-56 overflow-hidden sm:h-72">
         <img
-          src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=1200&h=600&fit=crop"
+          src={bannerData.imageUrl}
           alt="함께 책 읽고 토론하는 사람들"
           className="h-full w-full object-cover"
         />
@@ -185,13 +309,22 @@ export function HomePage() {
             HOT
           </span>
           <h1 className="font-serif text-2xl font-bold leading-tight text-white sm:text-3xl">
-            함께 읽고,{" "}
-            <span className="text-emerald">함께 나누는</span>
+            {bannerData.title.split(",")[0]},{" "}
+            <span className="text-emerald">{bannerData.title.split(",")[1] || "함께 나누는"}</span>
           </h1>
           <p className="mt-1 text-xs text-white/70 sm:text-sm">
-            오거서에서 당신의 독서 라이프를 시작하세요
+            {bannerData.subtitle}
           </p>
         </div>
+        {isAdmin && (
+          <button
+            onClick={handleEditBanner}
+            className="absolute right-3 top-3 flex h-8 w-8 items-center justify-center rounded-full bg-white/80 text-muted-foreground backdrop-blur-sm transition-colors hover:bg-white hover:text-primary"
+            title="배너 수정"
+          >
+            <Pencil size={14} />
+          </button>
+        )}
       </section>
 
       {/* Book Carousel - compact horizontal scroll */}
@@ -199,13 +332,22 @@ export function HomePage() {
         <div className="mb-3 flex items-center justify-between">
           <h2 className="flex items-center gap-2 text-sm font-bold text-foreground">
             <Sparkles size={14} className="text-tangerine" />
-            이달의 추천
+            이달의 책 추천
           </h2>
           <div className="flex items-center gap-1">
+            {isAdmin && (
+              <button
+                onClick={handleAddBook}
+                className="mr-2 flex items-center gap-1 rounded-full bg-primary/10 px-2 py-1 text-[10px] font-medium text-primary hover:bg-primary/20"
+              >
+                <Plus size={10} />
+                추가
+              </button>
+            )}
             <button onClick={prevSlide} className="rounded-full p-1 hover:bg-muted" aria-label="이전">
               <ChevronLeft size={14} className="text-muted-foreground" />
             </button>
-            <span className="text-[10px] text-muted-foreground">{currentSlide + 1}/{recommendedBooks.length}</span>
+            <span className="text-[10px] text-muted-foreground">{currentSlide + 1}/{books.length}</span>
             <button onClick={nextSlide} className="rounded-full p-1 hover:bg-muted" aria-label="다음">
               <ChevronRight size={14} className="text-muted-foreground" />
             </button>
@@ -213,16 +355,32 @@ export function HomePage() {
         </div>
 
         <div className="flex gap-3 overflow-x-auto no-scrollbar">
-          {recommendedBooks.map((book, i) => (
+          {books.map((book, i) => (
             <div
               key={book.id}
               className={cn(
-                "flex flex-shrink-0 flex-col items-center gap-2 transition-all",
+                "group relative flex flex-shrink-0 flex-col items-center gap-2 transition-all",
                 i === currentSlide ? "opacity-100" : "opacity-60"
               )}
             >
               <div className="relative h-32 w-22 overflow-hidden rounded-2xl shadow-md ring-1 ring-border sm:h-36 sm:w-24">
                 <img src={book.cover || "/placeholder.svg"} alt={book.title} className="h-full w-full object-cover" crossOrigin="anonymous" />
+                {isAdmin && (
+                  <div className="absolute inset-0 flex items-center justify-center gap-1 bg-foreground/50 opacity-0 transition-opacity group-hover:opacity-100">
+                    <button
+                      onClick={() => handleEditBook(book)}
+                      className="flex h-7 w-7 items-center justify-center rounded-full bg-white text-primary"
+                    >
+                      <Pencil size={12} />
+                    </button>
+                    <button
+                      onClick={() => handleDeleteBook(book.id)}
+                      className="flex h-7 w-7 items-center justify-center rounded-full bg-white text-red-500"
+                    >
+                      <Trash2 size={12} />
+                    </button>
+                  </div>
+                )}
               </div>
               <span className={cn("rounded-full px-2 py-0.5 text-[9px] font-bold", book.color)}>
                 {book.category}
@@ -230,6 +388,135 @@ export function HomePage() {
               <p className="w-20 truncate text-center text-[10px] font-medium text-foreground sm:w-24">{book.title}</p>
             </div>
           ))}
+        </div>
+      </section>
+
+      {/* 이번주 독모 - Horizontal Slider */}
+      <section className="mt-5 px-5 sm:px-8">
+        <div className="mb-3 flex items-center justify-between">
+          <h2 className="flex items-center gap-2 text-sm font-bold text-foreground">
+            <Sun size={14} className="text-amber-500" />
+            이번주 독모
+          </h2>
+          <Link
+            href="/programs/dokmo"
+            className="flex items-center gap-1 rounded-full bg-amber-500/10 px-3 py-1 text-[10px] font-semibold text-amber-600 transition-colors hover:bg-amber-500/20"
+          >
+            신청하러가기
+            <ArrowRight size={10} />
+          </Link>
+        </div>
+
+        <div className="flex gap-3 overflow-x-auto pb-2 no-scrollbar">
+          {dokmoGroups.map((group) => {
+            const IconComponent = group.icon
+            return (
+              <div
+                key={group.id}
+                className="flex w-40 flex-shrink-0 flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-sm transition-all hover:shadow-md"
+              >
+                {/* Book Cover */}
+                <div className="relative h-24 overflow-hidden">
+                  <img
+                    src={group.bookCover}
+                    alt={group.book}
+                    className="h-full w-full object-cover"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-foreground/60 to-transparent" />
+                  <div className="absolute bottom-2 left-2 right-2">
+                    <span className={cn("inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[9px] font-bold text-white", group.color)}>
+                      <IconComponent size={10} />
+                      {group.name}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Info */}
+                <div className="p-3">
+                  <h3 className="text-xs font-bold text-foreground line-clamp-1">{group.book}</h3>
+                  <p className="text-[10px] text-muted-foreground">{group.bookAuthor}</p>
+                  <div className="mt-2 flex flex-wrap gap-1">
+                    {group.times.slice(0, 3).map((time) => (
+                      <span key={time} className={cn("rounded-full px-1.5 py-0.5 text-[8px] font-medium", group.lightColor)}>
+                        {time}
+                      </span>
+                    ))}
+                    {group.times.length > 3 && (
+                      <span className="text-[8px] text-muted-foreground">+{group.times.length - 3}</span>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )
+          })}
+        </div>
+      </section>
+
+      {/* 이달의 독토 - Horizontal Slider */}
+      <section className="mt-5 px-5 sm:px-8">
+        <div className="mb-3 flex items-center justify-between">
+          <h2 className="flex items-center gap-2 text-sm font-bold text-foreground">
+            <BookOpen size={14} className="text-emerald" />
+            이달의 독토
+          </h2>
+          <Link
+            href="/programs/dokto"
+            className="flex items-center gap-1 rounded-full bg-emerald/10 px-3 py-1 text-[10px] font-semibold text-emerald transition-colors hover:bg-emerald/20"
+          >
+            신청하러가기
+            <ArrowRight size={10} />
+          </Link>
+        </div>
+
+        <div className="flex gap-3 overflow-x-auto pb-2 no-scrollbar">
+          {activeClubs.map((club) => {
+            const isJoined = joinedClubs.includes(club.id)
+            return (
+              <div
+                key={club.id}
+                className="group w-56 flex-shrink-0 overflow-hidden rounded-2xl border border-border bg-card shadow-sm transition-all hover:shadow-md"
+              >
+                {/* Vibe Image */}
+                <div className="relative h-28 overflow-hidden">
+                  <img src={club.vibeImage || "/placeholder.svg"} alt={club.title} className="h-full w-full object-cover transition-transform group-hover:scale-105" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-foreground/60 to-transparent" />
+                  <div className="absolute bottom-2 left-2 right-2">
+                    <h3 className="text-xs font-bold text-white line-clamp-1">{club.title}</h3>
+                    <span className="text-[10px] text-white/70">{club.leader}</span>
+                  </div>
+                  <span className={cn("absolute right-2 top-2 rounded-full px-2 py-0.5 text-[9px] font-bold", club.tagColor)}>
+                    {club.leaderType === "student" ? "학생" : club.leaderType === "professor" ? "교수" : "작가"}
+                  </span>
+                </div>
+
+                {/* Info Footer */}
+                <div className="flex items-center justify-between p-3">
+                  <div className="flex items-center gap-2 text-[10px] text-muted-foreground">
+                    <span className="flex items-center gap-0.5">
+                      <Users size={10} />
+                      {club.members}명
+                    </span>
+                    <span className="flex items-center gap-0.5">
+                      <Clock size={10} />
+                      {club.nextMeeting.split(" ")[0]}
+                    </span>
+                  </div>
+                  {isJoined ? (
+                    <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[9px] font-bold text-primary">
+                      완료
+                    </span>
+                  ) : (
+                    <button
+                      onClick={() => setSelectedClub(club.detail)}
+                      className="rounded-full bg-primary px-2.5 py-1 text-[9px] font-bold text-primary-foreground shadow-sm transition-all hover:shadow-md hover:brightness-110"
+                    >
+                      참여
+                    </button>
+                  )}
+                </div>
+              </div>
+            )
+          })}
         </div>
       </section>
 
@@ -295,72 +582,6 @@ export function HomePage() {
         </div>
       </section>
 
-      {/* Active Clubs */}
-      <section className="mt-5 px-5 sm:px-8">
-        <div className="mb-3 flex items-center justify-between">
-          <h2 className="flex items-center gap-2 text-sm font-bold text-foreground">
-            <BookOpen size={14} className="text-emerald" />
-            이달의 독토
-          </h2>
-          <button className="text-[10px] font-semibold text-primary">
-            전체 보기 <ArrowRight size={10} className="inline" />
-          </button>
-        </div>
-
-        <div className="flex flex-col gap-3 sm:grid sm:grid-cols-2 sm:gap-4">
-          {activeClubs.map((club) => {
-            const isJoined = joinedClubs.includes(club.id)
-            return (
-              <div
-                key={club.id}
-                className="group overflow-hidden rounded-2xl border border-border bg-card shadow-sm transition-all hover:shadow-md"
-              >
-                {/* Vibe Image */}
-                <div className="relative h-28 overflow-hidden sm:h-32">
-                  <img src={club.vibeImage || "/placeholder.svg"} alt={club.title} className="h-full w-full object-cover transition-transform group-hover:scale-105" />
-                  <div className="absolute inset-0 bg-gradient-to-t from-foreground/60 to-transparent" />
-                  <div className="absolute bottom-2 left-3 right-3 flex items-end justify-between">
-                    <div>
-                      <h3 className="text-sm font-bold text-white">{club.title}</h3>
-                      <span className="text-[10px] text-white/70">{club.leader}</span>
-                    </div>
-                    <span className={cn("rounded-full px-2 py-0.5 text-[9px] font-bold", club.tagColor)}>
-                      {club.leaderType === "student" ? "학생" : club.leaderType === "professor" ? "교수" : "작가"}
-                    </span>
-                  </div>
-                </div>
-
-                {/* Info Footer */}
-                <div className="flex items-center justify-between p-3">
-                  <div className="flex items-center gap-3 text-[10px] text-muted-foreground">
-                    <span className="flex items-center gap-1">
-                      <Users size={10} />
-                      {club.members}명
-                    </span>
-                    <span className="flex items-center gap-1">
-                      <Clock size={10} />
-                      {club.nextMeeting}
-                    </span>
-                  </div>
-                  {isJoined ? (
-                    <span className="rounded-full bg-primary/10 px-2.5 py-1 text-[10px] font-bold text-primary">
-                      신청 완료
-                    </span>
-                  ) : (
-                    <button
-                      onClick={() => setSelectedClub(club.detail)}
-                      className="rounded-full bg-primary px-3 py-1 text-[10px] font-bold text-primary-foreground shadow-sm transition-all hover:shadow-md hover:brightness-110"
-                    >
-                      참여
-                    </button>
-                  )}
-                </div>
-              </div>
-            )
-          })}
-        </div>
-      </section>
-
       <ClubDetailModal
         club={selectedClub}
         isOpen={!!selectedClub}
@@ -368,6 +589,192 @@ export function HomePage() {
         onApply={handleApply}
         applied={selectedClub ? joinedClubs.includes(selectedClub.id) : false}
       />
+
+      {/* Banner Edit Modal */}
+      {editingBanner && (
+        <div
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-foreground/50 p-4 backdrop-blur-sm"
+          onClick={() => setEditingBanner(null)}
+        >
+          <div
+            className="relative w-full max-w-lg overflow-hidden rounded-3xl border border-border bg-card shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between border-b border-border px-6 py-4">
+              <h2 className="text-lg font-bold text-foreground">배너 수정</h2>
+              <button
+                onClick={() => setEditingBanner(null)}
+                className="flex h-8 w-8 items-center justify-center rounded-full bg-muted text-muted-foreground transition-colors hover:bg-border hover:text-foreground"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <div className="flex flex-col gap-4 px-6 py-6">
+              <div>
+                <label className="mb-1.5 block text-sm font-medium text-foreground">배너 이미지 URL</label>
+                <input
+                  type="text"
+                  value={editingBanner.imageUrl}
+                  onChange={(e) => setEditingBanner({ ...editingBanner, imageUrl: e.target.value })}
+                  placeholder="https://..."
+                  className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+                />
+              </div>
+
+              <div>
+                <label className="mb-1.5 block text-sm font-medium text-foreground">제목 (쉼표로 색상 변경 부분 구분)</label>
+                <input
+                  type="text"
+                  value={editingBanner.title}
+                  onChange={(e) => setEditingBanner({ ...editingBanner, title: e.target.value })}
+                  placeholder="예: 함께 읽고, 함께 나누는"
+                  className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+                />
+              </div>
+
+              <div>
+                <label className="mb-1.5 block text-sm font-medium text-foreground">부제목</label>
+                <input
+                  type="text"
+                  value={editingBanner.subtitle}
+                  onChange={(e) => setEditingBanner({ ...editingBanner, subtitle: e.target.value })}
+                  placeholder="예: 오거서에서 당신의 독서 라이프를 시작하세요"
+                  className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+                />
+              </div>
+            </div>
+
+            <div className="flex gap-3 border-t border-border bg-muted/30 px-6 py-4">
+              <button
+                onClick={() => setEditingBanner(null)}
+                className="flex-1 rounded-xl border border-border bg-card py-3 text-sm font-medium text-foreground transition-colors hover:bg-muted"
+              >
+                취소
+              </button>
+              <button
+                onClick={handleSaveBanner}
+                className="flex-1 rounded-xl bg-primary py-3 text-sm font-bold text-primary-foreground transition-all hover:brightness-110"
+              >
+                저장
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Book Edit Modal */}
+      {editingBook && (
+        <div
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-foreground/50 p-4 backdrop-blur-sm"
+          onClick={() => setEditingBook(null)}
+        >
+          <div
+            className="relative w-full max-w-lg overflow-hidden rounded-3xl border border-border bg-card shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between border-b border-border px-6 py-4">
+              <h2 className="text-lg font-bold text-foreground">
+                {editingBook.id ? "추천 도서 수정" : "새 추천 도서 추가"}
+              </h2>
+              <button
+                onClick={() => setEditingBook(null)}
+                className="flex h-8 w-8 items-center justify-center rounded-full bg-muted text-muted-foreground transition-colors hover:bg-border hover:text-foreground"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <div className="flex flex-col gap-4 px-6 py-6">
+              <div>
+                <label className="mb-1.5 block text-sm font-medium text-foreground">도서명</label>
+                <input
+                  type="text"
+                  value={editingBook.title}
+                  onChange={(e) => setEditingBook({ ...editingBook, title: e.target.value })}
+                  placeholder="도서 제목"
+                  className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+                />
+              </div>
+
+              <div>
+                <label className="mb-1.5 block text-sm font-medium text-foreground">저자</label>
+                <input
+                  type="text"
+                  value={editingBook.author}
+                  onChange={(e) => setEditingBook({ ...editingBook, author: e.target.value })}
+                  placeholder="저자명"
+                  className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+                />
+              </div>
+
+              <div>
+                <label className="mb-1.5 block text-sm font-medium text-foreground">카테고리</label>
+                <input
+                  type="text"
+                  value={editingBook.category}
+                  onChange={(e) => setEditingBook({ ...editingBook, category: e.target.value })}
+                  placeholder="예: 에세이, 역사, 자기계발"
+                  className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+                />
+              </div>
+
+              <div>
+                <label className="mb-1.5 block text-sm font-medium text-foreground">표지 이미지 URL</label>
+                <input
+                  type="text"
+                  value={editingBook.cover}
+                  onChange={(e) => setEditingBook({ ...editingBook, cover: e.target.value })}
+                  placeholder="https://..."
+                  className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+                />
+              </div>
+
+              <div>
+                <label className="mb-1.5 block text-sm font-medium text-foreground">태그 색상</label>
+                <select
+                  value={editingBook.color}
+                  onChange={(e) => setEditingBook({ ...editingBook, color: e.target.value })}
+                  className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+                >
+                  <option value="bg-tangerine/10 text-tangerine">주황색</option>
+                  <option value="bg-mint/10 text-mint">민트</option>
+                  <option value="bg-emerald/10 text-emerald">에메랄드</option>
+                  <option value="bg-primary/10 text-primary">기본</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="flex gap-3 border-t border-border bg-muted/30 px-6 py-4">
+              <button
+                onClick={() => setEditingBook(null)}
+                className="flex-1 rounded-xl border border-border bg-card py-3 text-sm font-medium text-foreground transition-colors hover:bg-muted"
+              >
+                취소
+              </button>
+              <button
+                onClick={handleSaveBook}
+                disabled={!editingBook.title.trim() || !editingBook.author.trim()}
+                className="flex-1 rounded-xl bg-primary py-3 text-sm font-bold text-primary-foreground transition-all hover:brightness-110 disabled:opacity-50"
+              >
+                {editingBook.id ? "수정" : "추가"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Floating Admin Button */}
+      {isAdmin && (
+        <div className="fixed bottom-24 right-5 z-50">
+          <div className="rounded-full bg-primary p-3 text-white shadow-lg">
+            <Settings size={20} />
+          </div>
+          <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[8px] font-bold text-white">
+            관리
+          </span>
+        </div>
+      )}
     </div>
   )
 }

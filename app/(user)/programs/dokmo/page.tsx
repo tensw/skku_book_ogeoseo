@@ -1,8 +1,9 @@
 "use client"
 
 import { useState, useMemo } from "react"
-import { ChevronDown, ChevronLeft, ChevronRight, Clock, MapPin, Users, BookOpen, X, Calendar } from "lucide-react"
+import { ChevronDown, ChevronLeft, ChevronRight, Clock, MapPin, Users, BookOpen, X, Calendar, Pencil, Settings } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { useAuth } from "@/lib/auth-context"
 
 type GroupType = "all" | "yeomyeong" | "yunseul" | "dalbit"
 
@@ -108,7 +109,16 @@ function formatDateDisplay(date: Date): string {
 
 const MAX_BOOKINGS = 7
 
+interface BookEditForm {
+  groupId: GroupType
+  book: string
+  bookAuthor: string
+  bookCover: string
+  bookDescription: string
+}
+
 export default function Dokmo() {
+  const { isAdmin } = useAuth()
   const [selectedGroup, setSelectedGroup] = useState<GroupType>("all")
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
   const [selectedDate, setSelectedDate] = useState<Date>(new Date())
@@ -119,11 +129,43 @@ export default function Dokmo() {
     timeSlot: TimeSlot
     date: Date
   } | null>(null)
+  const [groups, setGroups] = useState<ReadingGroup[]>(readingGroups)
+  const [isBookModalOpen, setIsBookModalOpen] = useState(false)
+  const [editingBook, setEditingBook] = useState<BookEditForm | null>(null)
 
   const filteredGroups = useMemo(() => {
-    if (selectedGroup === "all") return readingGroups
-    return readingGroups.filter((g) => g.id === selectedGroup)
-  }, [selectedGroup])
+    if (selectedGroup === "all") return groups
+    return groups.filter((g) => g.id === selectedGroup)
+  }, [selectedGroup, groups])
+
+  const handleEditBook = (group: ReadingGroup) => {
+    setEditingBook({
+      groupId: group.id,
+      book: group.book,
+      bookAuthor: group.bookAuthor,
+      bookCover: group.bookCover,
+      bookDescription: group.bookDescription,
+    })
+    setIsBookModalOpen(true)
+  }
+
+  const handleSaveBook = () => {
+    if (!editingBook) return
+
+    setGroups(groups.map((g) =>
+      g.id === editingBook.groupId
+        ? {
+            ...g,
+            book: editingBook.book,
+            bookAuthor: editingBook.bookAuthor,
+            bookCover: editingBook.bookCover || g.bookCover,
+            bookDescription: editingBook.bookDescription,
+          }
+        : g
+    ))
+    setIsBookModalOpen(false)
+    setEditingBook(null)
+  }
 
   const selectedLabel = groupOptions.find((g) => g.id === selectedGroup)?.label || "전체"
 
@@ -192,9 +234,18 @@ export default function Dokmo() {
             한 달 뒤, 당신의 서재는 조금 더 풍성해질 거예요.
           </p>
           <p className="mt-2 text-xs text-muted-foreground">
-            매주 바뀌는 책 종류. 책은 <span className="font-semibold text-primary">이달의 책</span>으로 선정됩니다!
+            매주 바뀌는 책 종류. 책은 <span className="font-semibold text-primary">이주의 책</span>으로 선정됩니다!
           </p>
         </div>
+
+        {isAdmin && (
+          <div className="mt-3 rounded-xl border border-amber-200 bg-amber-50 p-3">
+            <div className="flex items-center gap-2">
+              <Settings size={14} className="text-amber-600" />
+              <span className="text-xs font-medium text-amber-700">관리자 모드: 각 모임의 이주의 책을 수정할 수 있습니다</span>
+            </div>
+          </div>
+        )}
       </header>
 
       {/* Calendar Week View */}
@@ -319,9 +370,24 @@ export default function Dokmo() {
                     className="h-20 w-14 rounded-lg object-cover shadow-md"
                   />
                   <div className="flex flex-1 flex-col">
-                    <span className={cn("w-fit rounded-full px-2 py-0.5 text-[10px] font-bold", colors.badge)}>
-                      {group.name}
-                    </span>
+                    <div className="flex items-center justify-between">
+                      <span className={cn("w-fit rounded-full px-2 py-0.5 text-[10px] font-bold", colors.badge)}>
+                        {group.name}
+                      </span>
+                      {isAdmin && (
+                        <button
+                          onClick={() => handleEditBook(group)}
+                          className={cn(
+                            "flex items-center gap-1 rounded-full px-2 py-1 text-[10px] font-medium transition-colors",
+                            colors.badge,
+                            "hover:opacity-80"
+                          )}
+                        >
+                          <Pencil size={10} />
+                          이주의 책 수정
+                        </button>
+                      )}
+                    </div>
                     <h3 className="mt-1 text-sm font-bold text-foreground">{group.book}</h3>
                     <p className="text-xs text-muted-foreground">{group.bookAuthor}</p>
                     <p className="mt-1 text-[10px] text-muted-foreground line-clamp-2">
@@ -421,7 +487,7 @@ export default function Dokmo() {
                   className="h-32 w-24 rounded-xl object-cover shadow-md"
                 />
                 <div className="flex flex-col">
-                  <span className="text-xs font-medium text-muted-foreground">이달의 도서</span>
+                  <span className="text-xs font-medium text-muted-foreground">이주의 도서</span>
                   <h3 className="mt-1 text-lg font-bold text-foreground">{selectedSession.group.book}</h3>
                   <p className="text-sm text-muted-foreground">{selectedSession.group.bookAuthor}</p>
                   <p className="mt-2 text-xs text-muted-foreground">{selectedSession.group.bookDescription}</p>
@@ -500,6 +566,93 @@ export default function Dokmo() {
                   신청하기
                 </button>
               )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Book Edit Modal */}
+      {isBookModalOpen && editingBook && (
+        <div
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-foreground/50 p-4 backdrop-blur-sm"
+          onClick={() => setIsBookModalOpen(false)}
+        >
+          <div
+            className="relative w-full max-w-lg overflow-hidden rounded-3xl border border-border bg-card shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between border-b border-border px-6 py-4">
+              <h2 className="text-lg font-bold text-foreground">
+                이주의 책 수정 - {groups.find(g => g.id === editingBook.groupId)?.name}
+              </h2>
+              <button
+                onClick={() => setIsBookModalOpen(false)}
+                className="flex h-8 w-8 items-center justify-center rounded-full bg-muted text-muted-foreground transition-colors hover:bg-border hover:text-foreground"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <div className="flex flex-col gap-4 px-6 py-6">
+              <div>
+                <label className="mb-1.5 block text-sm font-medium text-foreground">도서명</label>
+                <input
+                  type="text"
+                  value={editingBook.book}
+                  onChange={(e) => setEditingBook({ ...editingBook, book: e.target.value })}
+                  placeholder="예: 미움받을 용기"
+                  className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+                />
+              </div>
+
+              <div>
+                <label className="mb-1.5 block text-sm font-medium text-foreground">저자</label>
+                <input
+                  type="text"
+                  value={editingBook.bookAuthor}
+                  onChange={(e) => setEditingBook({ ...editingBook, bookAuthor: e.target.value })}
+                  placeholder="예: 기시미 이치로"
+                  className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+                />
+              </div>
+
+              <div>
+                <label className="mb-1.5 block text-sm font-medium text-foreground">도서 소개</label>
+                <textarea
+                  value={editingBook.bookDescription}
+                  onChange={(e) => setEditingBook({ ...editingBook, bookDescription: e.target.value })}
+                  placeholder="도서에 대한 간략한 설명"
+                  rows={3}
+                  className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+                />
+              </div>
+
+              <div>
+                <label className="mb-1.5 block text-sm font-medium text-foreground">표지 이미지 URL (선택)</label>
+                <input
+                  type="text"
+                  value={editingBook.bookCover}
+                  onChange={(e) => setEditingBook({ ...editingBook, bookCover: e.target.value })}
+                  placeholder="https://..."
+                  className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+                />
+              </div>
+            </div>
+
+            <div className="flex gap-3 border-t border-border bg-muted/30 px-6 py-4">
+              <button
+                onClick={() => setIsBookModalOpen(false)}
+                className="flex-1 rounded-xl border border-border bg-card py-3 text-sm font-medium text-foreground transition-colors hover:bg-muted"
+              >
+                취소
+              </button>
+              <button
+                onClick={handleSaveBook}
+                disabled={!editingBook.book.trim() || !editingBook.bookAuthor.trim()}
+                className="flex-1 rounded-xl bg-primary py-3 text-sm font-bold text-primary-foreground transition-all hover:brightness-110 disabled:opacity-50"
+              >
+                저장
+              </button>
             </div>
           </div>
         </div>

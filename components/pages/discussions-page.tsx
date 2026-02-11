@@ -47,7 +47,7 @@ const discussions: Discussion[] = [
     id: 1,
     title: "숨겨둔 내 안의 이야기",
     book: "아무튼, 메모",
-    bookCover: "https://picsum.photos/seed/disc1/100/140",
+    bookCover: "https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=100&h=140&fit=crop",
     vibeImage: "https://picsum.photos/seed/vibe-essay/800/400",
     leader: "OOO 학생",
     leaderType: "student",
@@ -65,7 +65,7 @@ const discussions: Discussion[] = [
       leaderDept: "중국어학과", leaderSchool: "성균관대학교", leaderYear: "2학년",
       leaderMessage: "감정을 메모하는 습관이 삶을 바꿉니다. 함께 내면의 목소리에 귀 기울여봐요!",
       topic: "숨겨둔 내 안의 이야기", book: "아무튼, 메모",
-      bookCover: "https://picsum.photos/seed/disc1/100/140", minMembers: 3, maxMembers: 8, currentMembers: 5,
+      bookCover: "https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=100&h=140&fit=crop", minMembers: 3, maxMembers: 8, currentMembers: 5,
       schedule: ["3/10 (화) 20:00 - 21:00", "3/24 (화) 20:00 - 21:00"],
       assignments: [
         { week: "1주차", task: "일상 속 감정에 이름 붙이기 - 하루에 3가지 감정을 메모하고 왜 그 감정을 느꼈는지 기록해주세요." },
@@ -77,7 +77,7 @@ const discussions: Discussion[] = [
     id: 2,
     title: "인류 역사의 이해",
     book: "사피엔스: 인류의 역사",
-    bookCover: "https://picsum.photos/seed/disc2/100/140",
+    bookCover: "https://images.unsplash.com/photo-1512820790803-83ca734da794?w=100&h=140&fit=crop",
     vibeImage: "https://picsum.photos/seed/vibe-history/800/400",
     leader: "박민준 학생",
     leaderType: "student",
@@ -95,7 +95,7 @@ const discussions: Discussion[] = [
       leaderDept: "사학과", leaderSchool: "고려대학교", leaderYear: "3학년",
       leaderMessage: "인류의 과거를 이해하면 미래가 보입니다. 함께 탐구해봐요!",
       topic: "인류 역사의 거시적 이해", book: "사피엔스: 인류의 역사",
-      bookCover: "https://picsum.photos/seed/disc2/100/140", minMembers: 5, maxMembers: 15, currentMembers: 12,
+      bookCover: "https://images.unsplash.com/photo-1512820790803-83ca734da794?w=100&h=140&fit=crop", minMembers: 5, maxMembers: 15, currentMembers: 12,
       schedule: ["3/13 (목) 19:00 - 20:30", "3/27 (목) 19:00 - 20:30"],
       assignments: [
         { week: "1주차", task: "인지혁명에 대한 핵심 논점을 정리하고, 가장 인상 깊은 부분을 공유해주세요." },
@@ -107,7 +107,7 @@ const discussions: Discussion[] = [
     id: 3,
     title: "더 나은 습관 만들기",
     book: "아주 작은 습관의 힘",
-    bookCover: "https://picsum.photos/seed/disc3/100/140",
+    bookCover: "https://images.unsplash.com/photo-1543002588-bfa74002ed7e?w=100&h=140&fit=crop",
     vibeImage: "https://picsum.photos/seed/vibe-habit/800/400",
     leader: "제임스 클리어 작가",
     leaderType: "author",
@@ -124,7 +124,7 @@ const discussions: Discussion[] = [
       id: 3, title: "더 나은 습관 만들기", leader: "제임스 클리어 작가", leaderType: "author",
       leaderDept: "자기계발 베스트셀러 작가",
       topic: "습관 설계와 실천", book: "아주 작은 습관의 힘",
-      bookCover: "https://picsum.photos/seed/disc3/100/140", minMembers: 20, maxMembers: 50, currentMembers: 42,
+      bookCover: "https://images.unsplash.com/photo-1543002588-bfa74002ed7e?w=100&h=140&fit=crop", minMembers: 20, maxMembers: 50, currentMembers: 42,
       schedule: ["3/15 (토) 15:00 - 16:30", "3/29 (토) 15:00 - 16:30"],
       assignments: [
         { week: "1주차", task: "자신의 현재 습관 루틴을 분석하고, 바꾸고 싶은 습관 1가지를 선정해주세요." },
@@ -136,7 +136,7 @@ const discussions: Discussion[] = [
     id: 4,
     title: "한국 현대문학 읽기",
     book: "채식주의자",
-    bookCover: "https://picsum.photos/seed/disc4/100/140",
+    bookCover: "https://images.unsplash.com/photo-1476275466078-4007374efbbe?w=100&h=140&fit=crop",
     vibeImage: "https://picsum.photos/seed/vibe-literature/800/400",
     leader: "이소연 학생",
     leaderType: "student",
@@ -154,7 +154,7 @@ const discussions: Discussion[] = [
       leaderDept: "국문학과", leaderSchool: "연세대학교", leaderYear: "4학년",
       leaderMessage: "한국 문학의 깊이를 함께 탐험해요. 다양한 해석을 환영합니다!",
       topic: "한국 현대문학의 상징과 서사", book: "채식주의자",
-      bookCover: "https://picsum.photos/seed/disc4/100/140", minMembers: 4, maxMembers: 12, currentMembers: 8,
+      bookCover: "https://images.unsplash.com/photo-1476275466078-4007374efbbe?w=100&h=140&fit=crop", minMembers: 4, maxMembers: 12, currentMembers: 8,
       schedule: ["3/19 (수) 21:00 - 22:00", "4/2 (수) 21:00 - 22:00"],
       assignments: [
         { week: "1주차", task: "소설 속 상징적 장면 하나를 골라 자신의 해석을 작성해주세요." },
@@ -166,7 +166,7 @@ const discussions: Discussion[] = [
     id: 5,
     title: "AI와 미래 사회",
     book: "라이프 3.0",
-    bookCover: "https://picsum.photos/seed/disc5/100/140",
+    bookCover: "https://images.unsplash.com/photo-1589998059171-988d887df646?w=100&h=140&fit=crop",
     vibeImage: "https://picsum.photos/seed/post-discussion/800/600",
     leader: "최동우 교수",
     leaderType: "professor",
@@ -184,7 +184,7 @@ const discussions: Discussion[] = [
       leaderDept: "컴퓨터공학과", leaderSchool: "KAIST",
       leaderMessage: "AI 시대를 살아가는 우리에게 필요한 사고력을 키워봅시다.",
       topic: "AI가 바꿀 미래 사회", book: "라이프 3.0",
-      bookCover: "https://picsum.photos/seed/disc5/100/140", minMembers: 10, maxMembers: 30, currentMembers: 28,
+      bookCover: "https://images.unsplash.com/photo-1589998059171-988d887df646?w=100&h=140&fit=crop", minMembers: 10, maxMembers: 30, currentMembers: 28,
       schedule: ["3/17 (월) 20:00 - 21:30", "3/31 (월) 20:00 - 21:30"],
       assignments: [
         { week: "1주차", task: "AI가 자신의 전공/관심 분야에 미칠 영향을 예측하여 정리해주세요." },
@@ -196,7 +196,7 @@ const discussions: Discussion[] = [
     id: 6,
     title: "예술사 핵심 읽기",
     book: "서양미술사",
-    bookCover: "https://picsum.photos/seed/disc6/100/140",
+    bookCover: "https://images.unsplash.com/photo-1497633762265-9d179a990aa6?w=100&h=140&fit=crop",
     vibeImage: "https://picsum.photos/seed/post-reading/800/600",
     leader: "윤하나 학생",
     leaderType: "student",
@@ -214,7 +214,7 @@ const discussions: Discussion[] = [
       leaderDept: "미술학과", leaderSchool: "홍익대학교", leaderYear: "2학년",
       leaderMessage: "미술사를 통해 세상을 보는 새로운 눈을 함께 열어봐요!",
       topic: "서양미술사의 흐름과 맥락", book: "서양미술사",
-      bookCover: "https://picsum.photos/seed/disc6/100/140", minMembers: 3, maxMembers: 10, currentMembers: 6,
+      bookCover: "https://images.unsplash.com/photo-1497633762265-9d179a990aa6?w=100&h=140&fit=crop", minMembers: 3, maxMembers: 10, currentMembers: 6,
       schedule: ["3/21 (금) 18:00 - 19:00", "4/4 (금) 18:00 - 19:00"],
       assignments: [
         { week: "1주차", task: "르네상스 작품 중 하나를 선정하여 감상문을 작성해주세요." },
@@ -448,31 +448,60 @@ export function DiscussionsPage() {
               key={discussion.id}
               className="group overflow-hidden rounded-2xl border border-border bg-card shadow-sm transition-all hover:shadow-lg"
             >
-              {/* Vibe Image */}
-              <div className="relative h-36 overflow-hidden sm:h-40">
-                <img
-                  src={discussion.vibeImage || "/placeholder.svg"}
-                  alt={discussion.title}
-                  className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-foreground/70 via-foreground/20 to-transparent" />
+              {/* Card Image with Book + Background Text */}
+              <div className={cn(
+                "relative h-44 overflow-hidden sm:h-48",
+                discussion.leaderType === "student" ? "bg-gradient-to-br from-emerald to-emerald/80" :
+                discussion.leaderType === "professor" ? "bg-gradient-to-br from-sky-500 to-sky-600" :
+                "bg-gradient-to-br from-tangerine to-orange-500"
+              )}>
+                {/* 배경 큰 텍스트 */}
+                <div className="absolute -right-2 top-1/2 -translate-y-1/2 select-none">
+                  <span className="text-[70px] font-black text-white/15 leading-none">
+                    {discussion.tags[0] || "독서"}
+                  </span>
+                </div>
 
-                {/* Top badges */}
-                <div className="absolute left-3 top-3 flex gap-1.5">
-                  {discussion.tags.map((tag, i) => (
-                    <span
-                      key={tag}
-                      className={cn("rounded-full px-2 py-0.5 text-[9px] font-bold", discussion.tagColors[i])}
-                    >
-                      {tag}
+                {/* 책 이미지 */}
+                <div className="absolute bottom-4 left-4">
+                  <div className="relative">
+                    <div className="absolute -bottom-1 -right-1 h-full w-full rounded-lg bg-black/20" />
+                    <img
+                      src={discussion.bookCover || "/placeholder.svg"}
+                      alt={discussion.book}
+                      className="relative h-28 w-20 rounded-lg object-cover shadow-xl ring-2 ring-white/30"
+                    />
+                  </div>
+                </div>
+
+                {/* 우측 텍스트 정보 */}
+                <div className="absolute bottom-4 left-28 right-3">
+                  <div className="flex flex-wrap gap-1 mb-2">
+                    {discussion.tags.map((tag, i) => (
+                      <span
+                        key={tag}
+                        className="rounded-full bg-white/20 px-2 py-0.5 text-[9px] font-bold text-white backdrop-blur-sm"
+                      >
+                        {tag}
+                      </span>
+                    ))}
+                    {discussion.rating >= 4.7 && (
+                      <span className="flex items-center gap-0.5 rounded-full bg-white/30 px-2 py-0.5 text-[9px] font-bold text-white backdrop-blur-sm">
+                        <Flame size={9} />
+                        HOT
+                      </span>
+                    )}
+                  </div>
+                  <h3 className="text-base font-bold text-white leading-tight">{discussion.title}</h3>
+                  <p className="text-xs text-white/80 mt-0.5">{discussion.book}</p>
+                  <div className="mt-2">
+                    <span className={cn(
+                      "inline-flex items-center gap-0.5 rounded-full px-2 py-0.5 text-[9px] font-semibold bg-white/20 text-white backdrop-blur-sm"
+                    )}>
+                      <GraduationCap size={9} />
+                      {discussion.leader}
                     </span>
-                  ))}
-                  {discussion.rating >= 4.7 && (
-                    <span className="flex items-center gap-0.5 rounded-full bg-tangerine px-2 py-0.5 text-[9px] font-bold text-white">
-                      <Flame size={9} />
-                      HOT
-                    </span>
-                  )}
+                  </div>
                 </div>
 
                 {/* Bookmark & Admin Actions */}
@@ -481,14 +510,14 @@ export function DiscussionsPage() {
                     <>
                       <button
                         onClick={(e) => handleEdit(e, discussion)}
-                        className="flex h-7 w-7 items-center justify-center rounded-full bg-white/80 text-muted-foreground backdrop-blur-sm transition-colors hover:bg-white hover:text-primary"
+                        className="flex h-7 w-7 items-center justify-center rounded-full bg-white/20 text-white backdrop-blur-sm transition-colors hover:bg-white/30"
                         title="수정"
                       >
                         <Pencil size={12} />
                       </button>
                       <button
                         onClick={(e) => handleDelete(e, discussion.id)}
-                        className="flex h-7 w-7 items-center justify-center rounded-full bg-white/80 text-muted-foreground backdrop-blur-sm transition-colors hover:bg-white hover:text-red-500"
+                        className="flex h-7 w-7 items-center justify-center rounded-full bg-white/20 text-white backdrop-blur-sm transition-colors hover:bg-white/30"
                         title="삭제"
                       >
                         <Trash2 size={12} />
@@ -503,25 +532,10 @@ export function DiscussionsPage() {
                       size={18}
                       className={cn(
                         "drop-shadow-sm transition-colors",
-                        bookmarked.includes(discussion.id) ? "fill-tangerine text-tangerine" : "text-white/80"
+                        bookmarked.includes(discussion.id) ? "fill-white text-white" : "text-white/60"
                       )}
                     />
                   </button>
-                </div>
-
-                {/* Bottom overlay info */}
-                <div className="absolute bottom-3 left-3 right-3">
-                  <h3 className="text-sm font-bold text-white">{discussion.title}</h3>
-                  <div className="mt-1 flex items-center gap-2">
-                    <span className={cn(
-                      "inline-flex items-center gap-0.5 rounded-full px-1.5 py-0.5 text-[9px] font-semibold",
-                      discussion.leaderType === "student" ? "bg-emerald/90 text-white" :
-                      discussion.leaderType === "professor" ? "bg-primary/90 text-white" : "bg-tangerine/90 text-white"
-                    )}>
-                      <GraduationCap size={9} />
-                      {discussion.leader}
-                    </span>
-                  </div>
                 </div>
               </div>
 

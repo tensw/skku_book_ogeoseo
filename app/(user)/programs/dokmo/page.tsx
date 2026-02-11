@@ -31,7 +31,7 @@ const readingGroups: ReadingGroup[] = [
     description: "아침 독서모임 (6-9시)",
     book: "미움받을 용기",
     bookAuthor: "기시미 이치로",
-    bookCover: "https://picsum.photos/seed/book-courage/100/140",
+    bookCover: "https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=100&h=140&fit=crop",
     bookDescription: "아들러 심리학을 통해 자유로운 삶을 탐구합니다.",
     timeSlots: [
       { time: "06:00", displayTime: "오전 6:00 - 7:00", location: "스터디룸 2-1" },
@@ -45,7 +45,7 @@ const readingGroups: ReadingGroup[] = [
     description: "점심 독서모임 (12-14시)",
     book: "데미안",
     bookAuthor: "헤르만 헤세",
-    bookCover: "https://picsum.photos/seed/book-demian/100/140",
+    bookCover: "https://images.unsplash.com/photo-1512820790803-83ca734da794?w=100&h=140&fit=crop",
     bookDescription: "자아 탐색의 여정을 함께합니다.",
     timeSlots: [
       { time: "12:00", displayTime: "오후 12:00 - 13:00", location: "스터디룸 3-1" },
@@ -58,7 +58,7 @@ const readingGroups: ReadingGroup[] = [
     description: "저녁 독서모임 (17-22시)",
     book: "아몬드",
     bookAuthor: "손원평",
-    bookCover: "https://picsum.photos/seed/book-almond/100/140",
+    bookCover: "https://images.unsplash.com/photo-1543002588-bfa74002ed7e?w=100&h=140&fit=crop",
     bookDescription: "감정을 느끼지 못하는 소년의 성장 이야기.",
     timeSlots: [
       { time: "17:00", displayTime: "오후 5:00 - 6:00", location: "스터디룸 4-1" },
@@ -77,11 +77,11 @@ const groupOptions = [
   { id: "dalbit" as GroupType, label: "달빛독", description: "저녁 독서모임 (17-22시)" },
 ]
 
-const groupColors: Record<GroupType, { bg: string; text: string; badge: string; light: string }> = {
-  all: { bg: "bg-primary", text: "text-primary", badge: "bg-primary/10 text-primary", light: "bg-primary/5" },
-  yeomyeong: { bg: "bg-amber-500", text: "text-amber-600", badge: "bg-amber-100 text-amber-700", light: "bg-amber-50" },
-  yunseul: { bg: "bg-sky-500", text: "text-sky-600", badge: "bg-sky-100 text-sky-700", light: "bg-sky-50" },
-  dalbit: { bg: "bg-indigo-500", text: "text-indigo-600", badge: "bg-indigo-100 text-indigo-700", light: "bg-indigo-50" },
+const groupColors: Record<GroupType, { bg: string; text: string; badge: string; light: string; gradient: string; accent: string }> = {
+  all: { bg: "bg-primary", text: "text-primary", badge: "bg-primary/10 text-primary", light: "bg-primary/5", gradient: "from-primary to-primary/80", accent: "독서" },
+  yeomyeong: { bg: "bg-amber-500", text: "text-amber-600", badge: "bg-amber-100 text-amber-700", light: "bg-amber-50", gradient: "from-amber-400 to-amber-600", accent: "아침" },
+  yunseul: { bg: "bg-sky-500", text: "text-sky-600", badge: "bg-sky-100 text-sky-700", light: "bg-sky-50", gradient: "from-sky-400 to-sky-600", accent: "점심" },
+  dalbit: { bg: "bg-indigo-500", text: "text-indigo-600", badge: "bg-indigo-100 text-indigo-700", light: "bg-indigo-50", gradient: "from-indigo-400 to-indigo-600", accent: "저녁" },
 }
 
 // Get dates for current week (Monday to Sunday)
@@ -361,36 +361,46 @@ export default function Dokmo() {
 
           return (
             <div key={group.id} className="flex flex-col gap-3">
-              {/* Group Header with Book */}
-              <div className={cn("rounded-2xl p-4", colors.light)}>
-                <div className="flex gap-3">
-                  <img
-                    src={group.bookCover}
-                    alt={group.book}
-                    className="h-20 w-14 rounded-lg object-cover shadow-md"
-                  />
-                  <div className="flex flex-1 flex-col">
+              {/* Group Header with Book - 카드 스타일 */}
+              <div className={cn("relative overflow-hidden rounded-2xl bg-gradient-to-br", colors.gradient)}>
+                {/* 배경 큰 텍스트 */}
+                <div className="absolute -right-4 top-1/2 -translate-y-1/2 select-none">
+                  <span className="text-[80px] font-black text-white/20 leading-none">
+                    {colors.accent}
+                  </span>
+                </div>
+
+                {/* 컨텐츠 */}
+                <div className="relative flex gap-4 p-5">
+                  {/* 책 이미지 */}
+                  <div className="relative flex-shrink-0">
+                    <div className="absolute -bottom-2 -right-2 h-full w-full rounded-lg bg-black/20" />
+                    <img
+                      src={group.bookCover}
+                      alt={group.book}
+                      className="relative h-28 w-20 rounded-lg object-cover shadow-xl ring-2 ring-white/30"
+                    />
+                  </div>
+
+                  {/* 텍스트 정보 */}
+                  <div className="flex flex-1 flex-col justify-center">
                     <div className="flex items-center justify-between">
-                      <span className={cn("w-fit rounded-full px-2 py-0.5 text-[10px] font-bold", colors.badge)}>
+                      <span className="w-fit rounded-full bg-white/20 px-2.5 py-1 text-[10px] font-bold text-white backdrop-blur-sm">
                         {group.name}
                       </span>
                       {isAdmin && (
                         <button
                           onClick={() => handleEditBook(group)}
-                          className={cn(
-                            "flex items-center gap-1 rounded-full px-2 py-1 text-[10px] font-medium transition-colors",
-                            colors.badge,
-                            "hover:opacity-80"
-                          )}
+                          className="flex items-center gap-1 rounded-full bg-white/20 px-2 py-1 text-[10px] font-medium text-white backdrop-blur-sm transition-colors hover:bg-white/30"
                         >
                           <Pencil size={10} />
-                          이주의 책 수정
+                          수정
                         </button>
                       )}
                     </div>
-                    <h3 className="mt-1 text-sm font-bold text-foreground">{group.book}</h3>
-                    <p className="text-xs text-muted-foreground">{group.bookAuthor}</p>
-                    <p className="mt-1 text-[10px] text-muted-foreground line-clamp-2">
+                    <h3 className="mt-2 text-lg font-bold text-white">{group.book}</h3>
+                    <p className="text-sm text-white/80">{group.bookAuthor}</p>
+                    <p className="mt-1.5 text-xs text-white/70 line-clamp-2">
                       {group.bookDescription}
                     </p>
                   </div>

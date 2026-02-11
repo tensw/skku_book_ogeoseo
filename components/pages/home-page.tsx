@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 import {
   ChevronLeft,
   ChevronRight,
@@ -23,170 +24,16 @@ import {
   Pencil,
   Plus,
   Trash2,
+  Calendar,
+  MapPin,
+  Check,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { ClubDetailModal } from "@/components/club-detail-modal"
 import type { ClubDetailData } from "@/components/club-detail-modal"
 import { useAuth } from "@/lib/auth-context"
-
-const recommendedBooks = [
-  { id: 1, title: "아무튼, 메모", author: "김신회", cover: "https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=200&h=280&fit=crop", category: "에세이", color: "bg-tangerine/10 text-tangerine" },
-  { id: 2, title: "사피엔스", author: "유발 하라리", cover: "https://images.unsplash.com/photo-1512820790803-83ca734da794?w=200&h=280&fit=crop", category: "역사", color: "bg-mint/10 text-mint" },
-  { id: 3, title: "아주 작은 습관의 힘", author: "제임스 클리어", cover: "https://images.unsplash.com/photo-1543002588-bfa74002ed7e?w=200&h=280&fit=crop", category: "자기계발", color: "bg-emerald/10 text-emerald" },
-  { id: 4, title: "미드나이트 라이브러리", author: "매트 헤이그", cover: "https://images.unsplash.com/photo-1476275466078-4007374efbbe?w=200&h=280&fit=crop", category: "문학", color: "bg-tangerine/10 text-tangerine" },
-  { id: 5, title: "생각에 관한 생각", author: "대니얼 카너먼", cover: "https://images.unsplash.com/photo-1589998059171-988d887df646?w=200&h=280&fit=crop", category: "심리학", color: "bg-mint/10 text-mint" },
-]
-
-const dokmoGroups = [
-  {
-    id: "yeomyeong",
-    name: "여명독",
-    description: "아침 6-9시",
-    book: "미움받을 용기",
-    bookAuthor: "기시미 이치로",
-    bookCover: "https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=100&h=140&fit=crop",
-    times: ["6:00", "7:00", "8:00"],
-    color: "bg-amber-500",
-    lightColor: "bg-amber-100 text-amber-700",
-    icon: Sun,
-  },
-  {
-    id: "yunseul",
-    name: "윤슬독",
-    description: "점심 12-14시",
-    book: "데미안",
-    bookAuthor: "헤르만 헤세",
-    bookCover: "https://images.unsplash.com/photo-1512820790803-83ca734da794?w=100&h=140&fit=crop",
-    times: ["12:00", "13:00"],
-    color: "bg-sky-500",
-    lightColor: "bg-sky-100 text-sky-700",
-    icon: Sunset,
-  },
-  {
-    id: "dalbit",
-    name: "달빛독",
-    description: "저녁 17-22시",
-    book: "아몬드",
-    bookAuthor: "손원평",
-    bookCover: "https://images.unsplash.com/photo-1543002588-bfa74002ed7e?w=100&h=140&fit=crop",
-    times: ["17:00", "18:00", "19:00", "20:00", "21:00"],
-    color: "bg-indigo-500",
-    lightColor: "bg-indigo-100 text-indigo-700",
-    icon: Moon,
-  },
-]
-
-const liveTalkPosts = [
-  {
-    id: 1,
-    author: "윤하나",
-    avatar: "https://picsum.photos/seed/avatar3/80/80",
-    content: "오늘 독서 모임에서 채식주의자 토론 완료! 한강 작가의 상징성에 대해 정말 깊은 이야기를 나눴어요.",
-    photos: ["https://picsum.photos/seed/post-discussion/800/600"],
-    likes: 56,
-    comments: 12,
-    time: "30분 전",
-  },
-  {
-    id: 2,
-    author: "김소은",
-    avatar: "https://picsum.photos/seed/avatar5/80/80",
-    content: "아침 독서 루틴 3주차! 습관의 힘을 읽으면서 진짜 나의 시스템이 바뀌고 있다는 걸 느껴요.",
-    photos: ["https://picsum.photos/seed/post-reading/800/600", "https://picsum.photos/seed/post-bookclub/800/600"],
-    likes: 89,
-    comments: 23,
-    time: "2시간 전",
-  },
-  {
-    id: 3,
-    author: "박민준",
-    avatar: "https://picsum.photos/seed/avatar2/80/80",
-    content: "카페에서 사피엔스 읽는 중. 커피 한 잔과 함께하는 일요일 오후가 최고네요.",
-    photos: ["https://picsum.photos/seed/post-bookclub/800/600"],
-    likes: 42,
-    comments: 8,
-    time: "4시간 전",
-  },
-]
-
-interface ActiveClub {
-  id: number
-  title: string
-  leader: string
-  leaderType: "student" | "professor" | "author"
-  members: number
-  nextMeeting: string
-  vibeImage: string
-  tagColor: string
-  detail: ClubDetailData
-}
-
-const activeClubs: ActiveClub[] = [
-  {
-    id: 1, title: "숨겨둔 내 안의 이야기", leader: "OOO 학생", leaderType: "student",
-    members: 5, nextMeeting: "3/10 (화) 20:00", vibeImage: "https://picsum.photos/seed/vibe-essay/800/400", tagColor: "bg-tangerine text-white",
-    detail: {
-      id: 1, title: "숨겨둔 내 안의 이야기", leader: "OOO 학생", leaderType: "student",
-      leaderDept: "중국어학과", leaderSchool: "성균관대학교", leaderYear: "2학년",
-      leaderMessage: "감정을 메모하는 습관이 삶을 바꿉니다. 함께 내면의 목소리에 귀 기울여봐요!",
-      topic: "숨겨둔 내 안의 이야기", book: "아무튼, 메모",
-      bookCover: "https://picsum.photos/seed/club1/100/140", minMembers: 3, maxMembers: 8, currentMembers: 5,
-      schedule: ["3/10 (화) 20:00 - 21:00", "3/24 (화) 20:00 - 21:00"],
-      assignments: [
-        { week: "1주차", task: "일상 속 감정에 이름 붙이기 - 하루에 3가지 감정을 메모하고 왜 그 감정을 느꼈는지 기록해주세요." },
-        { week: "2주차", task: "감정에 이름붙이기 2회 인증 - 메모 습관이 나에게 어떤 변화를 주었는지 나눠주세요." },
-      ],
-    },
-  },
-  {
-    id: 2, title: "철학 독서 모임", leader: "김지혜 교수", leaderType: "professor",
-    members: 12, nextMeeting: "3/18 (금) 19:00", vibeImage: "https://picsum.photos/seed/vibe-history/800/400", tagColor: "bg-mint text-white",
-    detail: {
-      id: 2, title: "철학 독서 모임", leader: "김지혜 교수", leaderType: "professor",
-      leaderDept: "철학과", leaderSchool: "서울대학교", leaderYear: "",
-      leaderMessage: "고전 철학서를 함께 읽고 현대적 관점에서 토론합니다.",
-      topic: "일상 속 철학 탐구", book: "생각의 오류를 넘어서",
-      bookCover: "https://picsum.photos/seed/club2/100/140", minMembers: 5, maxMembers: 15, currentMembers: 12,
-      schedule: ["3/18 (금) 19:00 - 20:30", "4/1 (금) 19:00 - 20:30"],
-      assignments: [
-        { week: "1주차", task: "인지 편향 3가지를 일상에서 찾아 기록하고 분석해주세요." },
-        { week: "2주차", task: "매몰비용 오류에 대한 자신의 경험을 500자 내로 정리해주세요." },
-      ],
-    },
-  },
-  {
-    id: 3, title: "현대 문학 클럽", leader: "박서연 작가", leaderType: "author",
-    members: 32, nextMeeting: "3/20 (일) 21:00", vibeImage: "https://picsum.photos/seed/vibe-literature/800/400", tagColor: "bg-primary text-white",
-    detail: {
-      id: 3, title: "현대 문학 클럽", leader: "박서연 작가", leaderType: "author",
-      leaderDept: "소설가", leaderSchool: "", leaderYear: "",
-      leaderMessage: "문학은 타인의 삶을 경험하는 가장 아름다운 방법입니다.",
-      topic: "한국 현대문학 깊이 읽기", book: "채식주의자",
-      bookCover: "https://picsum.photos/seed/club3/100/140", minMembers: 10, maxMembers: 40, currentMembers: 32,
-      schedule: ["3/20 (일) 21:00 - 22:30", "4/3 (일) 21:00 - 22:30"],
-      assignments: [
-        { week: "1주차", task: "소설 속 상징적 장면 하나를 골라 자신의 해석을 작성해주세요." },
-        { week: "2주차", task: "작가의 문체와 서사 기법에 대한 느낀 점을 자유롭게 공유해주세요." },
-      ],
-    },
-  },
-  {
-    id: 4, title: "과학과 사회", leader: "최동우 학생", leaderType: "student",
-    members: 18, nextMeeting: "3/22 (화) 20:00", vibeImage: "https://picsum.photos/seed/vibe-habit/800/400", tagColor: "bg-emerald text-white",
-    detail: {
-      id: 4, title: "과학과 사회", leader: "최동우 학생", leaderType: "student",
-      leaderDept: "물리학과", leaderSchool: "KAIST", leaderYear: "3학년",
-      leaderMessage: "과학이 사회에 미치는 영향을 함께 고민해봐요!",
-      topic: "AI와 미래 사회", book: "라이프 3.0",
-      bookCover: "https://picsum.photos/seed/club4/100/140", minMembers: 5, maxMembers: 20, currentMembers: 18,
-      schedule: ["3/22 (화) 20:00 - 21:00", "4/5 (화) 20:00 - 21:00"],
-      assignments: [
-        { week: "1주차", task: "AI가 자신의 전공 분야에 어떤 변화를 가져올지 예측해주세요." },
-        { week: "2주차", task: "라이프 3.0의 5~7장 핵심 논점 토론 질문 2개를 준비해주세요." },
-      ],
-    },
-  },
-]
+import { usePrograms } from "@/lib/program-context"
+import { useSharedData, type ReadingGroup } from "@/lib/shared-data-context"
 
 interface BannerForm {
   imageUrl: string
@@ -203,18 +50,68 @@ interface BookRecommendation {
   color: string
 }
 
+// 홈페이지용 독모 그룹 데이터 (공유 데이터에서 가져온 정보 + UI 정보)
+interface HomeDokmoGroup {
+  id: "yeomyeong" | "yunseul" | "dalbit"
+  name: string
+  description: string
+  book: string
+  bookAuthor: string
+  bookCover: string
+  times: string[]
+  icon: typeof Sun
+}
+
 export function HomePage() {
+  const router = useRouter()
   const { isAdmin } = useAuth()
+  const { monthlyBooks, getWeeklyBookAssignment } = usePrograms()
+  const {
+    readingGroups,
+    discussions,
+    talkPosts,
+    joinedDoktoClubs,
+    setJoinedDoktoClubs,
+    appliedDokmoSessions,
+    setAppliedDokmoSessions,
+  } = useSharedData()
+
+  // 이달의 책 배정 정보
+  const weeklyAssignment = getWeeklyBookAssignment()
+
+  // 독모 그룹에 책 정보 결합
+  const dokmoGroups: HomeDokmoGroup[] = readingGroups.map((group) => {
+    const book = group.id === "dalbit" ? weeklyAssignment.dalbit : weeklyAssignment.yeomyeong
+    return {
+      id: group.id,
+      name: group.name,
+      description: group.id === "yeomyeong" ? "아침 6-9시" : group.id === "yunseul" ? "점심 12-14시" : "저녁 17-22시",
+      book: book?.title || "도서 미정",
+      bookAuthor: book?.author || "추후 공지",
+      bookCover: book?.cover || "https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=100&h=140&fit=crop",
+      times: group.timeSlots.map((slot) => slot.time.replace(":00", ":00")),
+      icon: group.id === "yeomyeong" ? Sun : group.id === "yunseul" ? Sunset : Moon,
+    }
+  })
+
+  // 이달의 책 추천 (monthlyBooks에서 가져옴)
+  const books = monthlyBooks.map((book, index) => ({
+    id: index + 1,
+    title: book.title,
+    author: book.author,
+    cover: book.cover,
+    category: index % 4 === 0 ? "에세이" : index % 4 === 1 ? "역사" : index % 4 === 2 ? "자기계발" : "문학",
+    color: index % 4 === 0 ? "bg-tangerine/10 text-tangerine" : index % 4 === 1 ? "bg-mint/10 text-mint" : index % 4 === 2 ? "bg-emerald/10 text-emerald" : "bg-primary/10 text-primary",
+  }))
+
   const [currentSlide, setCurrentSlide] = useState(0)
   const [selectedClub, setSelectedClub] = useState<ClubDetailData | null>(null)
-  const [joinedClubs, setJoinedClubs] = useState<number[]>([])
   const [isAdminPanelOpen, setIsAdminPanelOpen] = useState(false)
   const [editingBanner, setEditingBanner] = useState<BannerForm | null>(null)
-  const [books, setBooks] = useState<BookRecommendation[]>(recommendedBooks)
-  const [editingBook, setEditingBook] = useState<BookRecommendation | null>(null)
-  const [isMultiAddMode, setIsMultiAddMode] = useState(false)
-  const [bookEntries, setBookEntries] = useState<Array<Omit<BookRecommendation, "id">>>([])
-  const [deleteAllBooksOpen, setDeleteAllBooksOpen] = useState(false)
+  // 카드 클릭 네비게이션을 위한 상태
+  const [selectedBook, setSelectedBook] = useState<BookRecommendation | null>(null)
+  const [selectedDokmoGroup, setSelectedDokmoGroup] = useState<HomeDokmoGroup | null>(null)
+  const [appliedDokmo, setAppliedDokmo] = useState<{ groupId: string; time: string; date: string }[]>([])
   const [bannerData, setBannerData] = useState({
     imageUrl: "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=1200&h=600&fit=crop",
     title: "함께 읽고, 함께 나누는",
@@ -223,7 +120,7 @@ export function HomePage() {
 
   const handleApply = () => {
     if (selectedClub) {
-      setJoinedClubs((prev) =>
+      setJoinedDoktoClubs((prev) =>
         prev.includes(selectedClub.id) ? prev : [...prev, selectedClub.id]
       )
     }
@@ -258,76 +155,26 @@ export function HomePage() {
     }
   }
 
+  // 이달의 책은 관리자 페이지에서 관리됨 (usePrograms context)
+  // 홈페이지에서는 표시만 하고 편집은 관리자 페이지로 이동 안내
   const handleEditBook = (book: BookRecommendation) => {
-    setEditingBook({ ...book })
-  }
-
-  const handleSaveBook = () => {
-    if (editingBook) {
-      if (editingBook.id) {
-        setBooks(books.map((b) => (b.id === editingBook.id ? editingBook : b)))
-      } else {
-        const newId = Math.max(...books.map((b) => b.id)) + 1
-        setBooks([...books, { ...editingBook, id: newId }])
-      }
-      setEditingBook(null)
-    }
+    // 관리자 페이지로 이동하라는 안내 표시 또는 관리자 페이지로 리다이렉트
+    router.push("/admin/programs")
   }
 
   const handleDeleteBook = (id: number) => {
-    setBooks(books.filter((b) => b.id !== id))
-  }
-
-  const handleAddBook = () => {
-    setEditingBook({
-      id: 0,
-      title: "",
-      author: "",
-      cover: "",
-      category: "",
-      color: "bg-primary/10 text-primary",
-    })
-    setIsMultiAddMode(false)
+    // 관리자 페이지에서만 삭제 가능
+    router.push("/admin/programs")
   }
 
   const handleMultiAddBook = () => {
-    setEditingBook(null)
-    setBookEntries([{ title: "", author: "", cover: "", category: "", color: "bg-primary/10 text-primary" }])
-    setIsMultiAddMode(true)
-  }
-
-  const addBookEntry = () => {
-    setBookEntries([...bookEntries, { title: "", author: "", cover: "", category: "", color: "bg-primary/10 text-primary" }])
-  }
-
-  const removeBookEntry = (index: number) => {
-    if (bookEntries.length <= 1) return
-    setBookEntries(bookEntries.filter((_, i) => i !== index))
-  }
-
-  const updateBookEntry = (index: number, field: string, value: string) => {
-    setBookEntries(bookEntries.map((entry, i) =>
-      i === index ? { ...entry, [field]: value } : entry
-    ))
-  }
-
-  const handleSaveMultiBooks = () => {
-    const validEntries = bookEntries.filter(e => e.title.trim() && e.author.trim())
-    if (validEntries.length === 0) return
-
-    let maxId = books.length > 0 ? Math.max(...books.map(b => b.id)) : 0
-    const newBooks = validEntries.map(entry => ({
-      ...entry,
-      id: ++maxId,
-    }))
-    setBooks([...books, ...newBooks])
-    setIsMultiAddMode(false)
-    setBookEntries([])
+    // 관리자 페이지로 이동
+    router.push("/admin/programs")
   }
 
   const handleDeleteAllBooks = () => {
-    setBooks([])
-    setDeleteAllBooksOpen(false)
+    // 관리자 페이지로 이동
+    router.push("/admin/programs")
   }
 
   useEffect(() => {
@@ -380,24 +227,13 @@ export function HomePage() {
           </h2>
           <div className="flex items-center gap-1">
             {isAdmin && (
-              <>
-                <button
-                  onClick={handleMultiAddBook}
-                  className="mr-1 flex items-center gap-1 rounded-full bg-primary/10 px-2 py-1 text-[10px] font-medium text-primary hover:bg-primary/20"
-                >
-                  <Plus size={10} />
-                  추가
-                </button>
-                {books.length > 0 && (
-                  <button
-                    onClick={() => setDeleteAllBooksOpen(true)}
-                    className="mr-2 flex items-center gap-1 rounded-full bg-red-500/10 px-2 py-1 text-[10px] font-medium text-red-500 hover:bg-red-500/20"
-                  >
-                    <Trash2 size={10} />
-                    전체삭제
-                  </button>
-                )}
-              </>
+              <button
+                onClick={() => router.push("/admin/programs")}
+                className="mr-2 flex items-center gap-1 rounded-full bg-primary/10 px-2 py-1 text-[10px] font-medium text-primary hover:bg-primary/20"
+              >
+                <Settings size={10} />
+                관리
+              </button>
             )}
             <button onClick={prevSlide} className="rounded-full p-1 hover:bg-muted" aria-label="이전">
               <ChevronLeft size={14} className="text-muted-foreground" />
@@ -413,23 +249,24 @@ export function HomePage() {
           {books.map((book, i) => (
             <div
               key={book.id}
+              onClick={() => !isAdmin && setSelectedBook(book)}
               className={cn(
-                "group relative flex flex-shrink-0 flex-col items-center gap-2 transition-all",
+                "group relative flex flex-shrink-0 flex-col items-center gap-2 transition-all cursor-pointer",
                 i === currentSlide ? "opacity-100" : "opacity-60"
               )}
             >
-              <div className="relative h-32 w-22 overflow-hidden rounded-2xl shadow-md ring-1 ring-border sm:h-36 sm:w-24">
+              <div className="relative h-32 w-22 overflow-hidden rounded-2xl shadow-md ring-1 ring-border sm:h-36 sm:w-24 transition-transform group-hover:scale-105">
                 <img src={book.cover || "/placeholder.svg"} alt={book.title} className="h-full w-full object-cover" crossOrigin="anonymous" />
                 {isAdmin && (
                   <div className="absolute inset-0 flex items-center justify-center gap-1 bg-foreground/50 opacity-0 transition-opacity group-hover:opacity-100">
                     <button
-                      onClick={() => handleEditBook(book)}
+                      onClick={(e) => { e.stopPropagation(); handleEditBook(book); }}
                       className="flex h-7 w-7 items-center justify-center rounded-full bg-white text-primary"
                     >
                       <Pencil size={12} />
                     </button>
                     <button
-                      onClick={() => handleDeleteBook(book.id)}
+                      onClick={(e) => { e.stopPropagation(); handleDeleteBook(book.id); }}
                       className="flex h-7 w-7 items-center justify-center rounded-full bg-white text-red-500"
                     >
                       <Trash2 size={12} />
@@ -471,15 +308,25 @@ export function HomePage() {
                 ? "from-sky-400 to-sky-600"
                 : "from-indigo-400 to-indigo-600"
             const accentText = group.id === "yeomyeong" ? "아침" : group.id === "yunseul" ? "점심" : "저녁"
+            const isApplied = appliedDokmo.some((a) => a.groupId === group.id)
 
             return (
               <div
                 key={group.id}
+                onClick={() => setSelectedDokmoGroup(group)}
                 className={cn(
-                  "relative w-44 flex-shrink-0 overflow-hidden rounded-2xl shadow-sm transition-all hover:shadow-md bg-gradient-to-br",
+                  "relative w-44 flex-shrink-0 overflow-hidden rounded-2xl shadow-sm transition-all hover:shadow-md bg-gradient-to-br cursor-pointer hover:scale-[1.02]",
                   gradientClass
                 )}
               >
+                {/* 신청완료 배지 */}
+                {isApplied && (
+                  <div className="absolute left-2 top-2 z-10 flex items-center gap-1 rounded-full bg-white px-2 py-0.5 shadow-sm">
+                    <Check size={10} className="text-emerald" />
+                    <span className="text-[9px] font-bold text-emerald">신청완료</span>
+                  </div>
+                )}
+
                 {/* 배경 큰 텍스트 */}
                 <div className="absolute -right-2 top-1/2 -translate-y-1/2 select-none">
                   <span className="text-[50px] font-black text-white/15 leading-none">
@@ -529,8 +376,8 @@ export function HomePage() {
         </div>
 
         <div className="flex gap-3 overflow-x-auto pb-2 no-scrollbar">
-          {activeClubs.map((club) => {
-            const isJoined = joinedClubs.includes(club.id)
+          {discussions.slice(0, 4).map((club) => {
+            const isJoined = joinedDoktoClubs.includes(club.id)
             const gradientClass = club.leaderType === "student"
               ? "from-emerald to-emerald/80"
               : club.leaderType === "professor"
@@ -541,11 +388,20 @@ export function HomePage() {
             return (
               <div
                 key={club.id}
+                onClick={() => setSelectedClub(club.detail)}
                 className={cn(
-                  "group relative w-56 flex-shrink-0 overflow-hidden rounded-2xl shadow-sm transition-all hover:shadow-md bg-gradient-to-br",
+                  "group relative w-56 flex-shrink-0 overflow-hidden rounded-2xl shadow-sm transition-all hover:shadow-md bg-gradient-to-br cursor-pointer hover:scale-[1.02]",
                   gradientClass
                 )}
               >
+                {/* 신청완료 배지 */}
+                {isJoined && (
+                  <div className="absolute left-2 top-2 z-10 flex items-center gap-1 rounded-full bg-white px-2 py-0.5 shadow-sm">
+                    <Check size={10} className="text-emerald" />
+                    <span className="text-[9px] font-bold text-emerald">신청완료</span>
+                  </div>
+                )}
+
                 {/* 배경 큰 텍스트 */}
                 <div className="absolute -right-1 top-1/2 -translate-y-1/2 select-none">
                   <span className="text-[45px] font-black text-white/15 leading-none">
@@ -560,7 +416,7 @@ export function HomePage() {
                     {club.leader}
                   </span>
                   <h3 className="mt-2 text-sm font-bold text-white line-clamp-1">{club.title}</h3>
-                  <p className="text-[10px] text-white/80">{club.detail.book}</p>
+                  <p className="text-[10px] text-white/80">{club.book}</p>
                   <div className="mt-3 flex items-center gap-2 text-[10px] text-white/80">
                     <span className="flex items-center gap-0.5">
                       <Users size={10} />
@@ -573,19 +429,17 @@ export function HomePage() {
                   </div>
                 </div>
 
-                {/* 하단 버튼 */}
+                {/* 하단 상태 표시 */}
                 <div className="relative border-t border-white/20 px-4 py-2.5">
                   {isJoined ? (
-                    <span className="rounded-full bg-white/20 px-2.5 py-1 text-[9px] font-bold text-white backdrop-blur-sm">
-                      신청 완료
+                    <span className="inline-flex items-center gap-1 rounded-full bg-white/30 px-2.5 py-1 text-[9px] font-bold text-white backdrop-blur-sm">
+                      <Check size={10} />
+                      신청완료
                     </span>
                   ) : (
-                    <button
-                      onClick={() => setSelectedClub(club.detail)}
-                      className="rounded-full bg-white/20 px-2.5 py-1 text-[9px] font-bold text-white backdrop-blur-sm transition-all hover:bg-white/30"
-                    >
+                    <span className="rounded-full bg-white/20 px-2.5 py-1 text-[9px] font-bold text-white backdrop-blur-sm">
                       참여하기
-                    </button>
+                    </span>
                   )}
                 </div>
               </div>
@@ -607,10 +461,14 @@ export function HomePage() {
         </div>
 
         <div className="flex flex-col gap-3">
-          {liveTalkPosts.map((post) => (
-            <div key={post.id} className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
+          {talkPosts.slice(0, 3).map((post) => (
+            <Link
+              key={post.id}
+              href="/talk"
+              className="block overflow-hidden rounded-2xl border border-border bg-card shadow-sm transition-all hover:shadow-md hover:border-mint/30"
+            >
               {/* Photo area */}
-              {post.photos.length > 0 && (
+              {post.photos && post.photos.length > 0 && (
                 <div className="relative">
                   <div className="flex overflow-x-auto no-scrollbar">
                     {post.photos.map((photo, i) => (
@@ -651,7 +509,7 @@ export function HomePage() {
                   </span>
                 </div>
               </div>
-            </div>
+            </Link>
           ))}
         </div>
       </section>
@@ -661,7 +519,7 @@ export function HomePage() {
         isOpen={!!selectedClub}
         onClose={() => setSelectedClub(null)}
         onApply={handleApply}
-        applied={selectedClub ? joinedClubs.includes(selectedClub.id) : false}
+        applied={selectedClub ? joinedDoktoClubs.includes(selectedClub.id) : false}
       />
 
       {/* Banner Edit Modal */}
@@ -737,280 +595,6 @@ export function HomePage() {
         </div>
       )}
 
-      {/* Book Edit Modal */}
-      {editingBook && (
-        <div
-          className="fixed inset-0 z-[100] flex items-center justify-center bg-foreground/50 p-4 backdrop-blur-sm"
-          onClick={() => setEditingBook(null)}
-        >
-          <div
-            className="relative w-full max-w-lg overflow-hidden rounded-3xl border border-border bg-card shadow-2xl"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="flex items-center justify-between border-b border-border px-6 py-4">
-              <h2 className="text-lg font-bold text-foreground">
-                {editingBook.id ? "추천 도서 수정" : "새 추천 도서 추가"}
-              </h2>
-              <button
-                onClick={() => setEditingBook(null)}
-                className="flex h-8 w-8 items-center justify-center rounded-full bg-muted text-muted-foreground transition-colors hover:bg-border hover:text-foreground"
-              >
-                <X size={18} />
-              </button>
-            </div>
-
-            <div className="flex flex-col gap-4 px-6 py-6">
-              <div>
-                <label className="mb-1.5 block text-sm font-medium text-foreground">도서명</label>
-                <input
-                  type="text"
-                  value={editingBook.title}
-                  onChange={(e) => setEditingBook({ ...editingBook, title: e.target.value })}
-                  placeholder="도서 제목"
-                  className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
-                />
-              </div>
-
-              <div>
-                <label className="mb-1.5 block text-sm font-medium text-foreground">저자</label>
-                <input
-                  type="text"
-                  value={editingBook.author}
-                  onChange={(e) => setEditingBook({ ...editingBook, author: e.target.value })}
-                  placeholder="저자명"
-                  className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
-                />
-              </div>
-
-              <div>
-                <label className="mb-1.5 block text-sm font-medium text-foreground">카테고리</label>
-                <input
-                  type="text"
-                  value={editingBook.category}
-                  onChange={(e) => setEditingBook({ ...editingBook, category: e.target.value })}
-                  placeholder="예: 에세이, 역사, 자기계발"
-                  className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
-                />
-              </div>
-
-              <div>
-                <label className="mb-1.5 block text-sm font-medium text-foreground">표지 이미지 URL</label>
-                <input
-                  type="text"
-                  value={editingBook.cover}
-                  onChange={(e) => setEditingBook({ ...editingBook, cover: e.target.value })}
-                  placeholder="https://..."
-                  className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
-                />
-              </div>
-
-              <div>
-                <label className="mb-1.5 block text-sm font-medium text-foreground">태그 색상</label>
-                <select
-                  value={editingBook.color}
-                  onChange={(e) => setEditingBook({ ...editingBook, color: e.target.value })}
-                  className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
-                >
-                  <option value="bg-tangerine/10 text-tangerine">주황색</option>
-                  <option value="bg-mint/10 text-mint">민트</option>
-                  <option value="bg-emerald/10 text-emerald">에메랄드</option>
-                  <option value="bg-primary/10 text-primary">기본</option>
-                </select>
-              </div>
-            </div>
-
-            <div className="flex gap-3 border-t border-border bg-muted/30 px-6 py-4">
-              <button
-                onClick={() => setEditingBook(null)}
-                className="flex-1 rounded-xl border border-border bg-card py-3 text-sm font-medium text-foreground transition-colors hover:bg-muted"
-              >
-                취소
-              </button>
-              <button
-                onClick={handleSaveBook}
-                disabled={!editingBook.title.trim() || !editingBook.author.trim()}
-                className="flex-1 rounded-xl bg-primary py-3 text-sm font-bold text-primary-foreground transition-all hover:brightness-110 disabled:opacity-50"
-              >
-                {editingBook.id ? "수정" : "추가"}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Multi Book Add Modal */}
-      {isMultiAddMode && (
-        <div
-          className="fixed inset-0 z-[100] flex items-center justify-center bg-foreground/50 p-4 backdrop-blur-sm"
-          onClick={() => setIsMultiAddMode(false)}
-        >
-          <div
-            className="relative max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-3xl border border-border bg-card shadow-2xl"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="flex items-center justify-between border-b border-border px-6 py-4">
-              <h2 className="text-lg font-bold text-foreground">
-                이달의 책 추가
-              </h2>
-              <button
-                onClick={() => setIsMultiAddMode(false)}
-                className="flex h-8 w-8 items-center justify-center rounded-full bg-muted text-muted-foreground transition-colors hover:bg-border hover:text-foreground"
-              >
-                <X size={18} />
-              </button>
-            </div>
-
-            <div className="flex flex-col gap-4 px-6 py-6">
-              <p className="text-xs text-muted-foreground">여러 권의 책을 한번에 추가할 수 있습니다.</p>
-
-              {bookEntries.map((entry, index) => (
-                <div
-                  key={index}
-                  className="relative rounded-xl border border-border bg-muted/30 p-4"
-                >
-                  {bookEntries.length > 1 && (
-                    <div className="mb-3 flex items-center justify-between">
-                      <span className="flex h-6 w-6 items-center justify-center rounded-full bg-primary text-xs font-bold text-white">
-                        {index + 1}
-                      </span>
-                      <button
-                        onClick={() => removeBookEntry(index)}
-                        className="flex h-6 w-6 items-center justify-center rounded-full text-muted-foreground hover:bg-red-500 hover:text-white transition-colors"
-                      >
-                        <X size={14} />
-                      </button>
-                    </div>
-                  )}
-
-                  <div className="space-y-3">
-                    <div className="grid grid-cols-2 gap-3">
-                      <div>
-                        <label className="mb-1 block text-xs font-medium text-foreground">도서명 *</label>
-                        <input
-                          type="text"
-                          value={entry.title}
-                          onChange={(e) => updateBookEntry(index, "title", e.target.value)}
-                          placeholder="도서 제목"
-                          className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus:border-primary focus:outline-none"
-                        />
-                      </div>
-                      <div>
-                        <label className="mb-1 block text-xs font-medium text-foreground">저자 *</label>
-                        <input
-                          type="text"
-                          value={entry.author}
-                          onChange={(e) => updateBookEntry(index, "author", e.target.value)}
-                          placeholder="저자명"
-                          className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus:border-primary focus:outline-none"
-                        />
-                      </div>
-                    </div>
-                    <div className="grid grid-cols-2 gap-3">
-                      <div>
-                        <label className="mb-1 block text-xs font-medium text-foreground">카테고리</label>
-                        <input
-                          type="text"
-                          value={entry.category}
-                          onChange={(e) => updateBookEntry(index, "category", e.target.value)}
-                          placeholder="에세이, 역사..."
-                          className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus:border-primary focus:outline-none"
-                        />
-                      </div>
-                      <div>
-                        <label className="mb-1 block text-xs font-medium text-foreground">태그 색상</label>
-                        <select
-                          value={entry.color}
-                          onChange={(e) => updateBookEntry(index, "color", e.target.value)}
-                          className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none"
-                        >
-                          <option value="bg-tangerine/10 text-tangerine">주황색</option>
-                          <option value="bg-mint/10 text-mint">민트</option>
-                          <option value="bg-emerald/10 text-emerald">에메랄드</option>
-                          <option value="bg-primary/10 text-primary">기본</option>
-                        </select>
-                      </div>
-                    </div>
-                    <div>
-                      <label className="mb-1 block text-xs font-medium text-foreground">표지 이미지 URL (선택)</label>
-                      <input
-                        type="text"
-                        value={entry.cover}
-                        onChange={(e) => updateBookEntry(index, "cover", e.target.value)}
-                        placeholder="https://..."
-                        className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus:border-primary focus:outline-none"
-                      />
-                    </div>
-                  </div>
-                </div>
-              ))}
-
-              <button
-                onClick={addBookEntry}
-                className="w-full rounded-xl border-2 border-dashed border-border py-3 text-sm font-medium text-muted-foreground hover:border-primary hover:text-primary transition-colors"
-              >
-                <Plus size={16} className="inline mr-1" />
-                책 추가 ({bookEntries.length}권)
-              </button>
-            </div>
-
-            <div className="flex gap-3 border-t border-border bg-muted/30 px-6 py-4">
-              <button
-                onClick={() => setIsMultiAddMode(false)}
-                className="flex-1 rounded-xl border border-border bg-card py-3 text-sm font-medium text-foreground transition-colors hover:bg-muted"
-              >
-                취소
-              </button>
-              <button
-                onClick={handleSaveMultiBooks}
-                disabled={!bookEntries.some(e => e.title.trim() && e.author.trim())}
-                className="flex-1 rounded-xl bg-primary py-3 text-sm font-bold text-primary-foreground transition-all hover:brightness-110 disabled:opacity-50"
-              >
-                {bookEntries.filter(e => e.title.trim() && e.author.trim()).length}권 추가
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Delete All Books Confirmation Modal */}
-      {deleteAllBooksOpen && (
-        <div
-          className="fixed inset-0 z-[100] flex items-center justify-center bg-foreground/50 p-4 backdrop-blur-sm"
-          onClick={() => setDeleteAllBooksOpen(false)}
-        >
-          <div
-            className="w-full max-w-sm overflow-hidden rounded-2xl border border-border bg-card shadow-2xl"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="px-6 py-6 text-center">
-              <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-red-100">
-                <Trash2 size={24} className="text-red-500" />
-              </div>
-              <h3 className="text-lg font-bold text-foreground">이달의 책 전체 삭제</h3>
-              <p className="mt-2 text-sm text-muted-foreground">
-                현재 등록된 {books.length}권의 책을 모두 삭제하시겠습니까?
-                <br />
-                새로운 달에 책을 다시 등록하기 전에 사용하세요.
-              </p>
-            </div>
-            <div className="flex gap-3 border-t border-border bg-muted/30 px-6 py-4">
-              <button
-                onClick={() => setDeleteAllBooksOpen(false)}
-                className="flex-1 rounded-xl border border-border bg-card py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-muted"
-              >
-                취소
-              </button>
-              <button
-                onClick={handleDeleteAllBooks}
-                className="flex-1 rounded-xl bg-red-500 py-2.5 text-sm font-bold text-white transition-all hover:bg-red-600"
-              >
-                전체 삭제
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* Floating Admin Button */}
       {isAdmin && (
         <div className="fixed bottom-24 right-5 z-50">
@@ -1022,6 +606,263 @@ export function HomePage() {
           </span>
         </div>
       )}
+
+      {/* Book Detail Modal */}
+      {selectedBook && (
+        <div
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-foreground/50 p-4 backdrop-blur-sm"
+          onClick={() => setSelectedBook(null)}
+        >
+          <div
+            className="relative w-full max-w-sm overflow-hidden rounded-3xl border border-border bg-card shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* 책 표지 */}
+            <div className="relative h-48 bg-gradient-to-br from-primary/20 via-emerald/10 to-tangerine/10">
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="h-36 w-24 overflow-hidden rounded-xl shadow-xl ring-1 ring-border">
+                  <img
+                    src={selectedBook.cover || "/placeholder.svg"}
+                    alt={selectedBook.title}
+                    className="h-full w-full object-cover"
+                    crossOrigin="anonymous"
+                  />
+                </div>
+              </div>
+              <button
+                onClick={() => setSelectedBook(null)}
+                className="absolute right-3 top-3 flex h-8 w-8 items-center justify-center rounded-full bg-white/80 text-muted-foreground backdrop-blur-sm transition-colors hover:bg-white hover:text-foreground"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            {/* 책 정보 */}
+            <div className="px-6 py-5 text-center">
+              <span className={cn("inline-flex rounded-full px-3 py-1 text-[10px] font-bold", selectedBook.color)}>
+                {selectedBook.category}
+              </span>
+              <h3 className="mt-3 text-xl font-bold text-foreground">{selectedBook.title}</h3>
+              <p className="mt-1 text-sm text-muted-foreground">{selectedBook.author}</p>
+
+              <div className="mt-4 rounded-xl bg-muted/50 p-4">
+                <p className="text-xs leading-relaxed text-foreground">
+                  이 책은 이달의 추천 도서입니다. 독서모임(독모)이나 자유 서평을 통해 함께 읽어보세요!
+                </p>
+              </div>
+
+              <div className="mt-4 flex gap-2">
+                <Link
+                  href="/programs/dokmo"
+                  className="flex-1 rounded-xl bg-primary py-3 text-sm font-bold text-primary-foreground transition-all hover:brightness-110"
+                >
+                  독모 신청하기
+                </Link>
+                <Link
+                  href="/reviews/write"
+                  className="flex-1 rounded-xl border border-border bg-card py-3 text-sm font-medium text-foreground transition-colors hover:bg-muted"
+                >
+                  서평 작성
+                </Link>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Dokmo Time Selection Modal */}
+      {selectedDokmoGroup && (
+        <DokmoTimeSelectModal
+          group={selectedDokmoGroup}
+          isOpen={!!selectedDokmoGroup}
+          onClose={() => setSelectedDokmoGroup(null)}
+          onApply={(time, date) => {
+            setAppliedDokmo((prev) => [...prev, { groupId: selectedDokmoGroup.id, time, date }])
+            setSelectedDokmoGroup(null)
+          }}
+          appliedInfo={appliedDokmo.find((a) => a.groupId === selectedDokmoGroup.id)}
+        />
+      )}
+    </div>
+  )
+}
+
+// 독모 시간 선택 모달 컴포넌트
+interface DokmoTimeSelectModalProps {
+  group: HomeDokmoGroup
+  isOpen: boolean
+  onClose: () => void
+  onApply: (time: string, date: string) => void
+  appliedInfo?: { time: string; date: string }
+}
+
+function DokmoTimeSelectModal({ group, isOpen, onClose, onApply, appliedInfo }: DokmoTimeSelectModalProps) {
+  const [selectedTime, setSelectedTime] = useState<string | null>(null)
+  const [selectedDate, setSelectedDate] = useState<string>(() => {
+    // 기본값: 오늘 날짜
+    const today = new Date()
+    return today.toISOString().split("T")[0]
+  })
+
+  // 모달이 열릴 때 초기화
+  useEffect(() => {
+    if (isOpen) {
+      setSelectedTime(appliedInfo?.time || null)
+      setSelectedDate(appliedInfo?.date || new Date().toISOString().split("T")[0])
+    }
+  }, [isOpen, appliedInfo])
+
+  const IconComponent = group.icon
+  const gradientClass = group.id === "yeomyeong"
+    ? "from-amber-400 to-amber-600"
+    : group.id === "yunseul"
+      ? "from-sky-400 to-sky-600"
+      : "from-indigo-400 to-indigo-600"
+
+  // 이번 주 날짜들 생성
+  const getWeekDates = () => {
+    const dates = []
+    const today = new Date()
+    const dayOfWeek = today.getDay()
+    const startOfWeek = new Date(today)
+    startOfWeek.setDate(today.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1)) // 월요일 시작
+
+    for (let i = 0; i < 7; i++) {
+      const date = new Date(startOfWeek)
+      date.setDate(startOfWeek.getDate() + i)
+      dates.push({
+        value: date.toISOString().split("T")[0],
+        day: ["일", "월", "화", "수", "목", "금", "토"][date.getDay()],
+        date: date.getDate(),
+        isPast: date < new Date(new Date().setHours(0, 0, 0, 0)),
+      })
+    }
+    return dates
+  }
+
+  const weekDates = getWeekDates()
+
+  if (!isOpen) return null
+
+  return (
+    <div
+      className="fixed inset-0 z-[100] flex items-center justify-center bg-foreground/50 p-4 backdrop-blur-sm"
+      onClick={onClose}
+    >
+      <div
+        className="relative w-full max-w-md overflow-hidden rounded-3xl border border-border bg-card shadow-2xl"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* 헤더 */}
+        <div className={cn("relative overflow-hidden bg-gradient-to-br p-5", gradientClass)}>
+          <div className="absolute -right-4 top-1/2 -translate-y-1/2 select-none">
+            <span className="text-[60px] font-black text-white/15 leading-none">
+              {group.id === "yeomyeong" ? "아침" : group.id === "yunseul" ? "점심" : "저녁"}
+            </span>
+          </div>
+          <div className="relative flex items-center justify-between">
+            <div>
+              <span className="inline-flex items-center gap-1 rounded-full bg-white/20 px-2 py-0.5 text-[10px] font-bold text-white backdrop-blur-sm">
+                <IconComponent size={12} />
+                {group.name}
+              </span>
+              <h2 className="mt-2 text-lg font-bold text-white">{group.book}</h2>
+              <p className="text-xs text-white/80">{group.bookAuthor}</p>
+            </div>
+            <button
+              onClick={onClose}
+              className="flex h-8 w-8 items-center justify-center rounded-full bg-white/20 text-white backdrop-blur-sm transition-colors hover:bg-white/30"
+            >
+              <X size={18} />
+            </button>
+          </div>
+        </div>
+
+        {/* 날짜 선택 */}
+        <div className="px-5 pt-5">
+          <label className="mb-2 flex items-center gap-2 text-sm font-bold text-foreground">
+            <Calendar size={14} className="text-primary" />
+            날짜 선택
+          </label>
+          <div className="flex gap-1.5 overflow-x-auto pb-2 no-scrollbar">
+            {weekDates.map((d) => (
+              <button
+                key={d.value}
+                onClick={() => !d.isPast && setSelectedDate(d.value)}
+                disabled={d.isPast}
+                className={cn(
+                  "flex min-w-[44px] flex-col items-center rounded-xl py-2 px-1 transition-all",
+                  selectedDate === d.value
+                    ? "bg-primary text-primary-foreground"
+                    : d.isPast
+                      ? "bg-muted/50 text-muted-foreground opacity-50"
+                      : "bg-muted hover:bg-muted/80"
+                )}
+              >
+                <span className="text-[10px] font-medium">{d.day}</span>
+                <span className="text-lg font-bold">{d.date}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* 시간 선택 */}
+        <div className="px-5 pt-4">
+          <label className="mb-2 flex items-center gap-2 text-sm font-bold text-foreground">
+            <Clock size={14} className="text-primary" />
+            시간 선택
+          </label>
+          <div className="grid grid-cols-4 gap-2">
+            {group.times.map((time) => (
+              <button
+                key={time}
+                onClick={() => setSelectedTime(time)}
+                className={cn(
+                  "rounded-xl py-3 text-sm font-medium transition-all",
+                  selectedTime === time
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-muted hover:bg-muted/80"
+                )}
+              >
+                {time}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* 안내 문구 */}
+        <div className="mx-5 mt-4 rounded-xl bg-muted/50 p-3">
+          <p className="text-xs leading-relaxed text-muted-foreground">
+            {group.description} 시간대 독서모임입니다.
+            <br />
+            신청 후 해당 시간에 ZOOM 링크가 발송됩니다.
+          </p>
+        </div>
+
+        {/* 버튼 */}
+        <div className="flex gap-3 p-5">
+          <button
+            onClick={onClose}
+            className="flex-1 rounded-xl border border-border bg-card py-3 text-sm font-medium text-foreground transition-colors hover:bg-muted"
+          >
+            취소
+          </button>
+          {appliedInfo ? (
+            <div className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-emerald/10 py-3 text-sm font-bold text-emerald">
+              <Check size={16} />
+              신청완료 ({appliedInfo.time})
+            </div>
+          ) : (
+            <button
+              onClick={() => selectedTime && onApply(selectedTime, selectedDate)}
+              disabled={!selectedTime}
+              className="flex-1 rounded-xl bg-primary py-3 text-sm font-bold text-primary-foreground transition-all hover:brightness-110 disabled:opacity-50"
+            >
+              신청하기
+            </button>
+          )}
+        </div>
+      </div>
     </div>
   )
 }

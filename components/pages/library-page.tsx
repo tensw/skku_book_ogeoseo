@@ -2,11 +2,9 @@
 
 import { useState } from "react"
 import {
-  ShoppingCart,
   BookOpen,
   Award,
   FileText,
-  Clock,
   ChevronRight,
   Sparkles,
   Key,
@@ -23,11 +21,19 @@ import {
   Star,
   Heart,
   MessageCircle,
+  Users,
+  Clock,
+  GraduationCap,
+  Sun,
+  Sunset,
+  Moon,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { KDCBadge } from "@/components/kdc-badge"
 import type { KDCBadgeData } from "@/components/kdc-badge"
 import { KDCRadarChart } from "@/components/radar-chart"
+import { useSharedData } from "@/lib/shared-data-context"
+import { usePrograms } from "@/lib/program-context"
 
 const radarData = [
   { label: "총류", value: 30, shortLabel: "000" },
@@ -135,81 +141,27 @@ const kdcBadges: KDCBadgeData[] = [
   },
 ]
 
-const wishlistItems = [
-  {
-    id: 1,
-    title: "미움받을 용기",
-    price: "13,500",
-    cover: "https://picsum.photos/seed/wish1/100/140",
-  },
-  {
-    id: 2,
-    title: "생각에 관한 생각",
-    price: "15,800",
-    cover: "https://picsum.photos/seed/wish2/100/140",
-  },
-  {
-    id: 3,
-    title: "1984",
-    price: "9,200",
-    cover: "https://picsum.photos/seed/wish3/100/140",
-  },
-]
+/* ── 프로그램 타입 정의 ── */
+type ProgramType = "dokmo" | "dokto" | "general"
 
-interface ActiveClub {
-  id: number
-  title: string
-  nextMeeting: string
-  cover: string
-  members: number
-  status: "active" | "completed"
+const programLabels: Record<ProgramType, string> = {
+  dokmo: "독모",
+  dokto: "독토",
+  general: "일반",
 }
 
-const activeClubs: ActiveClub[] = [
-  {
-    id: 1,
-    title: "숨겨둔 내 안의 이야기",
-    nextMeeting: "3월 24일 (화) 오후 8시",
-    cover: "https://picsum.photos/seed/active1/100/140",
-    members: 5,
-    status: "active",
-  },
-  {
-    id: 2,
-    title: "과학과 상상력",
-    nextMeeting: "3월 26일 (목) 오후 7시",
-    cover: "https://picsum.photos/seed/active2/100/140",
-    members: 22,
-    status: "active",
-  },
-  {
-    id: 3,
-    title: "고전 다시 읽기",
-    nextMeeting: "완료됨",
-    cover: "https://picsum.photos/seed/active3/100/140",
-    members: 10,
-    status: "completed",
-  },
-]
-
-const statusConfig = {
-  active: {
-    label: "참여 중",
-    bg: "bg-emerald",
-    text: "text-white",
-  },
-  completed: {
-    label: "참여 완료",
-    bg: "bg-amber-500",
-    text: "text-white",
-  },
+const programColors: Record<ProgramType, { bg: string; text: string }> = {
+  dokmo: { bg: "bg-emerald", text: "text-white" },
+  dokto: { bg: "bg-tangerine", text: "text-white" },
+  general: { bg: "bg-primary", text: "text-white" },
 }
 
-/* ── My Reviews (linked to KDC badge IDs) ── */
+/* ── My Reviews (프로그램별 분류) ── */
 const myReviews = [
   {
     id: 1,
     badgeId: "800",
+    program: "dokmo" as ProgramType,
     book: { title: "미드나이트 라이브러리", author: "매트 헤이그", cover: "https://picsum.photos/seed/rev4/100/140" },
     rating: 5,
     text: "살아보지 못한 삶들을 돌아보며 지금 이 순간의 소중함을 다시 느끼게 해준 책. 매트 헤이그의 따뜻한 문장들이 마음속에 오래 남았습니다.",
@@ -220,6 +172,7 @@ const myReviews = [
   {
     id: 2,
     badgeId: "800",
+    program: "dokto" as ProgramType,
     book: { title: "1984", author: "조지 오웰", cover: "https://picsum.photos/seed/rev6/100/140" },
     rating: 5,
     text: "디스토피아의 고전을 다시 읽으니 소름이 돋을 정도로 현실과 겹치는 부분이 많았어요. 필독서 중의 필독서.",
@@ -230,6 +183,7 @@ const myReviews = [
   {
     id: 3,
     badgeId: "300",
+    program: "dokmo" as ProgramType,
     book: { title: "아주 작은 습관의 힘", author: "제임스 클리어", cover: "https://picsum.photos/seed/rev3/100/140" },
     rating: 4,
     text: "습관을 '정체성의 변화'로 바라보는 시선이 인상 깊었어요. 내가 어떤 사람이 되고 싶은지에서 출발하는 접근이 실천력을 높여주네요.",
@@ -240,6 +194,7 @@ const myReviews = [
   {
     id: 4,
     badgeId: "900",
+    program: "dokto" as ProgramType,
     book: { title: "사피엔스", author: "유발 하라리", cover: "https://picsum.photos/seed/rev2/100/140" },
     rating: 5,
     text: "인류 역사를 전혀 새로운 관점에서 풀어낸 책. 농업혁명이 오히려 인류를 불행하게 만들었다는 주장은 충격적이면서도 설득력 있었어요.",
@@ -250,6 +205,7 @@ const myReviews = [
   {
     id: 5,
     badgeId: "100",
+    program: "general" as ProgramType,
     book: { title: "생각에 관한 생각", author: "대니얼 카너먼", cover: "https://picsum.photos/seed/rev5/100/140" },
     rating: 4,
     text: "시스템1과 시스템2의 개념을 알고 나면 일상에서 내 생각의 오류가 보이기 시작합니다. 재독할 가치가 충분한 명저!",
@@ -260,6 +216,7 @@ const myReviews = [
   {
     id: 6,
     badgeId: "000",
+    program: "dokmo" as ProgramType,
     book: { title: "정보의 세계사", author: "제임스 글릭", cover: "https://picsum.photos/seed/rev7/100/140" },
     rating: 4,
     text: "정보라는 개념이 인류 문명에 미친 영향을 방대하게 조망한 책. 아날로그에서 디지털까지의 여정이 흥미롭습니다.",
@@ -270,6 +227,7 @@ const myReviews = [
   {
     id: 7,
     badgeId: "400",
+    program: "dokto" as ProgramType,
     book: { title: "코스모스", author: "칼 세이건", cover: "https://picsum.photos/seed/rev8/100/140" },
     rating: 5,
     text: "우주의 광활함 앞에서 인간의 존재를 다시 생각하게 만드는 명저. 칼 세이건의 시적인 문체가 과학에 아름다움을 더합니다.",
@@ -280,6 +238,7 @@ const myReviews = [
   {
     id: 8,
     badgeId: "500",
+    program: "general" as ProgramType,
     book: { title: "클린 코드", author: "로버트 C. 마틴", cover: "https://picsum.photos/seed/rev9/100/140" },
     rating: 4,
     text: "개발자라면 한 번쯤 읽어야 할 책. 깨끗한 코드 작성의 원칙과 실전 사례가 유익했어요.",
@@ -290,6 +249,7 @@ const myReviews = [
   {
     id: 9,
     badgeId: "600",
+    program: "dokmo" as ProgramType,
     book: { title: "미술관에 간 화학자", author: "전창림", cover: "https://picsum.photos/seed/rev10/100/140" },
     rating: 4,
     text: "화학적 시선으로 명화를 분석하는 독특한 접근. 예술과 과학의 만남이 신선합니다.",
@@ -300,6 +260,7 @@ const myReviews = [
   {
     id: 10,
     badgeId: "300",
+    program: "dokto" as ProgramType,
     book: { title: "정의란 무엇인가", author: "마이클 샌델", cover: "https://picsum.photos/seed/rev11/100/140" },
     rating: 5,
     text: "정의에 대한 철학적 논쟁을 현실 사례와 엮어 풀어내는 샌델 교수의 필력이 돋보입니다.",
@@ -315,14 +276,72 @@ const badgeIdToLabel: Record<string, string> = {
   "800": "문학", "900": "역사",
 }
 
+// 독모 그룹 아이콘 매핑
+const dokmoGroupIcons: Record<string, typeof Sun> = {
+  yeomyeong: Sun,
+  yunseul: Sunset,
+  dalbit: Moon,
+}
+
+const dokmoGroupColors: Record<string, string> = {
+  yeomyeong: "bg-amber-500",
+  yunseul: "bg-orange-500",
+  dalbit: "bg-indigo-500",
+}
+
 export function LibraryPage() {
+  // Shared data context
+  const {
+    readingGroups,
+    discussions,
+    joinedDoktoClubs,
+    appliedDokmoSessions,
+  } = useSharedData()
+  const { getWeeklyBookAssignment } = usePrograms()
+
   const totalBadges = kdcBadges.filter((b) => b.earned).length
   const totalReviews = kdcBadges.reduce((sum, b) => sum + b.count, 0)
   const [selectedBadgeId, setSelectedBadgeId] = useState<string | null>(null)
   const [likedReviews, setLikedReviews] = useState<number[]>([])
+  const [showAllReviews, setShowAllReviews] = useState(false)
+  const [reviewProgramFilter, setReviewProgramFilter] = useState<ProgramType | null>(null)
 
   const selectedBadge = kdcBadges.find((b) => b.id === selectedBadgeId)
   const filteredReviews = myReviews.filter((r) => r.badgeId === selectedBadgeId)
+
+  // 전체보기에서 프로그램별 필터링
+  const allFilteredReviews = reviewProgramFilter
+    ? myReviews.filter((r) => r.program === reviewProgramFilter)
+    : myReviews
+
+  // 프로그램별 서평 개수
+  const reviewCountByProgram: Record<ProgramType, number> = {
+    dokmo: myReviews.filter((r) => r.program === "dokmo").length,
+    dokto: myReviews.filter((r) => r.program === "dokto").length,
+    general: myReviews.filter((r) => r.program === "general").length,
+  }
+
+  // 신청한 독토 목록
+  const myDoktoClubs = discussions.filter((d) => joinedDoktoClubs.includes(d.id))
+
+  // 신청한 독모 세션 파싱 (format: "groupId-time-date")
+  const parsedDokmoSessions = appliedDokmoSessions.map((session) => {
+    const [groupId, time, date] = session.split("-")
+    const group = readingGroups.find((g) => g.id === groupId)
+    const timeSlot = group?.timeSlots.find((t) => t.time === time)
+    const weeklyAssignment = getWeeklyBookAssignment()
+    const book = groupId === "dalbit" ? weeklyAssignment.dalbit : weeklyAssignment.yeomyeong
+    return {
+      sessionKey: session,
+      groupId,
+      groupName: group?.name || "",
+      time,
+      displayTime: timeSlot?.displayTime || time,
+      location: timeSlot?.location || "",
+      date,
+      book,
+    }
+  })
 
   const toggleLike = (id: number) => {
     setLikedReviews((prev) => prev.includes(id) ? prev.filter((r) => r !== id) : [...prev, id])
@@ -523,75 +542,105 @@ export function LibraryPage() {
         />
       </section>
 
-      {/* Wishlist / Cart Section */}
+      {/* 나의 독모 - My Reading Groups */}
       <section className="px-5 sm:px-8">
         <div className="mb-3 flex items-center justify-between">
           <h2 className="flex items-center gap-2 text-sm font-bold text-foreground">
-            <ShoppingCart size={16} className="text-primary" />
-            위시리스트
+            <Sun size={16} className="text-amber-500" />
+            나의 독모
           </h2>
-          <span className="rounded-full bg-[#7C3AED]/10 px-2.5 py-0.5 text-[10px] font-medium text-[#7C3AED]">
-            공동구매 대기 중
+          <span className="rounded-full bg-amber-500/10 px-2.5 py-0.5 text-[10px] font-medium text-amber-600">
+            {parsedDokmoSessions.length}개 신청
           </span>
         </div>
-        <div className="no-scrollbar flex gap-3 overflow-x-auto pb-1">
-          {wishlistItems.map((item) => (
-            <div
-              key={item.id}
-              className="flex min-w-[140px] flex-col rounded-3xl border border-border bg-card p-3 shadow-md"
-            >
-              <div className="mb-2 h-24 w-full overflow-hidden rounded-2xl ring-1 ring-border">
-                <img
-                  src={item.cover || "/placeholder.svg"}
-                  alt={item.title}
-                  className="h-full w-full object-cover"
-                  crossOrigin="anonymous"
-                />
-              </div>
-              <p className="truncate text-xs font-semibold text-foreground">
-                {item.title}
-              </p>
-              <p className="mt-0.5 text-[10px] font-bold text-primary">
-                공동구매: {item.price}원
-              </p>
-            </div>
-          ))}
-        </div>
+        {parsedDokmoSessions.length === 0 ? (
+          <div className="rounded-2xl border border-dashed border-border bg-muted/30 p-6 text-center">
+            <Sun size={24} className="mx-auto mb-2 text-muted-foreground" />
+            <p className="text-xs text-muted-foreground">
+              아직 신청한 독모가 없어요
+            </p>
+            <p className="mt-1 text-[10px] text-muted-foreground">
+              독모 페이지에서 시간대를 선택해 신청해보세요
+            </p>
+          </div>
+        ) : (
+          <div className="no-scrollbar flex gap-3 overflow-x-auto pb-1">
+            {parsedDokmoSessions.map((session) => {
+              const IconComponent = dokmoGroupIcons[session.groupId] || Sun
+              const bgColor = dokmoGroupColors[session.groupId] || "bg-amber-500"
+              return (
+                <div
+                  key={session.sessionKey}
+                  className="relative flex min-w-[230px] items-center gap-3 rounded-3xl border border-border bg-card p-3 shadow-md"
+                >
+                  {/* Group Badge */}
+                  <div className={cn("absolute right-3 top-3 rounded-full px-2 py-0.5 text-[9px] font-bold text-white shadow-sm", bgColor)}>
+                    {session.groupName}
+                  </div>
+                  <div className={cn("flex h-16 w-12 flex-shrink-0 items-center justify-center rounded-xl", bgColor)}>
+                    <IconComponent size={24} className="text-white" />
+                  </div>
+                  <div className="flex-1 pr-12">
+                    <h3 className="text-xs font-bold text-foreground">
+                      {session.book?.title || "도서 미정"}
+                    </h3>
+                    <p className="mt-0.5 flex items-center gap-1 text-[10px] text-muted-foreground">
+                      <Clock size={10} />
+                      {session.displayTime}
+                    </p>
+                    <p className="mt-0.5 text-[10px] text-muted-foreground">
+                      {session.location} · {session.date}
+                    </p>
+                  </div>
+                  <ChevronRight size={14} className="flex-shrink-0 text-muted-foreground" />
+                </div>
+              )
+            })}
+          </div>
+        )}
       </section>
 
-      {/* My Clubs - Horizontal Scroll */}
+      {/* 나의 독토 - My Discussion Clubs */}
       <section className="px-5 sm:px-8">
         <div className="mb-3 flex items-center justify-between">
           <h2 className="flex items-center gap-2 text-sm font-bold text-foreground">
-            <BookOpen size={16} className="text-emerald" />
-            나의 클럽
+            <GraduationCap size={16} className="text-tangerine" />
+            나의 독토
           </h2>
-          <button className="text-xs font-medium text-primary">
-            전체 보기
-          </button>
+          <span className="rounded-full bg-tangerine/10 px-2.5 py-0.5 text-[10px] font-medium text-tangerine">
+            {myDoktoClubs.length}개 참여 중
+          </span>
         </div>
-        <div className="no-scrollbar flex gap-3 overflow-x-auto pb-1">
-          {activeClubs.map((club) => {
-            const sc = statusConfig[club.status]
-            return (
+        {myDoktoClubs.length === 0 ? (
+          <div className="rounded-2xl border border-dashed border-border bg-muted/30 p-6 text-center">
+            <GraduationCap size={24} className="mx-auto mb-2 text-muted-foreground" />
+            <p className="text-xs text-muted-foreground">
+              아직 참여 중인 독토가 없어요
+            </p>
+            <p className="mt-1 text-[10px] text-muted-foreground">
+              독토 페이지에서 관심 있는 토론회에 참여해보세요
+            </p>
+          </div>
+        ) : (
+          <div className="no-scrollbar flex gap-3 overflow-x-auto pb-1">
+            {myDoktoClubs.map((club) => (
               <div
                 key={club.id}
                 className="relative flex min-w-[230px] items-center gap-3 rounded-3xl border border-border bg-card p-3 shadow-md"
               >
-                {/* Status Badge */}
-                <div
-                  className={cn(
-                    "absolute right-3 top-3 rounded-full px-2 py-0.5 text-[9px] font-bold shadow-sm",
-                    sc.bg,
-                    sc.text
-                  )}
-                >
-                  {sc.label}
+                {/* Leader Type Badge */}
+                <div className={cn(
+                  "absolute right-3 top-3 rounded-full px-2 py-0.5 text-[9px] font-bold text-white shadow-sm",
+                  club.leaderType === "student" ? "bg-emerald" :
+                  club.leaderType === "professor" ? "bg-sky-500" : "bg-tangerine"
+                )}>
+                  {club.leaderType === "student" ? "학생 주도" :
+                   club.leaderType === "professor" ? "교수" : "작가"}
                 </div>
                 <div className="h-16 w-12 flex-shrink-0 overflow-hidden rounded-xl ring-1 ring-border">
                   <img
-                    src={club.cover || "/placeholder.svg"}
-                    alt={club.title}
+                    src={club.bookCover || "/placeholder.svg"}
+                    alt={club.book}
                     className="h-full w-full object-cover"
                     crossOrigin="anonymous"
                   />
@@ -600,18 +649,77 @@ export function LibraryPage() {
                   <h3 className="text-xs font-bold text-foreground">
                     {club.title}
                   </h3>
-                  <p className="mt-0.5 flex items-center gap-1 text-[10px] text-muted-foreground">
-                    <Clock size={10} />
-                    {club.nextMeeting}
-                  </p>
                   <p className="mt-0.5 text-[10px] text-muted-foreground">
-                    {club.members}명 참여
+                    {club.book}
+                  </p>
+                  <p className="mt-0.5 flex items-center gap-1 text-[10px] text-muted-foreground">
+                    <Users size={10} />
+                    {club.members}/{club.maxMembers}명 · {club.nextMeeting}
                   </p>
                 </div>
                 <ChevronRight size={14} className="flex-shrink-0 text-muted-foreground" />
               </div>
-            )
-          })}
+            ))}
+          </div>
+        )}
+      </section>
+
+      {/* My Reviews - Horizontal Scroll */}
+      <section className="px-5 sm:px-8">
+        <div className="mb-3 flex items-center justify-between">
+          <h2 className="flex items-center gap-2 text-sm font-bold text-foreground">
+            <BookOpen size={16} className="text-emerald" />
+            나의 서평
+          </h2>
+          <button
+            onClick={() => setShowAllReviews(true)}
+            className="text-xs font-medium text-primary"
+          >
+            전체 보기
+          </button>
+        </div>
+        <div className="no-scrollbar flex gap-3 overflow-x-auto pb-1">
+          {myReviews.slice(0, 4).map((review) => {
+            const programColor = programColors[review.program]
+            return (
+            <div
+              key={review.id}
+              className="relative flex min-w-[230px] items-center gap-3 rounded-3xl border border-border bg-card p-3 shadow-md"
+            >
+              {/* Program Badge */}
+              <div className={cn("absolute right-3 top-3 rounded-full px-2 py-0.5 text-[9px] font-bold shadow-sm", programColor.bg, programColor.text)}>
+                {programLabels[review.program]}
+              </div>
+              <div className="h-16 w-12 flex-shrink-0 overflow-hidden rounded-xl ring-1 ring-border">
+                <img
+                  src={review.book.cover || "/placeholder.svg"}
+                  alt={review.book.title}
+                  className="h-full w-full object-cover"
+                  crossOrigin="anonymous"
+                />
+              </div>
+              <div className="flex-1 pr-12">
+                <h3 className="text-xs font-bold text-foreground">
+                  {review.book.title}
+                </h3>
+                <p className="mt-0.5 text-[10px] text-muted-foreground">
+                  {review.book.author}
+                </p>
+                <div className="mt-1 flex gap-0.5">
+                  {[1, 2, 3, 4, 5].map((s) => (
+                    <Star
+                      key={s}
+                      size={9}
+                      className={cn(
+                        s <= review.rating ? "fill-tangerine text-tangerine" : "text-border"
+                      )}
+                    />
+                  ))}
+                </div>
+              </div>
+              <ChevronRight size={14} className="flex-shrink-0 text-muted-foreground" />
+            </div>
+          )})}
         </div>
       </section>
 
@@ -742,6 +850,157 @@ export function LibraryPage() {
                         </div>
                         <div className="flex-1">
                           <p className="text-xs font-bold text-foreground">{review.book.title}</p>
+                          <p className="text-[11px] text-muted-foreground">{review.book.author}</p>
+                          <div className="mt-1 flex gap-0.5">
+                            {[1, 2, 3, 4, 5].map((s) => (
+                              <Star
+                                key={s}
+                                size={11}
+                                className={cn(
+                                  s <= review.rating ? "fill-tangerine text-tangerine" : "text-border"
+                                )}
+                              />
+                            ))}
+                          </div>
+                        </div>
+                        <span className="text-[10px] text-muted-foreground">{review.timeAgo}</span>
+                      </div>
+
+                      {/* Review text */}
+                      <p className="mt-3 text-[13px] leading-relaxed text-foreground">
+                        {review.text}
+                      </p>
+
+                      {/* Actions */}
+                      <div className="mt-3 flex items-center gap-5">
+                        <button
+                          onClick={() => toggleLike(review.id)}
+                          className="flex items-center gap-1.5 text-xs text-muted-foreground transition-colors"
+                        >
+                          <Heart
+                            size={15}
+                            className={cn(liked ? "fill-tangerine text-tangerine" : "text-muted-foreground")}
+                          />
+                          <span className={cn(liked ? "font-medium text-tangerine" : "")}>
+                            {review.likes + (liked ? 1 : 0)}
+                          </span>
+                        </button>
+                        <button className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                          <MessageCircle size={15} />
+                          {review.comments}
+                        </button>
+                      </div>
+                    </article>
+                  )
+                })
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* All Reviews Modal */}
+      {showAllReviews && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/40 p-4 backdrop-blur-sm"
+          onClick={() => {
+            setShowAllReviews(false)
+            setReviewProgramFilter(null)
+          }}
+        >
+          <div
+            className="relative flex max-h-[90vh] w-full max-w-lg flex-col overflow-hidden rounded-3xl border border-border bg-card shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Modal Header */}
+            <div className="border-b border-border px-5 py-4">
+              <div className="flex items-center justify-between">
+                <h3 className="text-lg font-bold text-foreground">나의 서평</h3>
+                <button
+                  onClick={() => {
+                    setShowAllReviews(false)
+                    setReviewProgramFilter(null)
+                  }}
+                  className="flex h-8 w-8 items-center justify-center rounded-full bg-muted text-foreground transition-colors hover:bg-muted/70"
+                  aria-label="닫기"
+                >
+                  <X size={16} />
+                </button>
+              </div>
+              <p className="mt-1 text-xs text-muted-foreground">
+                총 {myReviews.length}편의 서평을 작성했어요
+              </p>
+
+              {/* Program Filter Chips */}
+              <div className="mt-3 flex flex-wrap gap-2">
+                <button
+                  onClick={() => setReviewProgramFilter(null)}
+                  className={cn(
+                    "rounded-full px-3 py-1.5 text-xs font-semibold transition-all",
+                    reviewProgramFilter === null
+                      ? "bg-primary text-primary-foreground shadow-md"
+                      : "bg-muted text-muted-foreground hover:bg-border"
+                  )}
+                >
+                  전체 ({myReviews.length})
+                </button>
+                {(["dokmo", "dokto", "general"] as ProgramType[]).map((program) => {
+                  const colors = programColors[program]
+                  const count = reviewCountByProgram[program]
+                  return (
+                    <button
+                      key={program}
+                      onClick={() => setReviewProgramFilter(program)}
+                      className={cn(
+                        "rounded-full px-3 py-1.5 text-xs font-semibold transition-all",
+                        reviewProgramFilter === program
+                          ? `${colors.bg} ${colors.text} shadow-md`
+                          : "bg-muted text-muted-foreground hover:bg-border"
+                      )}
+                    >
+                      {programLabels[program]} ({count})
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
+
+            {/* Modal Content - Review List */}
+            <div className="flex-1 overflow-y-auto">
+              {allFilteredReviews.length === 0 ? (
+                <div className="flex flex-col items-center gap-3 py-12 text-center">
+                  <div className="flex h-16 w-16 items-center justify-center rounded-full bg-muted">
+                    <BookOpen size={24} className="text-muted-foreground" />
+                  </div>
+                  <p className="text-sm font-medium text-muted-foreground">
+                    아직 작성한 서평이 없어요
+                  </p>
+                </div>
+              ) : (
+                allFilteredReviews.map((review) => {
+                  const liked = likedReviews.includes(review.id)
+                  return (
+                    <article
+                      key={review.id}
+                      className="border-b border-border px-5 py-4 last:border-b-0"
+                    >
+                      {/* Book card */}
+                      <div className="flex items-center gap-3 rounded-2xl bg-muted/50 p-3">
+                        <div className="h-14 w-10 flex-shrink-0 overflow-hidden rounded-lg shadow-sm">
+                          <img
+                            src={review.book.cover || "/placeholder.svg"}
+                            alt={review.book.title}
+                            className="h-full w-full object-cover"
+                            crossOrigin="anonymous"
+                          />
+                        </div>
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2">
+                            <p className="text-xs font-bold text-foreground">{review.book.title}</p>
+                            <span className={cn("rounded-full px-1.5 py-0.5 text-[9px] font-semibold", programColors[review.program].bg, programColors[review.program].text)}>
+                              {programLabels[review.program]}
+                            </span>
+                          </div>
                           <p className="text-[11px] text-muted-foreground">{review.book.author}</p>
                           <div className="mt-1 flex gap-0.5">
                             {[1, 2, 3, 4, 5].map((s) => (

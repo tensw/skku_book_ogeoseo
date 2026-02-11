@@ -3,6 +3,7 @@ import type { Metadata, Viewport } from 'next'
 import { Inter, Playfair_Display } from 'next/font/google'
 import { AuthProvider } from "@/lib/auth-context"
 import { ProgramProvider } from "@/lib/program-context"
+import { SharedDataProvider } from "@/lib/shared-data-context"
 
 import './globals.css'
 
@@ -32,7 +33,9 @@ export default function RootLayout({
       <body className={`${inter.variable} ${playfair.variable} font-sans antialiased`}>
         <AuthProvider>
           <ProgramProvider>
-            {children}
+            <SharedDataProvider>
+              {children}
+            </SharedDataProvider>
           </ProgramProvider>
         </AuthProvider>
       </body>

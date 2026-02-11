@@ -30,11 +30,11 @@ import type { ClubDetailData } from "@/components/club-detail-modal"
 import { useAuth } from "@/lib/auth-context"
 
 const recommendedBooks = [
-  { id: 1, title: "아무튼, 메모", author: "김신회", cover: "https://picsum.photos/seed/book-memo/200/280", category: "에세이", color: "bg-tangerine/10 text-tangerine" },
-  { id: 2, title: "사피엔스", author: "유발 하라리", cover: "https://picsum.photos/seed/book-sapiens/200/280", category: "역사", color: "bg-mint/10 text-mint" },
-  { id: 3, title: "아주 작은 습관의 힘", author: "제임스 클리어", cover: "https://picsum.photos/seed/book-atomic/200/280", category: "자기계발", color: "bg-emerald/10 text-emerald" },
-  { id: 4, title: "미드나이트 라이브러리", author: "매트 헤이그", cover: "https://picsum.photos/seed/book-midnight/200/280", category: "문학", color: "bg-tangerine/10 text-tangerine" },
-  { id: 5, title: "생각에 관한 생각", author: "대니얼 카너먼", cover: "https://picsum.photos/seed/book-thinking/200/280", category: "심리학", color: "bg-mint/10 text-mint" },
+  { id: 1, title: "아무튼, 메모", author: "김신회", cover: "https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=200&h=280&fit=crop", category: "에세이", color: "bg-tangerine/10 text-tangerine" },
+  { id: 2, title: "사피엔스", author: "유발 하라리", cover: "https://images.unsplash.com/photo-1512820790803-83ca734da794?w=200&h=280&fit=crop", category: "역사", color: "bg-mint/10 text-mint" },
+  { id: 3, title: "아주 작은 습관의 힘", author: "제임스 클리어", cover: "https://images.unsplash.com/photo-1543002588-bfa74002ed7e?w=200&h=280&fit=crop", category: "자기계발", color: "bg-emerald/10 text-emerald" },
+  { id: 4, title: "미드나이트 라이브러리", author: "매트 헤이그", cover: "https://images.unsplash.com/photo-1476275466078-4007374efbbe?w=200&h=280&fit=crop", category: "문학", color: "bg-tangerine/10 text-tangerine" },
+  { id: 5, title: "생각에 관한 생각", author: "대니얼 카너먼", cover: "https://images.unsplash.com/photo-1589998059171-988d887df646?w=200&h=280&fit=crop", category: "심리학", color: "bg-mint/10 text-mint" },
 ]
 
 const dokmoGroups = [
@@ -44,7 +44,7 @@ const dokmoGroups = [
     description: "아침 6-9시",
     book: "미움받을 용기",
     bookAuthor: "기시미 이치로",
-    bookCover: "https://picsum.photos/seed/book-courage/100/140",
+    bookCover: "https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=100&h=140&fit=crop",
     times: ["6:00", "7:00", "8:00"],
     color: "bg-amber-500",
     lightColor: "bg-amber-100 text-amber-700",
@@ -56,7 +56,7 @@ const dokmoGroups = [
     description: "점심 12-14시",
     book: "데미안",
     bookAuthor: "헤르만 헤세",
-    bookCover: "https://picsum.photos/seed/book-demian/100/140",
+    bookCover: "https://images.unsplash.com/photo-1512820790803-83ca734da794?w=100&h=140&fit=crop",
     times: ["12:00", "13:00"],
     color: "bg-sky-500",
     lightColor: "bg-sky-100 text-sky-700",
@@ -68,7 +68,7 @@ const dokmoGroups = [
     description: "저녁 17-22시",
     book: "아몬드",
     bookAuthor: "손원평",
-    bookCover: "https://picsum.photos/seed/book-almond/100/140",
+    bookCover: "https://images.unsplash.com/photo-1543002588-bfa74002ed7e?w=100&h=140&fit=crop",
     times: ["17:00", "18:00", "19:00", "20:00", "21:00"],
     color: "bg-indigo-500",
     lightColor: "bg-indigo-100 text-indigo-700",
@@ -410,39 +410,44 @@ export function HomePage() {
         <div className="flex gap-3 overflow-x-auto pb-2 no-scrollbar">
           {dokmoGroups.map((group) => {
             const IconComponent = group.icon
+            const gradientClass = group.id === "yeomyeong"
+              ? "from-amber-400 to-amber-600"
+              : group.id === "yunseul"
+                ? "from-sky-400 to-sky-600"
+                : "from-indigo-400 to-indigo-600"
+            const accentText = group.id === "yeomyeong" ? "아침" : group.id === "yunseul" ? "점심" : "저녁"
+
             return (
               <div
                 key={group.id}
-                className="flex w-40 flex-shrink-0 flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-sm transition-all hover:shadow-md"
+                className={cn(
+                  "relative w-44 flex-shrink-0 overflow-hidden rounded-2xl shadow-sm transition-all hover:shadow-md bg-gradient-to-br",
+                  gradientClass
+                )}
               >
-                {/* Book Cover */}
-                <div className="relative h-24 overflow-hidden">
-                  <img
-                    src={group.bookCover}
-                    alt={group.book}
-                    className="h-full w-full object-cover"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-foreground/60 to-transparent" />
-                  <div className="absolute bottom-2 left-2 right-2">
-                    <span className={cn("inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[9px] font-bold text-white", group.color)}>
-                      <IconComponent size={10} />
-                      {group.name}
-                    </span>
-                  </div>
+                {/* 배경 큰 텍스트 */}
+                <div className="absolute -right-2 top-1/2 -translate-y-1/2 select-none">
+                  <span className="text-[50px] font-black text-white/15 leading-none">
+                    {accentText}
+                  </span>
                 </div>
 
-                {/* Info */}
-                <div className="p-3">
-                  <h3 className="text-xs font-bold text-foreground line-clamp-1">{group.book}</h3>
-                  <p className="text-[10px] text-muted-foreground">{group.bookAuthor}</p>
-                  <div className="mt-2 flex flex-wrap gap-1">
+                {/* 컨텐츠 */}
+                <div className="relative p-4">
+                  <span className="inline-flex items-center gap-1 rounded-full bg-white/20 px-2 py-0.5 text-[9px] font-bold text-white backdrop-blur-sm">
+                    <IconComponent size={10} />
+                    {group.name}
+                  </span>
+                  <h3 className="mt-2 text-sm font-bold text-white line-clamp-1">{group.book}</h3>
+                  <p className="text-[10px] text-white/80">{group.bookAuthor}</p>
+                  <div className="mt-3 flex flex-wrap gap-1">
                     {group.times.slice(0, 3).map((time) => (
-                      <span key={time} className={cn("rounded-full px-1.5 py-0.5 text-[8px] font-medium", group.lightColor)}>
+                      <span key={time} className="rounded-full bg-white/20 px-1.5 py-0.5 text-[8px] font-medium text-white backdrop-blur-sm">
                         {time}
                       </span>
                     ))}
                     {group.times.length > 3 && (
-                      <span className="text-[8px] text-muted-foreground">+{group.times.length - 3}</span>
+                      <span className="text-[8px] text-white/70">+{group.times.length - 3}</span>
                     )}
                   </div>
                 </div>
@@ -471,27 +476,37 @@ export function HomePage() {
         <div className="flex gap-3 overflow-x-auto pb-2 no-scrollbar">
           {activeClubs.map((club) => {
             const isJoined = joinedClubs.includes(club.id)
+            const gradientClass = club.leaderType === "student"
+              ? "from-emerald to-emerald/80"
+              : club.leaderType === "professor"
+                ? "from-sky-500 to-sky-600"
+                : "from-tangerine to-orange-500"
+            const accentText = club.leaderType === "student" ? "학생" : club.leaderType === "professor" ? "교수" : "작가"
+
             return (
               <div
                 key={club.id}
-                className="group w-56 flex-shrink-0 overflow-hidden rounded-2xl border border-border bg-card shadow-sm transition-all hover:shadow-md"
+                className={cn(
+                  "group relative w-56 flex-shrink-0 overflow-hidden rounded-2xl shadow-sm transition-all hover:shadow-md bg-gradient-to-br",
+                  gradientClass
+                )}
               >
-                {/* Vibe Image */}
-                <div className="relative h-28 overflow-hidden">
-                  <img src={club.vibeImage || "/placeholder.svg"} alt={club.title} className="h-full w-full object-cover transition-transform group-hover:scale-105" />
-                  <div className="absolute inset-0 bg-gradient-to-t from-foreground/60 to-transparent" />
-                  <div className="absolute bottom-2 left-2 right-2">
-                    <h3 className="text-xs font-bold text-white line-clamp-1">{club.title}</h3>
-                    <span className="text-[10px] text-white/70">{club.leader}</span>
-                  </div>
-                  <span className={cn("absolute right-2 top-2 rounded-full px-2 py-0.5 text-[9px] font-bold", club.tagColor)}>
-                    {club.leaderType === "student" ? "학생" : club.leaderType === "professor" ? "교수" : "작가"}
+                {/* 배경 큰 텍스트 */}
+                <div className="absolute -right-1 top-1/2 -translate-y-1/2 select-none">
+                  <span className="text-[45px] font-black text-white/15 leading-none">
+                    {accentText}
                   </span>
                 </div>
 
-                {/* Info Footer */}
-                <div className="flex items-center justify-between p-3">
-                  <div className="flex items-center gap-2 text-[10px] text-muted-foreground">
+                {/* 컨텐츠 */}
+                <div className="relative p-4">
+                  <span className="inline-flex items-center gap-1 rounded-full bg-white/20 px-2 py-0.5 text-[9px] font-bold text-white backdrop-blur-sm">
+                    <GraduationCap size={10} />
+                    {club.leader}
+                  </span>
+                  <h3 className="mt-2 text-sm font-bold text-white line-clamp-1">{club.title}</h3>
+                  <p className="text-[10px] text-white/80">{club.detail.book}</p>
+                  <div className="mt-3 flex items-center gap-2 text-[10px] text-white/80">
                     <span className="flex items-center gap-0.5">
                       <Users size={10} />
                       {club.members}명
@@ -501,16 +516,20 @@ export function HomePage() {
                       {club.nextMeeting.split(" ")[0]}
                     </span>
                   </div>
+                </div>
+
+                {/* 하단 버튼 */}
+                <div className="relative border-t border-white/20 px-4 py-2.5">
                   {isJoined ? (
-                    <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[9px] font-bold text-primary">
-                      완료
+                    <span className="rounded-full bg-white/20 px-2.5 py-1 text-[9px] font-bold text-white backdrop-blur-sm">
+                      신청 완료
                     </span>
                   ) : (
                     <button
                       onClick={() => setSelectedClub(club.detail)}
-                      className="rounded-full bg-primary px-2.5 py-1 text-[9px] font-bold text-primary-foreground shadow-sm transition-all hover:shadow-md hover:brightness-110"
+                      className="rounded-full bg-white/20 px-2.5 py-1 text-[9px] font-bold text-white backdrop-blur-sm transition-all hover:bg-white/30"
                     >
-                      참여
+                      참여하기
                     </button>
                   )}
                 </div>

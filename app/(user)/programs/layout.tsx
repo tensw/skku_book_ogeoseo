@@ -3,28 +3,40 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
-
-const programTabs = [
-  { href: "/programs/dokmo", label: "독모" },
-  { href: "/programs/dokto", label: "독토" },
-]
+import { usePrograms } from "@/lib/program-context"
 
 export default function ProgramsLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
+  const { customPrograms } = usePrograms()
+
+  // 기본 탭 + 활성화된 커스텀 프로그램
+  const programTabs = [
+    { href: "/programs", label: "전체", exact: true },
+    { href: "/programs/dokmo", label: "독모" },
+    { href: "/programs/dokto", label: "독토" },
+    ...customPrograms
+      .filter((p) => p.isActive)
+      .map((p) => ({
+        href: `/programs/${p.id}`,
+        label: p.name.length > 8 ? p.name.slice(0, 8) + "..." : p.name,
+      })),
+  ]
 
   return (
     <div className="flex flex-col">
       {/* LNB - Local Navigation Bar */}
       <div className="border-b border-border bg-card px-5 sm:px-8">
-        <div className="flex gap-1">
+        <div className="flex gap-1 overflow-x-auto no-scrollbar">
           {programTabs.map((tab) => {
-            const isActive = pathname === tab.href || pathname.startsWith(tab.href + "/")
+            const isActive = tab.exact
+              ? pathname === tab.href
+              : pathname === tab.href || pathname.startsWith(tab.href + "/")
             return (
               <Link
                 key={tab.href}
                 href={tab.href}
                 className={cn(
-                  "relative px-4 py-3 text-sm font-medium transition-colors",
+                  "relative flex-shrink-0 px-4 py-3 text-sm font-medium transition-colors whitespace-nowrap",
                   isActive
                     ? "text-primary"
                     : "text-muted-foreground hover:text-foreground"

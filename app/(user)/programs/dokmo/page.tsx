@@ -1,9 +1,11 @@
 "use client"
 
 import { useState, useMemo } from "react"
-import { ChevronDown, ChevronLeft, ChevronRight, Clock, MapPin, Users, BookOpen, X, Calendar, Pencil, Settings } from "lucide-react"
+import Link from "next/link"
+import { ChevronDown, ChevronLeft, ChevronRight, Clock, MapPin, Users, BookOpen, X, Calendar, Settings, Book } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useAuth } from "@/lib/auth-context"
+import { usePrograms, type MonthlyBook } from "@/lib/program-context"
 
 type GroupType = "all" | "yeomyeong" | "yunseul" | "dalbit"
 
@@ -14,13 +16,9 @@ interface TimeSlot {
 }
 
 interface ReadingGroup {
-  id: GroupType
+  id: "yeomyeong" | "yunseul" | "dalbit"
   name: string
   description: string
-  book: string
-  bookAuthor: string
-  bookCover: string
-  bookDescription: string
   timeSlots: TimeSlot[]
 }
 
@@ -29,10 +27,6 @@ const readingGroups: ReadingGroup[] = [
     id: "yeomyeong",
     name: "여명독",
     description: "아침 독서모임 (6-9시)",
-    book: "미움받을 용기",
-    bookAuthor: "기시미 이치로",
-    bookCover: "https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=100&h=140&fit=crop",
-    bookDescription: "아들러 심리학을 통해 자유로운 삶을 탐구합니다.",
     timeSlots: [
       { time: "06:00", displayTime: "오전 6:00 - 7:00", location: "스터디룸 2-1" },
       { time: "07:00", displayTime: "오전 7:00 - 8:00", location: "스터디룸 2-1" },
@@ -43,10 +37,6 @@ const readingGroups: ReadingGroup[] = [
     id: "yunseul",
     name: "윤슬독",
     description: "점심 독서모임 (12-14시)",
-    book: "데미안",
-    bookAuthor: "헤르만 헤세",
-    bookCover: "https://images.unsplash.com/photo-1512820790803-83ca734da794?w=100&h=140&fit=crop",
-    bookDescription: "자아 탐색의 여정을 함께합니다.",
     timeSlots: [
       { time: "12:00", displayTime: "오후 12:00 - 13:00", location: "스터디룸 3-1" },
       { time: "13:00", displayTime: "오후 1:00 - 2:00", location: "스터디룸 3-1" },
@@ -56,10 +46,6 @@ const readingGroups: ReadingGroup[] = [
     id: "dalbit",
     name: "달빛독",
     description: "저녁 독서모임 (17-22시)",
-    book: "아몬드",
-    bookAuthor: "손원평",
-    bookCover: "https://images.unsplash.com/photo-1543002588-bfa74002ed7e?w=100&h=140&fit=crop",
-    bookDescription: "감정을 느끼지 못하는 소년의 성장 이야기.",
     timeSlots: [
       { time: "17:00", displayTime: "오후 5:00 - 6:00", location: "스터디룸 4-1" },
       { time: "18:00", displayTime: "오후 6:00 - 7:00", location: "스터디룸 4-1" },
@@ -109,63 +95,45 @@ function formatDateDisplay(date: Date): string {
 
 const MAX_BOOKINGS = 7
 
-interface BookEditForm {
-  groupId: GroupType
-  book: string
-  bookAuthor: string
-  bookCover: string
-  bookDescription: string
+// 기본 책 정보 (이달의 책이 없을 때 사용)
+const defaultBook: MonthlyBook = {
+  id: "default",
+  title: "도서 미정",
+  author: "추후 공지",
+  cover: "https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=100&h=140&fit=crop",
+  description: "이달의 책이 아직 선정되지 않았습니다.",
 }
 
 export default function Dokmo() {
   const { isAdmin } = useAuth()
+  const { getWeeklyBookAssignment, monthlyBooks } = usePrograms()
   const [selectedGroup, setSelectedGroup] = useState<GroupType>("all")
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
   const [selectedDate, setSelectedDate] = useState<Date>(new Date())
   const [weekDates, setWeekDates] = useState<Date[]>(getWeekDates(new Date()))
-  const [appliedSessions, setAppliedSessions] = useState<string[]>([]) // Format: "date_groupId_time"
+  const [appliedSessions, setAppliedSessions] = useState<string[]>([])
   const [selectedSession, setSelectedSession] = useState<{
     group: ReadingGroup
+    book: MonthlyBook
     timeSlot: TimeSlot
     date: Date
   } | null>(null)
-  const [groups, setGroups] = useState<ReadingGroup[]>(readingGroups)
-  const [isBookModalOpen, setIsBookModalOpen] = useState(false)
-  const [editingBook, setEditingBook] = useState<BookEditForm | null>(null)
+
+  // 이달의 책에서 자동 배정된 주간 책 정보 가져오기
+  const weeklyAssignment = getWeeklyBookAssignment()
+
+  // 각 그룹별 책 가져오기
+  const getBookForGroup = (groupId: "yeomyeong" | "yunseul" | "dalbit"): MonthlyBook => {
+    if (groupId === "yeomyeong" || groupId === "yunseul") {
+      return weeklyAssignment.yeomyeong || defaultBook
+    }
+    return weeklyAssignment.dalbit || defaultBook
+  }
 
   const filteredGroups = useMemo(() => {
-    if (selectedGroup === "all") return groups
-    return groups.filter((g) => g.id === selectedGroup)
-  }, [selectedGroup, groups])
-
-  const handleEditBook = (group: ReadingGroup) => {
-    setEditingBook({
-      groupId: group.id,
-      book: group.book,
-      bookAuthor: group.bookAuthor,
-      bookCover: group.bookCover,
-      bookDescription: group.bookDescription,
-    })
-    setIsBookModalOpen(true)
-  }
-
-  const handleSaveBook = () => {
-    if (!editingBook) return
-
-    setGroups(groups.map((g) =>
-      g.id === editingBook.groupId
-        ? {
-            ...g,
-            book: editingBook.book,
-            bookAuthor: editingBook.bookAuthor,
-            bookCover: editingBook.bookCover || g.bookCover,
-            bookDescription: editingBook.bookDescription,
-          }
-        : g
-    ))
-    setIsBookModalOpen(false)
-    setEditingBook(null)
-  }
+    if (selectedGroup === "all") return readingGroups
+    return readingGroups.filter((g) => g.id === selectedGroup)
+  }, [selectedGroup])
 
   const selectedLabel = groupOptions.find((g) => g.id === selectedGroup)?.label || "전체"
 
@@ -191,7 +159,6 @@ export default function Dokmo() {
     const newBase = new Date(weekDates[0])
     newBase.setDate(newBase.getDate() + direction * 7)
 
-    // Don't allow past weeks
     const today = new Date()
     today.setHours(0, 0, 0, 0)
     if (newBase < today && direction < 0) return
@@ -220,6 +187,9 @@ export default function Dokmo() {
           <span className="rounded-full bg-emerald/10 px-2 py-0.5 text-[10px] font-bold text-emerald">
             {appliedSessions.length}/{MAX_BOOKINGS} 신청
           </span>
+          <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-bold text-primary">
+            {weeklyAssignment.weekNumber}주차
+          </span>
         </div>
         <p className="mt-0.5 text-[11px] text-muted-foreground">
           시간대별 독서모임에 참여하세요
@@ -234,15 +204,53 @@ export default function Dokmo() {
             한 달 뒤, 당신의 서재는 조금 더 풍성해질 거예요.
           </p>
           <p className="mt-2 text-xs text-muted-foreground">
-            매주 바뀌는 책 종류. 책은 <span className="font-semibold text-primary">이주의 책</span>으로 선정됩니다!
+            <span className="font-semibold text-primary">이달의 책</span>에서 자동 배정됩니다.
+            매주 새로운 책을 만나보세요!
           </p>
         </div>
 
+        {/* 관리자 안내 */}
         {isAdmin && (
-          <div className="mt-3 rounded-xl border border-amber-200 bg-amber-50 p-3">
+          <Link
+            href="/admin/programs"
+            className="mt-3 flex items-center justify-between rounded-xl border border-amber-200 bg-amber-50 p-3 transition-colors hover:bg-amber-100"
+          >
             <div className="flex items-center gap-2">
               <Settings size={14} className="text-amber-600" />
-              <span className="text-xs font-medium text-amber-700">관리자 모드: 각 모임의 이주의 책을 수정할 수 있습니다</span>
+              <span className="text-xs font-medium text-amber-700">
+                이달의 책은 관리자 페이지에서 수정할 수 있습니다
+              </span>
+            </div>
+            <ChevronRight size={14} className="text-amber-600" />
+          </Link>
+        )}
+
+        {/* 이달의 책 미리보기 */}
+        {monthlyBooks.length > 0 && (
+          <div className="mt-3 rounded-xl border border-border bg-card p-3">
+            <div className="mb-2 flex items-center gap-2">
+              <Book size={14} className="text-primary" />
+              <span className="text-xs font-bold text-foreground">이달의 책 ({monthlyBooks.length}권)</span>
+            </div>
+            <div className="flex gap-2 overflow-x-auto pb-1">
+              {monthlyBooks.map((book, index) => (
+                <div
+                  key={book.id}
+                  className="flex-shrink-0 text-center"
+                >
+                  <div className="relative">
+                    <img
+                      src={book.cover}
+                      alt={book.title}
+                      className="h-16 w-12 rounded-md object-cover shadow-sm"
+                    />
+                    <span className="absolute -top-1 -left-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[9px] font-bold text-white">
+                      {index + 1}
+                    </span>
+                  </div>
+                  <p className="mt-1 w-12 truncate text-[9px] text-muted-foreground">{book.title}</p>
+                </div>
+              ))}
             </div>
           </div>
         )}
@@ -358,6 +366,7 @@ export default function Dokmo() {
       <div className="flex flex-col gap-6 px-5 sm:px-8">
         {filteredGroups.map((group) => {
           const colors = groupColors[group.id]
+          const book = getBookForGroup(group.id)
 
           return (
             <div key={group.id} className="flex flex-col gap-3">
@@ -376,32 +385,26 @@ export default function Dokmo() {
                   <div className="relative flex-shrink-0">
                     <div className="absolute -bottom-2 -right-2 h-full w-full rounded-lg bg-black/20" />
                     <img
-                      src={group.bookCover}
-                      alt={group.book}
+                      src={book.cover}
+                      alt={book.title}
                       className="relative h-28 w-20 rounded-lg object-cover shadow-xl ring-2 ring-white/30"
                     />
                   </div>
 
                   {/* 텍스트 정보 */}
                   <div className="flex flex-1 flex-col justify-center">
-                    <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
                       <span className="w-fit rounded-full bg-white/20 px-2.5 py-1 text-[10px] font-bold text-white backdrop-blur-sm">
                         {group.name}
                       </span>
-                      {isAdmin && (
-                        <button
-                          onClick={() => handleEditBook(group)}
-                          className="flex items-center gap-1 rounded-full bg-white/20 px-2 py-1 text-[10px] font-medium text-white backdrop-blur-sm transition-colors hover:bg-white/30"
-                        >
-                          <Pencil size={10} />
-                          수정
-                        </button>
-                      )}
+                      <span className="rounded-full bg-white/10 px-2 py-0.5 text-[9px] text-white/80">
+                        {weeklyAssignment.weekNumber}주차
+                      </span>
                     </div>
-                    <h3 className="mt-2 text-lg font-bold text-white">{group.book}</h3>
-                    <p className="text-sm text-white/80">{group.bookAuthor}</p>
+                    <h3 className="mt-2 text-lg font-bold text-white">{book.title}</h3>
+                    <p className="text-sm text-white/80">{book.author}</p>
                     <p className="mt-1.5 text-xs text-white/70 line-clamp-2">
-                      {group.bookDescription}
+                      {book.description}
                     </p>
                   </div>
                 </div>
@@ -415,7 +418,7 @@ export default function Dokmo() {
                   return (
                     <button
                       key={slot.time}
-                      onClick={() => !isApplied && setSelectedSession({ group, timeSlot: slot, date: selectedDate })}
+                      onClick={() => !isApplied && setSelectedSession({ group, book, timeSlot: slot, date: selectedDate })}
                       disabled={isApplied}
                       className={cn(
                         "flex flex-col items-center rounded-xl border p-3 transition-all",
@@ -492,15 +495,17 @@ export default function Dokmo() {
               {/* Book Info */}
               <div className="flex gap-4">
                 <img
-                  src={selectedSession.group.bookCover}
-                  alt={selectedSession.group.book}
+                  src={selectedSession.book.cover}
+                  alt={selectedSession.book.title}
                   className="h-32 w-24 rounded-xl object-cover shadow-md"
                 />
                 <div className="flex flex-col">
-                  <span className="text-xs font-medium text-muted-foreground">이주의 도서</span>
-                  <h3 className="mt-1 text-lg font-bold text-foreground">{selectedSession.group.book}</h3>
-                  <p className="text-sm text-muted-foreground">{selectedSession.group.bookAuthor}</p>
-                  <p className="mt-2 text-xs text-muted-foreground">{selectedSession.group.bookDescription}</p>
+                  <span className="text-xs font-medium text-muted-foreground">
+                    {weeklyAssignment.weekNumber}주차 도서
+                  </span>
+                  <h3 className="mt-1 text-lg font-bold text-foreground">{selectedSession.book.title}</h3>
+                  <p className="text-sm text-muted-foreground">{selectedSession.book.author}</p>
+                  <p className="mt-2 text-xs text-muted-foreground">{selectedSession.book.description}</p>
                 </div>
               </div>
 
@@ -576,93 +581,6 @@ export default function Dokmo() {
                   신청하기
                 </button>
               )}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Book Edit Modal */}
-      {isBookModalOpen && editingBook && (
-        <div
-          className="fixed inset-0 z-[100] flex items-center justify-center bg-foreground/50 p-4 backdrop-blur-sm"
-          onClick={() => setIsBookModalOpen(false)}
-        >
-          <div
-            className="relative w-full max-w-lg overflow-hidden rounded-3xl border border-border bg-card shadow-2xl"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="flex items-center justify-between border-b border-border px-6 py-4">
-              <h2 className="text-lg font-bold text-foreground">
-                이주의 책 수정 - {groups.find(g => g.id === editingBook.groupId)?.name}
-              </h2>
-              <button
-                onClick={() => setIsBookModalOpen(false)}
-                className="flex h-8 w-8 items-center justify-center rounded-full bg-muted text-muted-foreground transition-colors hover:bg-border hover:text-foreground"
-              >
-                <X size={18} />
-              </button>
-            </div>
-
-            <div className="flex flex-col gap-4 px-6 py-6">
-              <div>
-                <label className="mb-1.5 block text-sm font-medium text-foreground">도서명</label>
-                <input
-                  type="text"
-                  value={editingBook.book}
-                  onChange={(e) => setEditingBook({ ...editingBook, book: e.target.value })}
-                  placeholder="예: 미움받을 용기"
-                  className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
-                />
-              </div>
-
-              <div>
-                <label className="mb-1.5 block text-sm font-medium text-foreground">저자</label>
-                <input
-                  type="text"
-                  value={editingBook.bookAuthor}
-                  onChange={(e) => setEditingBook({ ...editingBook, bookAuthor: e.target.value })}
-                  placeholder="예: 기시미 이치로"
-                  className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
-                />
-              </div>
-
-              <div>
-                <label className="mb-1.5 block text-sm font-medium text-foreground">도서 소개</label>
-                <textarea
-                  value={editingBook.bookDescription}
-                  onChange={(e) => setEditingBook({ ...editingBook, bookDescription: e.target.value })}
-                  placeholder="도서에 대한 간략한 설명"
-                  rows={3}
-                  className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
-                />
-              </div>
-
-              <div>
-                <label className="mb-1.5 block text-sm font-medium text-foreground">표지 이미지 URL (선택)</label>
-                <input
-                  type="text"
-                  value={editingBook.bookCover}
-                  onChange={(e) => setEditingBook({ ...editingBook, bookCover: e.target.value })}
-                  placeholder="https://..."
-                  className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
-                />
-              </div>
-            </div>
-
-            <div className="flex gap-3 border-t border-border bg-muted/30 px-6 py-4">
-              <button
-                onClick={() => setIsBookModalOpen(false)}
-                className="flex-1 rounded-xl border border-border bg-card py-3 text-sm font-medium text-foreground transition-colors hover:bg-muted"
-              >
-                취소
-              </button>
-              <button
-                onClick={handleSaveBook}
-                disabled={!editingBook.book.trim() || !editingBook.bookAuthor.trim()}
-                className="flex-1 rounded-xl bg-primary py-3 text-sm font-bold text-primary-foreground transition-all hover:brightness-110 disabled:opacity-50"
-              >
-                저장
-              </button>
             </div>
           </div>
         </div>

@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
+import { usePrograms } from "@/lib/program-context"
 import {
   BookOpen,
   FileText,
@@ -35,13 +36,6 @@ const sampleBooks = [
   { id: 4, title: "미드나이트 라이브러리", author: "매트 헤이그", cover: "https://picsum.photos/seed/book-midnight/100/140" },
   { id: 5, title: "생각에 관한 생각", author: "대니얼 카너먼", cover: "https://picsum.photos/seed/book-thinking/100/140" },
   { id: 6, title: "1984", author: "조지 오웰", cover: "https://picsum.photos/seed/book-1984/100/140" },
-]
-
-// Program options
-const programOptions = [
-  { id: "free", label: "자유 서평" },
-  { id: "dokto", label: "독토 프로그램" },
-  { id: "classic100", label: "고전 100선" },
 ]
 
 // KDC Badge Categories
@@ -86,6 +80,8 @@ function GinkgoLeaf({ className, filled = false }: { className?: string; filled?
 
 export default function WriteReview() {
   const router = useRouter()
+  const { getAllProgramOptions } = usePrograms()
+  const programOptions = getAllProgramOptions()
   const [currentStep, setCurrentStep] = useState(1)
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedBook, setSelectedBook] = useState<typeof sampleBooks[0] | null>(null)

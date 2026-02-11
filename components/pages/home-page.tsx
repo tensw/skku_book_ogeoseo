@@ -212,6 +212,9 @@ export function HomePage() {
   const [editingBanner, setEditingBanner] = useState<BannerForm | null>(null)
   const [books, setBooks] = useState<BookRecommendation[]>(recommendedBooks)
   const [editingBook, setEditingBook] = useState<BookRecommendation | null>(null)
+  const [isMultiAddMode, setIsMultiAddMode] = useState(false)
+  const [bookEntries, setBookEntries] = useState<Array<Omit<BookRecommendation, "id">>>([])
+  const [deleteAllBooksOpen, setDeleteAllBooksOpen] = useState(false)
   const [bannerData, setBannerData] = useState({
     imageUrl: "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=1200&h=600&fit=crop",
     title: "함께 읽고, 함께 나누는",
@@ -284,6 +287,47 @@ export function HomePage() {
       category: "",
       color: "bg-primary/10 text-primary",
     })
+    setIsMultiAddMode(false)
+  }
+
+  const handleMultiAddBook = () => {
+    setEditingBook(null)
+    setBookEntries([{ title: "", author: "", cover: "", category: "", color: "bg-primary/10 text-primary" }])
+    setIsMultiAddMode(true)
+  }
+
+  const addBookEntry = () => {
+    setBookEntries([...bookEntries, { title: "", author: "", cover: "", category: "", color: "bg-primary/10 text-primary" }])
+  }
+
+  const removeBookEntry = (index: number) => {
+    if (bookEntries.length <= 1) return
+    setBookEntries(bookEntries.filter((_, i) => i !== index))
+  }
+
+  const updateBookEntry = (index: number, field: string, value: string) => {
+    setBookEntries(bookEntries.map((entry, i) =>
+      i === index ? { ...entry, [field]: value } : entry
+    ))
+  }
+
+  const handleSaveMultiBooks = () => {
+    const validEntries = bookEntries.filter(e => e.title.trim() && e.author.trim())
+    if (validEntries.length === 0) return
+
+    let maxId = books.length > 0 ? Math.max(...books.map(b => b.id)) : 0
+    const newBooks = validEntries.map(entry => ({
+      ...entry,
+      id: ++maxId,
+    }))
+    setBooks([...books, ...newBooks])
+    setIsMultiAddMode(false)
+    setBookEntries([])
+  }
+
+  const handleDeleteAllBooks = () => {
+    setBooks([])
+    setDeleteAllBooksOpen(false)
   }
 
   useEffect(() => {
@@ -336,18 +380,29 @@ export function HomePage() {
           </h2>
           <div className="flex items-center gap-1">
             {isAdmin && (
-              <button
-                onClick={handleAddBook}
-                className="mr-2 flex items-center gap-1 rounded-full bg-primary/10 px-2 py-1 text-[10px] font-medium text-primary hover:bg-primary/20"
-              >
-                <Plus size={10} />
-                추가
-              </button>
+              <>
+                <button
+                  onClick={handleMultiAddBook}
+                  className="mr-1 flex items-center gap-1 rounded-full bg-primary/10 px-2 py-1 text-[10px] font-medium text-primary hover:bg-primary/20"
+                >
+                  <Plus size={10} />
+                  추가
+                </button>
+                {books.length > 0 && (
+                  <button
+                    onClick={() => setDeleteAllBooksOpen(true)}
+                    className="mr-2 flex items-center gap-1 rounded-full bg-red-500/10 px-2 py-1 text-[10px] font-medium text-red-500 hover:bg-red-500/20"
+                  >
+                    <Trash2 size={10} />
+                    전체삭제
+                  </button>
+                )}
+              </>
             )}
             <button onClick={prevSlide} className="rounded-full p-1 hover:bg-muted" aria-label="이전">
               <ChevronLeft size={14} className="text-muted-foreground" />
             </button>
-            <span className="text-[10px] text-muted-foreground">{currentSlide + 1}/{books.length}</span>
+            <span className="text-[10px] text-muted-foreground">{currentSlide + 1}/{books.length || 1}</span>
             <button onClick={nextSlide} className="rounded-full p-1 hover:bg-muted" aria-label="다음">
               <ChevronRight size={14} className="text-muted-foreground" />
             </button>
@@ -777,6 +832,179 @@ export function HomePage() {
                 className="flex-1 rounded-xl bg-primary py-3 text-sm font-bold text-primary-foreground transition-all hover:brightness-110 disabled:opacity-50"
               >
                 {editingBook.id ? "수정" : "추가"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Multi Book Add Modal */}
+      {isMultiAddMode && (
+        <div
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-foreground/50 p-4 backdrop-blur-sm"
+          onClick={() => setIsMultiAddMode(false)}
+        >
+          <div
+            className="relative max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-3xl border border-border bg-card shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between border-b border-border px-6 py-4">
+              <h2 className="text-lg font-bold text-foreground">
+                이달의 책 추가
+              </h2>
+              <button
+                onClick={() => setIsMultiAddMode(false)}
+                className="flex h-8 w-8 items-center justify-center rounded-full bg-muted text-muted-foreground transition-colors hover:bg-border hover:text-foreground"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <div className="flex flex-col gap-4 px-6 py-6">
+              <p className="text-xs text-muted-foreground">여러 권의 책을 한번에 추가할 수 있습니다.</p>
+
+              {bookEntries.map((entry, index) => (
+                <div
+                  key={index}
+                  className="relative rounded-xl border border-border bg-muted/30 p-4"
+                >
+                  {bookEntries.length > 1 && (
+                    <div className="mb-3 flex items-center justify-between">
+                      <span className="flex h-6 w-6 items-center justify-center rounded-full bg-primary text-xs font-bold text-white">
+                        {index + 1}
+                      </span>
+                      <button
+                        onClick={() => removeBookEntry(index)}
+                        className="flex h-6 w-6 items-center justify-center rounded-full text-muted-foreground hover:bg-red-500 hover:text-white transition-colors"
+                      >
+                        <X size={14} />
+                      </button>
+                    </div>
+                  )}
+
+                  <div className="space-y-3">
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="mb-1 block text-xs font-medium text-foreground">도서명 *</label>
+                        <input
+                          type="text"
+                          value={entry.title}
+                          onChange={(e) => updateBookEntry(index, "title", e.target.value)}
+                          placeholder="도서 제목"
+                          className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus:border-primary focus:outline-none"
+                        />
+                      </div>
+                      <div>
+                        <label className="mb-1 block text-xs font-medium text-foreground">저자 *</label>
+                        <input
+                          type="text"
+                          value={entry.author}
+                          onChange={(e) => updateBookEntry(index, "author", e.target.value)}
+                          placeholder="저자명"
+                          className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus:border-primary focus:outline-none"
+                        />
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="mb-1 block text-xs font-medium text-foreground">카테고리</label>
+                        <input
+                          type="text"
+                          value={entry.category}
+                          onChange={(e) => updateBookEntry(index, "category", e.target.value)}
+                          placeholder="에세이, 역사..."
+                          className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus:border-primary focus:outline-none"
+                        />
+                      </div>
+                      <div>
+                        <label className="mb-1 block text-xs font-medium text-foreground">태그 색상</label>
+                        <select
+                          value={entry.color}
+                          onChange={(e) => updateBookEntry(index, "color", e.target.value)}
+                          className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none"
+                        >
+                          <option value="bg-tangerine/10 text-tangerine">주황색</option>
+                          <option value="bg-mint/10 text-mint">민트</option>
+                          <option value="bg-emerald/10 text-emerald">에메랄드</option>
+                          <option value="bg-primary/10 text-primary">기본</option>
+                        </select>
+                      </div>
+                    </div>
+                    <div>
+                      <label className="mb-1 block text-xs font-medium text-foreground">표지 이미지 URL (선택)</label>
+                      <input
+                        type="text"
+                        value={entry.cover}
+                        onChange={(e) => updateBookEntry(index, "cover", e.target.value)}
+                        placeholder="https://..."
+                        className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus:border-primary focus:outline-none"
+                      />
+                    </div>
+                  </div>
+                </div>
+              ))}
+
+              <button
+                onClick={addBookEntry}
+                className="w-full rounded-xl border-2 border-dashed border-border py-3 text-sm font-medium text-muted-foreground hover:border-primary hover:text-primary transition-colors"
+              >
+                <Plus size={16} className="inline mr-1" />
+                책 추가 ({bookEntries.length}권)
+              </button>
+            </div>
+
+            <div className="flex gap-3 border-t border-border bg-muted/30 px-6 py-4">
+              <button
+                onClick={() => setIsMultiAddMode(false)}
+                className="flex-1 rounded-xl border border-border bg-card py-3 text-sm font-medium text-foreground transition-colors hover:bg-muted"
+              >
+                취소
+              </button>
+              <button
+                onClick={handleSaveMultiBooks}
+                disabled={!bookEntries.some(e => e.title.trim() && e.author.trim())}
+                className="flex-1 rounded-xl bg-primary py-3 text-sm font-bold text-primary-foreground transition-all hover:brightness-110 disabled:opacity-50"
+              >
+                {bookEntries.filter(e => e.title.trim() && e.author.trim()).length}권 추가
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete All Books Confirmation Modal */}
+      {deleteAllBooksOpen && (
+        <div
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-foreground/50 p-4 backdrop-blur-sm"
+          onClick={() => setDeleteAllBooksOpen(false)}
+        >
+          <div
+            className="w-full max-w-sm overflow-hidden rounded-2xl border border-border bg-card shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="px-6 py-6 text-center">
+              <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-red-100">
+                <Trash2 size={24} className="text-red-500" />
+              </div>
+              <h3 className="text-lg font-bold text-foreground">이달의 책 전체 삭제</h3>
+              <p className="mt-2 text-sm text-muted-foreground">
+                현재 등록된 {books.length}권의 책을 모두 삭제하시겠습니까?
+                <br />
+                새로운 달에 책을 다시 등록하기 전에 사용하세요.
+              </p>
+            </div>
+            <div className="flex gap-3 border-t border-border bg-muted/30 px-6 py-4">
+              <button
+                onClick={() => setDeleteAllBooksOpen(false)}
+                className="flex-1 rounded-xl border border-border bg-card py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-muted"
+              >
+                취소
+              </button>
+              <button
+                onClick={handleDeleteAllBooks}
+                className="flex-1 rounded-xl bg-red-500 py-2.5 text-sm font-bold text-white transition-all hover:bg-red-600"
+              >
+                전체 삭제
               </button>
             </div>
           </div>

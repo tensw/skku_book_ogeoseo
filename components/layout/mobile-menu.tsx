@@ -1,9 +1,9 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useRef, useEffect } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { Menu, X, User, LogOut, Shield } from "lucide-react"
+import { Menu, X, User, LogOut, BookOpen, Settings } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useAuth } from "@/lib/auth-context"
 import {
@@ -14,22 +14,35 @@ import {
 } from "@/components/ui/sheet"
 
 const menuItems = [
-  { href: "/notices", label: "공지사항" },
-  { href: "/reviews", label: "독서리뷰" },
-  { href: "/programs", label: "오거서 프로그램" },
-  { href: "/guide", label: "오거서 도서추천" },
+  { href: "/programs", label: "프로그램" },
+  { href: "/guide", label: "추천도서" },
+  { href: "/reviews", label: "서평" },
   { href: "/talk", label: "톡톡" },
-  { href: "/library", label: "내 서재" },
+  { href: "/notices", label: "공지사항" },
+  { href: "/library", label: "내 서재", requiresAuth: true },
 ]
 
 export function MobileMenu() {
   const [open, setOpen] = useState(false)
   const { user, isLoggedIn, isAdmin, login, logout } = useAuth()
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false)
+  const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false)
   const [loginId, setLoginId] = useState("")
   const [loginPassword, setLoginPassword] = useState("")
   const [loginError, setLoginError] = useState("")
   const pathname = usePathname()
+  const profileMenuRef = useRef<HTMLDivElement>(null)
+
+  // 프로필 메뉴 외부 클릭 시 닫기
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (profileMenuRef.current && !profileMenuRef.current.contains(event.target as Node)) {
+        setIsProfileMenuOpen(false)
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside)
+    return () => document.removeEventListener("mousedown", handleClickOutside)
+  }, [])
 
   const handleLogin = () => {
     const success = login(loginId, loginPassword)
@@ -44,8 +57,12 @@ export function MobileMenu() {
   }
 
   const handleLogout = () => {
+    setIsProfileMenuOpen(false)
     logout()
   }
+
+  // 로그인 여부에 따라 메뉴 필터링
+  const filteredMenuItems = menuItems.filter(item => !item.requiresAuth || isLoggedIn)
 
   return (
     <>
@@ -75,7 +92,7 @@ export function MobileMenu() {
                   <p className="mt-1 text-xs text-muted-foreground">독서 토론 플랫폼</p>
                 </div>
                 <nav className="flex flex-col gap-1 p-4">
-                  {menuItems.map((item) => {
+                  {filteredMenuItems.map((item) => {
                     const isActive = pathname === item.href || pathname.startsWith(item.href + "/")
                     return (
                       <Link
@@ -101,19 +118,50 @@ export function MobileMenu() {
             </Link>
           </div>
 
-          {/* Right: Login/Logout Button */}
+          {/* Right: Login/Profile Button */}
           {isLoggedIn ? (
-            <div className="flex items-center gap-2">
-              <div className="flex items-center gap-1 text-xs">
-                {isAdmin && <Shield size={12} className="text-amber-500" />}
-                <span className="font-medium text-foreground">{user?.name}</span>
-              </div>
+            <div className="relative" ref={profileMenuRef}>
               <button
-                onClick={handleLogout}
-                className="flex items-center gap-1 rounded-full bg-muted px-2.5 py-1.5 text-xs font-medium text-muted-foreground transition-all hover:bg-border"
+                onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
+                className="flex h-8 w-8 items-center justify-center overflow-hidden rounded-full bg-gradient-to-br from-primary to-primary/70 text-xs font-bold text-primary-foreground ring-2 ring-transparent transition-all hover:ring-primary/30"
               >
-                <LogOut size={12} />
+                {user?.name?.charAt(0) || "U"}
               </button>
+
+              {/* Profile Dropdown Menu */}
+              {isProfileMenuOpen && (
+                <div className="absolute right-0 top-full mt-2 w-44 overflow-hidden rounded-xl border border-border bg-card shadow-lg">
+                  <div className="border-b border-border px-4 py-2.5">
+                    <p className="text-sm font-medium text-foreground">{user?.name}</p>
+                    <p className="text-xs text-muted-foreground">{isAdmin ? "관리자" : "학생"}</p>
+                  </div>
+                  <div className="p-1.5">
+                    <Link
+                      href="/profile"
+                      onClick={() => setIsProfileMenuOpen(false)}
+                      className="flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                    >
+                      <Settings size={15} />
+                      프로필 수정
+                    </Link>
+                    <Link
+                      href="/library"
+                      onClick={() => setIsProfileMenuOpen(false)}
+                      className="flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                    >
+                      <BookOpen size={15} />
+                      내 서재
+                    </Link>
+                    <button
+                      onClick={handleLogout}
+                      className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-red-500 transition-colors hover:bg-red-50"
+                    >
+                      <LogOut size={15} />
+                      로그아웃
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           ) : (
             <button

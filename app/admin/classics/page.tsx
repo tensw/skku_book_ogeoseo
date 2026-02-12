@@ -28,13 +28,19 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog"
 
-const categoryOptions: Classic100["category"][] = ["문학·예술", "인문·사회", "자연과학"]
+const categoryOptions = ["총류", "철학", "종교", "사회과학", "기술과학", "예술", "언어", "문학", "역사"]
 
 const filterTabs = [
   { id: "all", label: "전체" },
-  { id: "문학·예술", label: "문학·예술" },
-  { id: "인문·사회", label: "인문·사회" },
-  { id: "자연과학", label: "자연과학" },
+  { id: "총류", label: "총류" },
+  { id: "철학", label: "철학" },
+  { id: "종교", label: "종교" },
+  { id: "사회과학", label: "사회과학" },
+  { id: "기술과학", label: "기술과학" },
+  { id: "예술", label: "예술" },
+  { id: "언어", label: "언어" },
+  { id: "문학", label: "문학" },
+  { id: "역사", label: "역사" },
 ]
 
 export default function AdminClassicsPage() {
@@ -49,7 +55,7 @@ export default function AdminClassicsPage() {
   const [formTitle, setFormTitle] = useState("")
   const [formAuthor, setFormAuthor] = useState("")
   const [formPublisher, setFormPublisher] = useState("")
-  const [formCategory, setFormCategory] = useState<Classic100["category"]>("문학·예술")
+  const [formCategory, setFormCategory] = useState("문학")
   const [formYear, setFormYear] = useState("")
   const [formDescription, setFormDescription] = useState("")
 
@@ -66,7 +72,7 @@ export default function AdminClassicsPage() {
     setFormTitle("")
     setFormAuthor("")
     setFormPublisher("")
-    setFormCategory("문학·예술")
+    setFormCategory("문학")
     setFormYear("")
     setFormDescription("")
     setDialogOpen(true)
@@ -141,19 +147,24 @@ export default function AdminClassicsPage() {
       label: "분류",
       className: "w-24",
       hideOnMobile: true,
-      render: (val: string) => (
-        <span
-          className={`inline-flex rounded-full px-2 py-0.5 text-[11px] font-semibold ${
-            val === "문학·예술"
-              ? "bg-rose-50 text-rose-600"
-              : val === "인문·사회"
-                ? "bg-sky-50 text-sky-600"
-                : "bg-emerald-50 text-emerald-600"
-          }`}
-        >
-          {val}
-        </span>
-      ),
+      render: (val: string) => {
+        const colorMap: Record<string, string> = {
+          "총류": "bg-gray-100 text-gray-600",
+          "철학": "bg-purple-50 text-purple-600",
+          "종교": "bg-amber-50 text-amber-600",
+          "사회과학": "bg-blue-50 text-blue-600",
+          "기술과학": "bg-teal-50 text-teal-600",
+          "예술": "bg-rose-50 text-rose-600",
+          "언어": "bg-orange-50 text-orange-600",
+          "문학": "bg-pink-50 text-pink-600",
+          "역사": "bg-emerald-50 text-emerald-600",
+        }
+        return (
+          <span className={`inline-flex rounded-full px-2 py-0.5 text-[11px] font-semibold ${colorMap[val] || "bg-gray-100 text-gray-600"}`}>
+            {val}
+          </span>
+        )
+      },
     },
     { key: "year", label: "연도", className: "w-16", hideOnMobile: true },
     {
@@ -233,7 +244,7 @@ export default function AdminClassicsPage() {
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label>분류</Label>
-                <Select value={formCategory} onValueChange={(val) => setFormCategory(val as Classic100["category"])}>
+                <Select value={formCategory} onValueChange={(val) => setFormCategory(val)}>
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>

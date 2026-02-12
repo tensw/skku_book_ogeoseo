@@ -180,7 +180,7 @@ export default function AdminReviewsPage() {
 
   return (
     <div className="space-y-6">
-      <PageHeader title="독서리뷰 관리" />
+      <PageHeader title="서평 관리" />
 
       {/* 데이터 추출 버튼들 */}
       <div className="px-5 sm:px-8">

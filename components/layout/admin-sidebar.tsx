@@ -23,7 +23,7 @@ import {
 const adminMenuItems = [
   { href: "/admin", label: "대시보드", icon: LayoutDashboard },
   { href: "/admin/notices", label: "공지사항 관리", icon: Megaphone },
-  { href: "/admin/reviews", label: "리뷰 관리", icon: PenTool },
+  { href: "/admin/reviews", label: "서평 관리", icon: PenTool },
   { href: "/admin/classics", label: "고전100선 관리", icon: BookOpen },
   { href: "/admin/programs", label: "프로그램 관리", icon: Calendar },
 ]

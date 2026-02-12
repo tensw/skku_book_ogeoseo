@@ -12,7 +12,7 @@ const stats = [
     textColor: "text-blue-600",
   },
   {
-    label: "독서리뷰",
+    label: "서평",
     count: reviews.length,
     icon: PenTool,
     bgColor: "bg-green-50",

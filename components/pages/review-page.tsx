@@ -100,13 +100,36 @@ const steps = [
 ]
 
 const availableBooks = [
-  { id: 1, title: "아무튼, 메모", author: "김신회", cover: "https://picsum.photos/seed/rev1/100/140" },
-  { id: 2, title: "사피엔스: 인류의 역사", author: "유발 하라리", cover: "https://picsum.photos/seed/rev2/100/140" },
-  { id: 3, title: "아주 작은 습관의 힘", author: "제임스 클리어", cover: "https://picsum.photos/seed/rev3/100/140" },
-  { id: 4, title: "미드나이트 라이브러리", author: "매트 헤이그", cover: "https://picsum.photos/seed/rev4/100/140" },
-  { id: 5, title: "생각에 관한 생각", author: "대니얼 카너먼", cover: "https://picsum.photos/seed/rev5/100/140" },
-  { id: 6, title: "1984", author: "조지 오웰", cover: "https://picsum.photos/seed/rev6/100/140" },
+  { id: 1, title: "아무튼, 메모", author: "김신회", cover: "https://picsum.photos/seed/rev1/100/140", source: "library" as const },
+  { id: 2, title: "사피엔스: 인류의 역사", author: "유발 하라리", cover: "https://picsum.photos/seed/rev2/100/140", source: "library" as const },
+  { id: 3, title: "아주 작은 습관의 힘", author: "제임스 클리어", cover: "https://picsum.photos/seed/rev3/100/140", source: "library" as const },
+  { id: 4, title: "미드나이트 라이브러리", author: "매트 헤이그", cover: "https://picsum.photos/seed/rev4/100/140", source: "library" as const },
+  { id: 5, title: "생각에 관한 생각", author: "대니얼 카너먼", cover: "https://picsum.photos/seed/rev5/100/140", source: "library" as const },
+  { id: 6, title: "1984", author: "조지 오웰", cover: "https://picsum.photos/seed/rev6/100/140", source: "library" as const },
 ]
+
+/* ── 알라딘 도서 검색 (Mock - 실제 API 연동 시 교체) ── */
+const aladinBooks = [
+  { id: 101, title: "채식주의자", author: "한강", cover: "https://picsum.photos/seed/aladin1/100/140", publisher: "창비", isbn: "9788936434120", source: "aladin" as const },
+  { id: 102, title: "82년생 김지영", author: "조남주", cover: "https://picsum.photos/seed/aladin2/100/140", publisher: "민음사", isbn: "9788937473135", source: "aladin" as const },
+  { id: 103, title: "불편한 편의점", author: "김호연", cover: "https://picsum.photos/seed/aladin3/100/140", publisher: "나무옆의자", isbn: "9791161571188", source: "aladin" as const },
+  { id: 104, title: "달러구트 꿈 백화점", author: "이미예", cover: "https://picsum.photos/seed/aladin4/100/140", publisher: "팩토리나인", isbn: "9791165341909", source: "aladin" as const },
+  { id: 105, title: "파친코", author: "이민진", cover: "https://picsum.photos/seed/aladin5/100/140", publisher: "인플루엔셜", isbn: "9791189092467", source: "aladin" as const },
+  { id: 106, title: "총, 균, 쇠", author: "재레드 다이아몬드", cover: "https://picsum.photos/seed/aladin6/100/140", publisher: "문학사상", isbn: "9788970128986", source: "aladin" as const },
+  { id: 107, title: "정의란 무엇인가", author: "마이클 샌델", cover: "https://picsum.photos/seed/aladin7/100/140", publisher: "김영사", isbn: "9788934939849", source: "aladin" as const },
+  { id: 108, title: "코스모스", author: "칼 세이건", cover: "https://picsum.photos/seed/aladin8/100/140", publisher: "사이언스북스", isbn: "9788983711892", source: "aladin" as const },
+]
+
+type BookSource = "library" | "aladin"
+type BookItem = {
+  id: number
+  title: string
+  author: string
+  cover: string
+  source: BookSource
+  publisher?: string
+  isbn?: string
+}
 
 const badgeOptions: KDCBadgeData[] = [
   { id: "000", label: "총류", icon: <Key size={18} />, earned: true, count: 0, gradient: "linear-gradient(135deg, #064E3B 0%, #0D7349 50%, #042F24 100%)", borderGradient: "linear-gradient(135deg, #34D399, #6EE7B7, #10B981)" },
@@ -279,21 +302,35 @@ function ReviewList({ onWrite }: { onWrite: () => void }) {
 /* ── Review Writer (stepper form) sub-component ── */
 function ReviewWriter({ onBack }: { onBack: () => void }) {
   const [currentStep, setCurrentStep] = useState(1)
-  const [selectedBook, setSelectedBook] = useState<number | null>(null)
+  const [selectedBook, setSelectedBook] = useState<BookItem | null>(null)
   const [selectedBadge, setSelectedBadge] = useState<string | null>(null)
   const [reviewText, setReviewText] = useState("")
   const [showStamp, setShowStamp] = useState(false)
   const [searchQuery, setSearchQuery] = useState("")
   const [rating, setRating] = useState(0)
+  const [bookSearchTab, setBookSearchTab] = useState<"library" | "aladin">("library")
+  const [isSearching, setIsSearching] = useState(false)
 
   const charCount = reviewText.length
   const isReviewValid = charCount >= 100
 
-  const filteredBooks = availableBooks.filter(
+  // 도서관 소장 도서 검색
+  const filteredLibraryBooks: BookItem[] = availableBooks.filter(
     (b) =>
       b.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       b.author.toLowerCase().includes(searchQuery.toLowerCase())
   )
+
+  // 알라딘 도서 검색 (Mock - 실제로는 API 호출)
+  const filteredAladinBooks: BookItem[] = searchQuery.length >= 2
+    ? aladinBooks.filter(
+        (b) =>
+          b.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          b.author.toLowerCase().includes(searchQuery.toLowerCase())
+      )
+    : []
+
+  const currentBooks = bookSearchTab === "library" ? filteredLibraryBooks : filteredAladinBooks
 
   const handleNext = useCallback(() => {
     if (currentStep === 3 && isReviewValid) {
@@ -304,7 +341,6 @@ function ReviewWriter({ onBack }: { onBack: () => void }) {
     }
   }, [currentStep, isReviewValid])
 
-  const selectedBookData = availableBooks.find((b) => b.id === selectedBook)
   const selectedBadgeData = badgeOptions.find((b) => b.id === selectedBadge)
 
   return (
@@ -376,24 +412,68 @@ function ReviewWriter({ onBack }: { onBack: () => void }) {
         {/* Step 1: Select Book */}
         {currentStep === 1 && (
           <div className="animate-fade-in-up">
+            {/* 도서 검색 탭 (도서관/알라딘) */}
+            <div className="mb-4 flex gap-2">
+              <button
+                onClick={() => setBookSearchTab("library")}
+                className={cn(
+                  "flex-1 rounded-xl py-2 text-xs font-medium transition-all",
+                  bookSearchTab === "library"
+                    ? "bg-primary text-primary-foreground shadow-sm"
+                    : "bg-muted text-muted-foreground hover:bg-muted/80"
+                )}
+              >
+                도서관 소장
+              </button>
+              <button
+                onClick={() => setBookSearchTab("aladin")}
+                className={cn(
+                  "flex-1 rounded-xl py-2 text-xs font-medium transition-all",
+                  bookSearchTab === "aladin"
+                    ? "bg-[#7C3AED] text-white shadow-sm"
+                    : "bg-muted text-muted-foreground hover:bg-muted/80"
+                )}
+              >
+                알라딘 검색
+              </button>
+            </div>
+
+            {/* 검색 입력 */}
             <div className="mb-4 flex items-center gap-2 rounded-2xl border border-border bg-card px-3 py-2.5 shadow-sm">
               <Search size={16} className="text-muted-foreground" />
               <input
                 type="text"
-                placeholder="도서 검색..."
+                placeholder={bookSearchTab === "library" ? "도서관 소장 도서 검색..." : "알라딘에서 도서 검색 (2글자 이상)..."}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="flex-1 bg-transparent text-sm text-foreground outline-none placeholder:text-muted-foreground"
               />
             </div>
+
+            {/* 알라딘 탭 안내 */}
+            {bookSearchTab === "aladin" && searchQuery.length < 2 && (
+              <div className="mb-4 rounded-xl bg-[#7C3AED]/10 p-3 text-center">
+                <p className="text-xs text-[#7C3AED]">
+                  도서관에 없는 책도 검색할 수 있어요!<br />
+                  2글자 이상 입력하면 알라딘에서 검색됩니다.
+                </p>
+              </div>
+            )}
+
+            {/* 도서 목록 */}
             <div className="flex flex-col gap-2">
-              {filteredBooks.map((book) => (
+              {currentBooks.length === 0 && searchQuery.length >= 2 && (
+                <div className="rounded-xl bg-muted/50 py-8 text-center">
+                  <p className="text-sm text-muted-foreground">검색 결과가 없습니다</p>
+                </div>
+              )}
+              {currentBooks.map((book) => (
                 <button
-                  key={book.id}
-                  onClick={() => setSelectedBook(book.id)}
+                  key={`${book.source}-${book.id}`}
+                  onClick={() => setSelectedBook(book)}
                   className={cn(
                     "flex items-center gap-3 rounded-2xl border p-3 text-left transition-all",
-                    selectedBook === book.id
+                    selectedBook?.id === book.id && selectedBook?.source === book.source
                       ? "border-primary bg-primary/5 shadow-md"
                       : "border-border bg-card hover:bg-muted/50"
                   )}
@@ -402,10 +482,23 @@ function ReviewWriter({ onBack }: { onBack: () => void }) {
                     <img src={book.cover || "/placeholder.svg"} alt={book.title} className="h-full w-full object-cover" crossOrigin="anonymous" />
                   </div>
                   <div className="flex-1">
-                    <p className="text-sm font-semibold text-foreground">{book.title}</p>
+                    <div className="flex items-center gap-2">
+                      <p className="text-sm font-semibold text-foreground">{book.title}</p>
+                      <span className={cn(
+                        "rounded-full px-1.5 py-0.5 text-[9px] font-medium",
+                        book.source === "library"
+                          ? "bg-emerald/20 text-emerald-700"
+                          : "bg-[#7C3AED]/15 text-[#7C3AED]"
+                      )}>
+                        {book.source === "library" ? "소장" : "알라딘"}
+                      </span>
+                    </div>
                     <p className="text-xs text-muted-foreground">{book.author}</p>
+                    {book.publisher && (
+                      <p className="text-[10px] text-muted-foreground/70">{book.publisher}</p>
+                    )}
                   </div>
-                  {selectedBook === book.id && (
+                  {selectedBook?.id === book.id && selectedBook?.source === book.source && (
                     <div className="flex h-5 w-5 items-center justify-center rounded-full bg-primary">
                       <Check size={12} className="text-primary-foreground" />
                     </div>
@@ -442,13 +535,23 @@ function ReviewWriter({ onBack }: { onBack: () => void }) {
         {/* Step 3: Write Review */}
         {currentStep === 3 && (
           <div className="animate-fade-in-up">
-            {selectedBookData && selectedBadgeData && (
+            {selectedBook && selectedBadgeData && (
               <div className="mb-4 flex items-center gap-3 rounded-2xl border border-border bg-muted/50 p-3">
                 <div className="h-12 w-8 flex-shrink-0 overflow-hidden rounded-lg">
-                  <img src={selectedBookData.cover || "/placeholder.svg"} alt={selectedBookData.title} className="h-full w-full object-cover" crossOrigin="anonymous" />
+                  <img src={selectedBook.cover || "/placeholder.svg"} alt={selectedBook.title} className="h-full w-full object-cover" crossOrigin="anonymous" />
                 </div>
                 <div className="flex-1">
-                  <p className="text-xs font-semibold text-foreground">{selectedBookData.title}</p>
+                  <div className="flex items-center gap-2">
+                    <p className="text-xs font-semibold text-foreground">{selectedBook.title}</p>
+                    <span className={cn(
+                      "rounded-full px-1.5 py-0.5 text-[9px] font-medium",
+                      selectedBook.source === "library"
+                        ? "bg-emerald/20 text-emerald-700"
+                        : "bg-[#7C3AED]/15 text-[#7C3AED]"
+                    )}>
+                      {selectedBook.source === "library" ? "소장" : "알라딘"}
+                    </span>
+                  </div>
                   <p className="text-[10px] text-muted-foreground">뱃지: {selectedBadgeData.label} ({selectedBadgeData.id})</p>
                 </div>
               </div>
@@ -532,7 +635,7 @@ function ReviewWriter({ onBack }: { onBack: () => void }) {
             }
             className={cn(
               "flex w-full items-center justify-center gap-2 rounded-2xl py-3 text-sm font-medium transition-all",
-              (currentStep === 1 && selectedBook) ||
+              (currentStep === 1 && selectedBook !== null) ||
                 (currentStep === 2 && selectedBadge) ||
                 (currentStep === 3 && isReviewValid)
                 ? "bg-primary text-primary-foreground shadow-md hover:shadow-lg hover:brightness-110"

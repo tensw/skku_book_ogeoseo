@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from "react"
 import { useRouter } from "next/navigation"
-import { ArrowLeft, FileText, FileSpreadsheet, Calendar, Check, Trash2, Download } from "lucide-react"
+import { ArrowLeft, FileText, FileSpreadsheet, Calendar, Check, Trash2, Download, Users, Award, List } from "lucide-react"
 import { useAuth } from "@/lib/auth-context"
 import { reviews } from "@/lib/mock-data"
 
@@ -12,6 +12,9 @@ const programOptions = [
   { id: "dokto", label: "독토 프로그램" },
   { id: "classic100", label: "고전100선" },
 ]
+
+// 학생 데이터 출력 스타일 옵션
+type OutputStyle = "certificate" | "list"
 
 // Mock data for export - simulating users with multiple reviews
 const mockExportData = [
@@ -37,7 +40,7 @@ const mockExportData = [
   ]},
 ]
 
-type ExportType = "pdf" | "excel" | null
+type ExportType = "pdf" | "excel" | "student" | null
 
 interface ExportFilters {
   startDate: string
@@ -51,6 +54,7 @@ export default function ReviewExport() {
   const { isAdmin } = useAuth()
   const [step, setStep] = useState(1)
   const [exportType, setExportType] = useState<ExportType>(null)
+  const [outputStyle, setOutputStyle] = useState<OutputStyle>("certificate")
   const [filters, setFilters] = useState<ExportFilters>({
     startDate: "2026-01-01",
     endDate: "2026-02-10",
@@ -80,15 +84,21 @@ export default function ReviewExport() {
     return mockExportData.filter(user => user.reviewCount >= filters.minReviewCount)
   }, [filters.minReviewCount])
 
-  // Initialize selected items when entering step 3
+  // Initialize selected items when entering preview step
   const initializeSelection = () => {
     const allIds = new Set(filteredData.map(user => user.id))
     setSelectedItems(allIds)
     setSelectAll(true)
   }
 
+  // Get the final step number based on export type
+  const getFinalStep = () => exportType === "student" ? 4 : 3
+  const getFilterStep = () => exportType === "student" ? 3 : 2
+  const getPreviewStep = () => exportType === "student" ? 4 : 3
+
   const handleNext = () => {
-    if (step === 2) {
+    const filterStep = getFilterStep()
+    if (step === filterStep) {
       initializeSelection()
     }
     setStep(step + 1)
@@ -127,8 +137,11 @@ export default function ReviewExport() {
     const selectedData = filteredData.filter(user => selectedItems.has(user.id))
     if (exportType === "pdf") {
       alert(`PDF 생성 완료!\n\n선택된 대상자: ${selectedData.length}명\n총 독후감: ${selectedData.reduce((acc, u) => acc + u.reviewCount, 0)}편`)
-    } else {
+    } else if (exportType === "excel") {
       alert(`엑셀 다운로드 완료!\n\n선택된 대상자: ${selectedData.length}명\n총 독후감: ${selectedData.reduce((acc, u) => acc + u.reviewCount, 0)}편`)
+    } else if (exportType === "student") {
+      const styleLabel = outputStyle === "certificate" ? "독서인증서" : "독서목록"
+      alert(`학생 데이터 PDF 다운로드 완료!\n\n출력 스타일: ${styleLabel}\n선택된 학생: ${selectedData.length}명\n기간: ${filters.startDate} ~ ${filters.endDate}`)
     }
     router.push("/reviews")
   }
@@ -158,11 +171,16 @@ export default function ReviewExport() {
       {/* Progress Steps */}
       <div className="px-5 sm:px-8">
         <div className="flex items-center justify-between">
-          {[
+          {(exportType === "student" ? [
+            { num: 1, label: "추출 유형" },
+            { num: 2, label: "출력 스타일" },
+            { num: 3, label: "필터 설정" },
+            { num: 4, label: "미리보기" },
+          ] : [
             { num: 1, label: "추출 유형" },
             { num: 2, label: "필터 설정" },
             { num: 3, label: "미리보기" },
-          ].map((s, i) => (
+          ]).map((s, i, arr) => (
             <div key={s.num} className="flex items-center">
               <div className="flex flex-col items-center">
                 <div
@@ -178,8 +196,8 @@ export default function ReviewExport() {
                   {s.label}
                 </span>
               </div>
-              {i < 2 && (
-                <div className={`mx-2 h-0.5 w-12 sm:w-20 ${step > s.num ? "bg-amber-500" : "bg-muted"}`} />
+              {i < arr.length - 1 && (
+                <div className={`mx-2 h-0.5 w-8 sm:w-16 ${step > s.num ? "bg-amber-500" : "bg-muted"}`} />
               )}
             </div>
           ))}
@@ -192,7 +210,7 @@ export default function ReviewExport() {
         {step === 1 && (
           <div className="flex flex-col gap-4">
             <h2 className="text-base font-semibold text-foreground">추출 유형을 선택하세요</h2>
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
               <button
                 onClick={() => setExportType("pdf")}
                 className={`flex flex-col items-center gap-3 rounded-2xl border-2 p-6 transition-all ${
@@ -229,12 +247,81 @@ export default function ReviewExport() {
                   <p className="mt-1 text-xs text-muted-foreground">심사 대상 리스트</p>
                 </div>
               </button>
+              <button
+                onClick={() => setExportType("student")}
+                className={`flex flex-col items-center gap-3 rounded-2xl border-2 p-6 transition-all ${
+                  exportType === "student"
+                    ? "border-primary bg-primary/10"
+                    : "border-border bg-card hover:border-primary/50"
+                }`}
+              >
+                <div className={`flex h-16 w-16 items-center justify-center rounded-full ${
+                  exportType === "student" ? "bg-primary text-white" : "bg-muted text-muted-foreground"
+                }`}>
+                  <Users size={32} />
+                </div>
+                <div className="text-center">
+                  <p className="font-semibold text-foreground">학생 데이터</p>
+                  <p className="mt-1 text-xs text-muted-foreground">독서목록/인증서</p>
+                </div>
+              </button>
             </div>
           </div>
         )}
 
-        {/* Step 2: Filter Settings */}
-        {step === 2 && (
+        {/* Step 2: Output Style Selection (학생 데이터 only) */}
+        {step === 2 && exportType === "student" && (
+          <div className="flex flex-col gap-4">
+            <h2 className="text-base font-semibold text-foreground">출력 스타일을 선택하세요</h2>
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              <button
+                onClick={() => setOutputStyle("certificate")}
+                className={`flex flex-col items-start gap-3 rounded-2xl border-2 p-5 text-left transition-all ${
+                  outputStyle === "certificate"
+                    ? "border-primary bg-primary/10"
+                    : "border-border bg-card hover:border-primary/50"
+                }`}
+              >
+                <div className={`flex h-12 w-12 items-center justify-center rounded-full ${
+                  outputStyle === "certificate" ? "bg-primary text-white" : "bg-muted text-muted-foreground"
+                }`}>
+                  <Award size={24} />
+                </div>
+                <div>
+                  <p className="font-semibold text-foreground">독서인증서</p>
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    공식 독서 인증서 형식으로 출력<br />
+                    학교 로고, 학생 정보, 읽은 도서 목록 포함
+                  </p>
+                </div>
+              </button>
+              <button
+                onClick={() => setOutputStyle("list")}
+                className={`flex flex-col items-start gap-3 rounded-2xl border-2 p-5 text-left transition-all ${
+                  outputStyle === "list"
+                    ? "border-primary bg-primary/10"
+                    : "border-border bg-card hover:border-primary/50"
+                }`}
+              >
+                <div className={`flex h-12 w-12 items-center justify-center rounded-full ${
+                  outputStyle === "list" ? "bg-primary text-white" : "bg-muted text-muted-foreground"
+                }`}>
+                  <List size={24} />
+                </div>
+                <div>
+                  <p className="font-semibold text-foreground">독서목록</p>
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    읽은 도서 목록을 표 형식으로 출력<br />
+                    도서명, 저자, 읽은 날짜, 프로그램 정보 포함
+                  </p>
+                </div>
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Step 2/3: Filter Settings */}
+        {((step === 2 && exportType !== "student") || (step === 3 && exportType === "student")) && (
           <div className="flex flex-col gap-5">
             <h2 className="text-base font-semibold text-foreground">필터를 설정하세요</h2>
 
@@ -307,8 +394,8 @@ export default function ReviewExport() {
           </div>
         )}
 
-        {/* Step 3: Preview & Export */}
-        {step === 3 && (
+        {/* Step 3/4: Preview & Export */}
+        {((step === 3 && exportType !== "student") || (step === 4 && exportType === "student")) && (
           <div className="flex flex-col gap-4">
             <div className="flex items-center justify-between">
               <h2 className="text-base font-semibold text-foreground">미리보기 & 추출</h2>
@@ -417,14 +504,16 @@ export default function ReviewExport() {
               이전
             </button>
           )}
-          {step < 3 ? (
+          {step < getPreviewStep() ? (
             <button
               onClick={handleNext}
               disabled={step === 1 && !exportType}
               className={`flex-1 rounded-xl py-3 text-sm font-bold transition-all ${
                 (step === 1 && !exportType)
                   ? "bg-muted text-muted-foreground"
-                  : "bg-amber-500 text-white hover:brightness-110"
+                  : exportType === "student"
+                    ? "bg-primary text-white hover:brightness-110"
+                    : "bg-amber-500 text-white hover:brightness-110"
               }`}
             >
               다음
@@ -436,11 +525,13 @@ export default function ReviewExport() {
               className={`flex flex-1 items-center justify-center gap-2 rounded-xl py-3 text-sm font-bold transition-all ${
                 selectedItems.size === 0
                   ? "bg-muted text-muted-foreground"
-                  : "bg-amber-500 text-white hover:brightness-110"
+                  : exportType === "student"
+                    ? "bg-primary text-white hover:brightness-110"
+                    : "bg-amber-500 text-white hover:brightness-110"
               }`}
             >
               <Download size={16} />
-              {exportType === "pdf" ? "PDF 다운로드" : "엑셀 다운로드"}
+              {exportType === "pdf" ? "PDF 다운로드" : exportType === "excel" ? "엑셀 다운로드" : `PDF 다운로드 (${outputStyle === "certificate" ? "독서인증서" : "독서목록"})`}
             </button>
           )}
         </div>

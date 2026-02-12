@@ -1,7 +1,9 @@
 "use client"
 
 import { useState } from "react"
-import { Plus, Pencil, Trash2, Book, GripVertical, X, ChevronDown, ChevronUp } from "lucide-react"
+import { Plus, Pencil, Trash2, Book, GripVertical, X, ChevronDown, ChevronUp, CalendarIcon } from "lucide-react"
+import { format } from "date-fns"
+import { ko } from "date-fns/locale"
 import { programs as initialPrograms } from "@/lib/mock-data"
 import type { Program } from "@/lib/types"
 import { PageHeader } from "@/components/shared/page-header"
@@ -11,7 +13,10 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
+import { Calendar } from "@/components/ui/calendar"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { usePrograms, type MonthlyBook } from "@/lib/program-context"
+import { cn } from "@/lib/utils"
 import {
   Select,
   SelectContent,
@@ -52,10 +57,10 @@ export default function AdminProgramsPage() {
 
   const [formTitle, setFormTitle] = useState("")
   const [formDescription, setFormDescription] = useState("")
-  const [formDate, setFormDate] = useState("")
+  const [formStartDate, setFormStartDate] = useState<Date | undefined>(undefined)
+  const [formEndDate, setFormEndDate] = useState<Date | undefined>(undefined)
   const [formMaxParticipants, setFormMaxParticipants] = useState("")
   const [formStatus, setFormStatus] = useState<Program["status"]>("upcoming")
-  const [formCategory, setFormCategory] = useState("")
 
   // 이달의 책 관련 상태
   const {
@@ -93,10 +98,10 @@ export default function AdminProgramsPage() {
     setEditingProgram(null)
     setFormTitle("")
     setFormDescription("")
-    setFormDate("")
+    setFormStartDate(undefined)
+    setFormEndDate(undefined)
     setFormMaxParticipants("")
     setFormStatus("upcoming")
-    setFormCategory("")
     setDialogOpen(true)
   }
 
@@ -104,15 +109,27 @@ export default function AdminProgramsPage() {
     setEditingProgram(program)
     setFormTitle(program.title)
     setFormDescription(program.description)
-    setFormDate(program.date)
+    // Parse date string to Date objects (format: "2026-03-02 ~ 2026-06-20")
+    const dateParts = program.date.split(" ~ ")
+    if (dateParts.length === 2) {
+      setFormStartDate(new Date(dateParts[0]))
+      setFormEndDate(new Date(dateParts[1]))
+    } else {
+      setFormStartDate(undefined)
+      setFormEndDate(undefined)
+    }
     setFormMaxParticipants(String(program.maxParticipants))
     setFormStatus(program.status)
-    setFormCategory(program.category)
     setDialogOpen(true)
   }
 
   function handleSubmit() {
     if (!formTitle.trim()) return
+
+    // Format date string
+    const dateStr = formStartDate && formEndDate
+      ? `${format(formStartDate, "yyyy-MM-dd")} ~ ${format(formEndDate, "yyyy-MM-dd")}`
+      : ""
 
     if (editingProgram) {
       setProgramList((prev) =>
@@ -122,10 +139,9 @@ export default function AdminProgramsPage() {
                 ...p,
                 title: formTitle,
                 description: formDescription,
-                date: formDate,
+                date: dateStr,
                 maxParticipants: Number(formMaxParticipants) || p.maxParticipants,
                 status: formStatus,
-                category: formCategory,
               }
             : p
         )
@@ -135,11 +151,11 @@ export default function AdminProgramsPage() {
         id: Math.max(0, ...programList.map((p) => p.id)) + 1,
         title: formTitle,
         description: formDescription,
-        date: formDate,
+        date: dateStr,
         status: formStatus,
         participants: 0,
         maxParticipants: Number(formMaxParticipants) || 100,
-        category: formCategory,
+        category: "",
       }
       setProgramList((prev) => [newProgram, ...prev])
     }
@@ -475,14 +491,60 @@ export default function AdminProgramsPage() {
                 rows={3}
               />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="program-date">날짜</Label>
-              <Input
-                id="program-date"
-                value={formDate}
-                onChange={(e) => setFormDate(e.target.value)}
-                placeholder="2026-03-02 ~ 2026-06-20"
-              />
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>시작일</Label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className={cn(
+                        "w-full justify-start text-left font-normal",
+                        !formStartDate && "text-muted-foreground"
+                      )}
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {formStartDate ? format(formStartDate, "yyyy-MM-dd", { locale: ko }) : "날짜 선택"}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={formStartDate}
+                      onSelect={setFormStartDate}
+                      locale={ko}
+                      initialFocus
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
+              <div className="space-y-2">
+                <Label>종료일</Label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className={cn(
+                        "w-full justify-start text-left font-normal",
+                        !formEndDate && "text-muted-foreground"
+                      )}
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {formEndDate ? format(formEndDate, "yyyy-MM-dd", { locale: ko }) : "날짜 선택"}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={formEndDate}
+                      onSelect={setFormEndDate}
+                      locale={ko}
+                      disabled={(date) => formStartDate ? date < formStartDate : false}
+                      initialFocus
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
@@ -510,15 +572,6 @@ export default function AdminProgramsPage() {
                   </SelectContent>
                 </Select>
               </div>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="program-category">카테고리</Label>
-              <Input
-                id="program-category"
-                value={formCategory}
-                onChange={(e) => setFormCategory(e.target.value)}
-                placeholder="자율독서, 멘토링, 공모전 등"
-              />
             </div>
           </div>
           <DialogFooter>

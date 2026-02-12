@@ -187,7 +187,7 @@ export default function AdminClassicsPage() {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="고전100선 관리"
+        title="추천도서 관리"
         action={
           <Button onClick={openCreate} size="sm">
             <Plus size={16} />
@@ -210,7 +210,7 @@ export default function AdminClassicsPage() {
           <DialogHeader>
             <DialogTitle>{editingClassic ? "도서 수정" : "도서 등록"}</DialogTitle>
             <DialogDescription>
-              {editingClassic ? "고전100선 도서 정보를 수정합니다." : "고전100선에 새 도서를 등록합니다."}
+              {editingClassic ? "추천도서 도서 정보를 수정합니다." : "추천도서에 새 도서를 등록합니다."}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">

@@ -168,7 +168,6 @@ export function GNB() {
               <div className="mb-4 rounded-xl bg-amber-50 p-4 text-xs">
                 <p className="mb-2 font-semibold text-amber-800">테스트 계정</p>
                 <div className="space-y-1 text-amber-700">
-                  <p><span className="font-medium">관리자:</span> admin / admin123</p>
                   <p><span className="font-medium">학생:</span> student / student123</p>
                 </div>
               </div>

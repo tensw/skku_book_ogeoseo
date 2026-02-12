@@ -23,13 +23,15 @@ export interface BookReview {
   program?: string
 }
 
+export type BookCategory = '총류' | '철학' | '종교' | '사회과학' | '기술과학' | '예술' | '언어' | '문학' | '역사'
+
 export interface Classic100 {
   id: number
   title: string
   author: string
   publisher: string
   year: number
-  category: '문학·예술' | '인문·사회' | '자연과학'
+  category: BookCategory | string
   description: string
   cover: string
   isbn?: string

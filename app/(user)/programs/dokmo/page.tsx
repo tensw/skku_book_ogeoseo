@@ -1,10 +1,8 @@
 "use client"
 
 import { useState, useMemo } from "react"
-import Link from "next/link"
-import { ChevronDown, ChevronLeft, ChevronRight, Clock, MapPin, Users, BookOpen, X, Calendar, Settings, Book } from "lucide-react"
+import { ChevronDown, ChevronLeft, ChevronRight, Clock, MapPin, Users, BookOpen, X, Calendar, Book } from "lucide-react"
 import { cn } from "@/lib/utils"
-import { useAuth } from "@/lib/auth-context"
 import { usePrograms, type MonthlyBook } from "@/lib/program-context"
 
 type GroupType = "all" | "yeomyeong" | "yunseul" | "dalbit"
@@ -105,7 +103,6 @@ const defaultBook: MonthlyBook = {
 }
 
 export default function Dokmo() {
-  const { isAdmin } = useAuth()
   const { getWeeklyBookAssignment, monthlyBooks } = usePrograms()
   const [selectedGroup, setSelectedGroup] = useState<GroupType>("all")
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
@@ -208,22 +205,6 @@ export default function Dokmo() {
             매주 새로운 책을 만나보세요!
           </p>
         </div>
-
-        {/* 관리자 안내 */}
-        {isAdmin && (
-          <Link
-            href="/admin/programs"
-            className="mt-3 flex items-center justify-between rounded-xl border border-amber-200 bg-amber-50 p-3 transition-colors hover:bg-amber-100"
-          >
-            <div className="flex items-center gap-2">
-              <Settings size={14} className="text-amber-600" />
-              <span className="text-xs font-medium text-amber-700">
-                이달의 책은 관리자 페이지에서 수정할 수 있습니다
-              </span>
-            </div>
-            <ChevronRight size={14} className="text-amber-600" />
-          </Link>
-        )}
 
         {/* 이달의 책 미리보기 */}
         {monthlyBooks.length > 0 && (

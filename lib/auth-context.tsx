@@ -22,8 +22,6 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
 // 테스트용 계정
 const TEST_ACCOUNTS = {
-  // 관리자 계정: admin / admin123
-  admin: { id: "admin", name: "관리자", role: "admin" as UserRole, password: "admin123" },
   // 학생 계정: student / student123
   student: { id: "student", name: "홍길동", role: "student" as UserRole, password: "student123" },
 }
@@ -44,13 +42,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [])
 
   const login = (id: string, password: string): boolean => {
-    // 관리자 계정 확인
-    if (id === TEST_ACCOUNTS.admin.id && password === TEST_ACCOUNTS.admin.password) {
-      const userData = { id: TEST_ACCOUNTS.admin.id, name: TEST_ACCOUNTS.admin.name, role: TEST_ACCOUNTS.admin.role }
-      setUser(userData)
-      localStorage.setItem("ogeoseo_user", JSON.stringify(userData))
-      return true
-    }
     // 학생 계정 확인
     if (id === TEST_ACCOUNTS.student.id && password === TEST_ACCOUNTS.student.password) {
       const userData = { id: TEST_ACCOUNTS.student.id, name: TEST_ACCOUNTS.student.name, role: TEST_ACCOUNTS.student.role }

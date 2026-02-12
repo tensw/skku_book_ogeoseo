@@ -11,6 +11,8 @@ import {
   Calendar,
   Menu,
   ArrowLeft,
+  MessageCircle,
+  Users,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import {
@@ -23,9 +25,11 @@ import {
 const adminMenuItems = [
   { href: "/admin", label: "대시보드", icon: LayoutDashboard },
   { href: "/admin/notices", label: "공지사항 관리", icon: Megaphone },
-  { href: "/admin/reviews", label: "리뷰 관리", icon: PenTool },
-  { href: "/admin/classics", label: "고전100선 관리", icon: BookOpen },
+  { href: "/admin/reviews", label: "서평 관리", icon: PenTool },
+  { href: "/admin/classics", label: "추천도서 관리", icon: BookOpen },
   { href: "/admin/programs", label: "프로그램 관리", icon: Calendar },
+  { href: "/admin/talk", label: "톡톡 관리", icon: MessageCircle },
+  { href: "/admin/users", label: "이용자 관리", icon: Users },
 ]
 
 function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {

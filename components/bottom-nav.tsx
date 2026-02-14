@@ -19,8 +19,8 @@ export function BottomNav({
   onTabChange: (tab: string) => void
 }) {
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-card/95 backdrop-blur-xl">
-      <div className="mx-auto flex items-center justify-around py-2 sm:py-3 lg:max-w-3xl">
+    <nav className="fixed bottom-0 inset-x-0 z-50 bg-white border-t border-[#E8E8E8]">
+      <div className="flex justify-around h-[56px] max-w-md mx-auto">
         {navItems.map((item) => {
           const Icon = item.icon
           const isActive = activeTab === item.id
@@ -28,20 +28,18 @@ export function BottomNav({
             <button
               key={item.id}
               onClick={() => onTabChange(item.id)}
-              className={cn(
-                "relative flex flex-col items-center gap-0.5 px-3 py-1.5 transition-all",
-                isActive
-                  ? item.activeColor
-                  : "text-muted-foreground hover:text-foreground"
-              )}
+              className="flex flex-col items-center justify-center gap-0.5 flex-1"
               aria-label={item.label}
               aria-current={isActive ? "page" : undefined}
             >
-              {isActive && (
-                <span className="absolute -top-2 h-0.5 w-6 rounded-full bg-current" />
-              )}
-              <Icon size={20} strokeWidth={isActive ? 2.5 : 1.5} />
-              <span className="text-[10px] font-medium">{item.label}</span>
+              <Icon className={cn(
+                "w-[22px] h-[22px]",
+                isActive ? "text-[#1E1E1E]" : "text-[#A0A0A0]"
+              )} strokeWidth={isActive ? 2.5 : 1.5} />
+              <span className={cn(
+                "text-[10px]",
+                isActive ? "text-[#1E1E1E] font-medium" : "text-[#A0A0A0]"
+              )}>{item.label}</span>
             </button>
           )
         })}

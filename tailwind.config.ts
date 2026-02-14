@@ -11,7 +11,7 @@ const config: Config = {
   theme: {
     extend: {
       fontFamily: {
-        sans: ['var(--font-inter)', 'system-ui', 'sans-serif'],
+        sans: ['"Spoqa Han Sans Neo"', 'var(--font-inter)', 'system-ui', 'sans-serif'],
         serif: ['var(--font-playfair)', 'Georgia', 'serif'],
       },
       colors: {
@@ -52,6 +52,17 @@ const config: Config = {
         emerald: 'hsl(var(--emerald))',
         tangerine: 'hsl(var(--tangerine))',
         mint: 'hsl(var(--mint))',
+        /* 네이버 모바일 시맨틱 색상 */
+        page: '#F5F6F8',
+        surface: '#FFFFFF',
+        divider: 'hsl(var(--divider))',
+        'text-primary': '#1E1E1E',
+        'text-secondary': '#787878',
+        'text-tertiary': '#A0A0A0',
+        'border-light': '#E8E8E8',
+        badge: '#FF3B30',
+        link: '#4A89DC',
+        urgent: '#FF6600',
         chart: {
           '1': 'hsl(var(--chart-1))',
           '2': 'hsl(var(--chart-2))',

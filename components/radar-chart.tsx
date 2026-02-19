@@ -55,12 +55,12 @@ export function KDCRadarChart({ data }: { data: RadarDataPoint[] }) {
     <svg viewBox={`0 0 ${size} ${size}`} className="h-full w-full">
       <defs>
         <linearGradient id="radarFill" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="#064E3B" stopOpacity="0.25" />
-          <stop offset="100%" stopColor="#059669" stopOpacity="0.1" />
+          <stop offset="0%" stopColor="hsl(var(--brand-mid))" stopOpacity="0.25" />
+          <stop offset="100%" stopColor="hsl(var(--brand-light))" stopOpacity="0.1" />
         </linearGradient>
         <linearGradient id="radarStroke" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="#064E3B" />
-          <stop offset="100%" stopColor="#059669" />
+          <stop offset="0%" stopColor="hsl(var(--brand-mid))" />
+          <stop offset="100%" stopColor="hsl(var(--brand-light))" />
         </linearGradient>
       </defs>
 
@@ -108,7 +108,7 @@ export function KDCRadarChart({ data }: { data: RadarDataPoint[] }) {
             cx={p.x}
             cy={p.y}
             r="3.5"
-            fill="#064E3B"
+            fill="hsl(var(--brand-mid))"
             stroke="hsl(var(--card))"
             strokeWidth="2"
           />

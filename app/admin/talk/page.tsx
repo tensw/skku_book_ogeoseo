@@ -69,7 +69,7 @@ const mockTalkPosts = [
     authorType: "professor",
     department: "경영학과",
     avatar: "https://picsum.photos/seed/user4/80/80",
-    content: "이번 주 독모 도서 '코스모스' 읽으신 분들, 3장에서 다루는 우주의 기원에 대해 어떻게 생각하시나요?",
+    content: "이번 주 번독 도서 '코스모스' 읽으신 분들, 3장에서 다루는 우주의 기원에 대해 어떻게 생각하시나요?",
     time: "1일 전",
     likes: 67,
     comments: 23,

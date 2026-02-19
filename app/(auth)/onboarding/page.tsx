@@ -95,69 +95,85 @@ const readingStyles = [
   { id: "both", label: "상관없음", icon: BookOpen, description: "둘 다 좋아요!", emoji: "✨" },
 ]
 
-const readingFrequencies = [
-  { id: "heavy", label: "한 달에 3권 이상", emoji: "📚", description: "열정적인 독서가" },
-  { id: "medium", label: "한 달에 1권 이상", emoji: "📖", description: "꾸준한 독서가" },
-  { id: "light", label: "1년에 1~5권", emoji: "📕", description: "가끔 읽는 편" },
-  { id: "unknown", label: "잘 모르겠어요", emoji: "🤔", description: "이제 시작해볼게요" },
-]
-
-// 완료 메시지 컴포넌트
-function CompletionMessage({ onComplete }: { onComplete: () => void }) {
-  const message = "이제 자유롭게 오거서를 탐험해보세요!"
-  const [visibleChars, setVisibleChars] = useState(0)
-  const [showMessage, setShowMessage] = useState(true)
-
-  useEffect(() => {
-    if (visibleChars < message.length) {
-      const timer = setTimeout(() => {
-        setVisibleChars(prev => prev + 1)
-      }, 80)
-      return () => clearTimeout(timer)
-    } else {
-      // 메시지 완료 후 2초 대기
-      const timer = setTimeout(() => {
-        setShowMessage(false)
-        setTimeout(onComplete, 500)
-      }, 2000)
-      return () => clearTimeout(timer)
-    }
-  }, [visibleChars, message.length, onComplete])
+// 분석 결과 페이지 컴포넌트
+function AnalysisResultPage({
+  nickname,
+  selectedSubcategories,
+  selectedBooks,
+  readingStyle,
+  onComplete,
+}: {
+  nickname: string
+  selectedSubcategories: string[]
+  selectedBooks: number[]
+  readingStyle: string | null
+  onComplete: () => void
+}) {
+  const topInterests = selectedSubcategories.slice(0, 5)
+  const styleLabel = readingStyle === "alone" ? "개인 독서" : readingStyle === "together" ? "함께 독서" : "유연한 독서"
+  const similarCount = Math.floor(Math.random() * 50) + 30
 
   return (
-    <div className={cn(
-      "fixed inset-0 z-50 flex items-center justify-center bg-gradient-to-br from-[#064E3B] via-[#065F46] to-[#047857] transition-opacity duration-500",
-      showMessage ? "opacity-100" : "opacity-0"
-    )}>
-      <div className="text-center px-8">
-        <div className="mb-8">
-          <Sparkles size={64} className="mx-auto text-emerald-300 animate-pulse" />
+    <div className="min-h-screen bg-brand-surface flex flex-col items-center justify-center px-6 py-12">
+      <div className="mx-auto max-w-md w-full">
+        <div className="text-center mb-8">
+          <Sparkles size={48} className="mx-auto text-brand-accent mb-4" />
+          <h1 className="text-2xl font-bold text-gray-900">
+            <span className="text-brand">{nickname || "독서인"}</span>님의
+            <br />독서 취향을 분석했어요!
+          </h1>
         </div>
-        <h2 className="text-3xl font-bold text-white sm:text-4xl">
-          {message.split("").map((char, index) => (
-            <span
-              key={index}
-              className={cn(
-                "inline-block transition-all duration-300",
-                index < visibleChars
-                  ? "opacity-100 translate-y-0"
-                  : "opacity-0 translate-y-4"
-              )}
-              style={{ transitionDelay: `${index * 30}ms` }}
-            >
-              {char === " " ? "\u00A0" : char}
-            </span>
-          ))}
-        </h2>
-        <div className="mt-8 flex justify-center gap-2">
-          {[0, 1, 2].map((i) => (
-            <div
-              key={i}
-              className="h-2 w-2 rounded-full bg-emerald-400 animate-bounce"
-              style={{ animationDelay: `${i * 150}ms` }}
-            />
-          ))}
+
+        {/* 취향 요약 카드 */}
+        <div className="rounded-3xl border-2 border-brand/20 bg-white p-6 shadow-lg">
+          <h3 className="text-sm font-bold text-gray-900 mb-4">나의 독서 프로필</h3>
+
+          <div className="flex flex-col gap-3">
+            {/* 관심 분야 */}
+            <div className="rounded-2xl bg-brand/5 p-4">
+              <p className="text-[10px] font-semibold text-brand mb-2">관심 분야</p>
+              <div className="flex flex-wrap gap-1.5">
+                {topInterests.map((interest) => (
+                  <span key={interest} className="rounded-full bg-brand/10 px-2.5 py-1 text-xs font-medium text-brand">
+                    {interest}
+                  </span>
+                ))}
+                {selectedSubcategories.length > 5 && (
+                  <span className="rounded-full bg-gray-100 px-2.5 py-1 text-xs text-gray-500">
+                    +{selectedSubcategories.length - 5}개
+                  </span>
+                )}
+              </div>
+            </div>
+
+            {/* 선택 도서 수 */}
+            <div className="flex items-center justify-between rounded-2xl bg-brand-accent/5 p-4">
+              <p className="text-[10px] font-semibold text-brand-accent">관심 도서</p>
+              <span className="text-sm font-bold text-brand-accent">{selectedBooks.length}권</span>
+            </div>
+
+            {/* 독서 스타일 */}
+            <div className="flex items-center justify-between rounded-2xl bg-emerald/5 p-4">
+              <p className="text-[10px] font-semibold text-emerald">독서 스타일</p>
+              <span className="text-sm font-bold text-emerald">{styleLabel}</span>
+            </div>
+          </div>
         </div>
+
+        {/* 비슷한 취향 */}
+        <div className="mt-4 rounded-2xl bg-gradient-to-r from-brand/10 to-brand-accent/10 p-4 text-center">
+          <p className="text-sm text-gray-700">
+            비슷한 취향의 <span className="font-bold text-brand">{similarCount}명</span>이 활동 중이에요
+          </p>
+        </div>
+
+        {/* 시작하기 버튼 */}
+        <button
+          onClick={onComplete}
+          className="mt-6 w-full rounded-full bg-gradient-to-r from-brand to-brand-accent py-4 text-base font-bold text-white shadow-lg shadow-brand/30 transition-all hover:shadow-brand/50"
+        >
+          시작하기
+        </button>
       </div>
     </div>
   )
@@ -174,7 +190,6 @@ export default function OnboardingPage() {
   const [selectedSubcategories, setSelectedSubcategories] = useState<string[]>([])
   const [selectedBooks, setSelectedBooks] = useState<number[]>([])
   const [readingStyle, setReadingStyle] = useState<string | null>(null)
-  const [readingFrequency, setReadingFrequency] = useState<string | null>(null)
 
   useEffect(() => {
     const savedNickname = localStorage.getItem("ogeoseo_nickname")
@@ -183,7 +198,7 @@ export default function OnboardingPage() {
     }
   }, [])
 
-  const totalSteps = 4
+  const totalSteps = 3
   const progress = ((step + 1) / totalSteps) * 100
 
   // 대분류 선택 시 세부 분류 전체 선택/해제
@@ -262,7 +277,6 @@ export default function OnboardingPage() {
       subcategories: selectedSubcategories,
       books: selectedBooks,
       readingStyle,
-      readingFrequency,
     }))
     setShowCompletion(true)
   }
@@ -277,27 +291,34 @@ export default function OnboardingPage() {
       case 0: return selectedSubcategories.length > 0
       case 1: return selectedBooks.length >= 1
       case 2: return readingStyle !== null
-      case 3: return readingFrequency !== null
       default: return true
     }
   }
 
   if (showCompletion) {
-    return <CompletionMessage onComplete={() => router.push("/")} />
+    return (
+      <AnalysisResultPage
+        nickname={nickname}
+        selectedSubcategories={selectedSubcategories}
+        selectedBooks={selectedBooks}
+        readingStyle={readingStyle}
+        onComplete={() => router.push("/")}
+      />
+    )
   }
 
   return (
-    <div className="min-h-screen bg-[#FAFBFC]">
+    <div className="min-h-screen bg-brand-surface">
       {/* Header */}
       <header className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-xl border-b border-gray-100 shadow-sm">
         <div className="mx-auto max-w-5xl px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-[#064E3B] to-[#059669]">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-brand to-brand-light">
                 <BookOpen size={20} className="text-white" />
               </div>
               <div>
-                <h1 className="font-serif text-lg font-bold text-gray-900">오거서</h1>
+                <h1 className="text-lg font-bold text-gray-900">오거서</h1>
                 <p className="text-[10px] text-gray-500">맞춤 설정 중...</p>
               </div>
             </div>
@@ -312,7 +333,7 @@ export default function OnboardingPage() {
           {/* Progress bar */}
           <div className="mt-4 h-2 overflow-hidden rounded-full bg-gray-100">
             <div
-              className="h-full rounded-full bg-gradient-to-r from-[#064E3B] to-[#10B981] transition-all duration-500"
+              className="h-full rounded-full bg-gradient-to-r from-brand to-brand-accent transition-all duration-500"
               style={{ width: `${progress}%` }}
             />
           </div>
@@ -330,18 +351,16 @@ export default function OnboardingPage() {
           <h2 className="text-2xl font-bold text-gray-900 sm:text-3xl">
             {step === 0 && (
               <>
-                <span className="text-[#064E3B]">{nickname}</span>님, 관심 분야를 선택해주세요
+                <span className="text-brand">{nickname}</span>님, 관심 분야를 선택해주세요
               </>
             )}
             {step === 1 && "읽고 싶은 책을 골라주세요"}
             {step === 2 && "선호하는 독서 스타일은?"}
-            {step === 3 && "독서는 얼마나 자주 하시나요?"}
           </h2>
           <p className="mt-2 text-gray-500">
             {step === 0 && "대분류를 선택하면 세부 분야가 모두 선택돼요"}
             {step === 1 && "1권 이상 10권 이하로 선택해주세요"}
             {step === 2 && "맞춤 독서 모임을 추천해드릴게요"}
-            {step === 3 && "부담 없이 선택해주세요"}
           </p>
         </div>
 
@@ -359,9 +378,9 @@ export default function OnboardingPage() {
                   className={cn(
                     "overflow-hidden rounded-2xl border-2 transition-all",
                     isFullySelected
-                      ? "border-[#064E3B] bg-[#064E3B]/5 shadow-lg shadow-[#064E3B]/10"
+                      ? "border-brand bg-brand/5 shadow-lg shadow-brand/10"
                       : isPartiallySelected
-                      ? "border-[#10B981] bg-[#10B981]/5"
+                      ? "border-brand-accent bg-brand-accent/5"
                       : "border-gray-200 bg-white hover:border-gray-300"
                   )}
                 >
@@ -373,9 +392,9 @@ export default function OnboardingPage() {
                     <div className={cn(
                       "flex h-12 w-12 items-center justify-center rounded-xl transition-all",
                       isFullySelected
-                        ? "bg-[#064E3B] text-white"
+                        ? "bg-brand text-white"
                         : isPartiallySelected
-                        ? "bg-[#10B981] text-white"
+                        ? "bg-brand-accent text-white"
                         : "bg-gray-100 text-gray-500"
                     )}>
                       <Icon size={24} />
@@ -383,7 +402,7 @@ export default function OnboardingPage() {
                     <div className="flex-1 text-left">
                       <h3 className={cn(
                         "font-bold",
-                        isFullySelected || isPartiallySelected ? "text-[#064E3B]" : "text-gray-900"
+                        isFullySelected || isPartiallySelected ? "text-brand" : "text-gray-900"
                       )}>
                         {category.name}
                       </h3>
@@ -394,9 +413,9 @@ export default function OnboardingPage() {
                     <div className={cn(
                       "flex h-6 w-6 items-center justify-center rounded-full transition-all",
                       isFullySelected
-                        ? "bg-[#064E3B] text-white"
+                        ? "bg-brand text-white"
                         : isPartiallySelected
-                        ? "bg-[#10B981] text-white"
+                        ? "bg-brand-accent text-white"
                         : "bg-gray-200"
                     )}>
                       {(isFullySelected || isPartiallySelected) && <Check size={14} />}
@@ -415,8 +434,8 @@ export default function OnboardingPage() {
                             className={cn(
                               "rounded-full px-3 py-1.5 text-sm font-medium transition-all",
                               isSelected
-                                ? "bg-[#064E3B] text-white shadow-md"
-                                : "bg-white text-gray-600 border border-gray-200 hover:border-[#064E3B] hover:text-[#064E3B]"
+                                ? "bg-brand text-white shadow-md"
+                                : "bg-white text-gray-600 border border-gray-200 hover:border-brand hover:text-brand"
                             )}
                           >
                             {sub}
@@ -435,9 +454,9 @@ export default function OnboardingPage() {
         {step === 1 && (
           <div>
             <div className="mb-6 flex items-center justify-center gap-4">
-              <div className="flex items-center gap-2 rounded-full bg-[#064E3B]/10 px-4 py-2">
-                <span className="text-2xl font-bold text-[#064E3B]">{selectedBooks.length}</span>
-                <span className="text-sm text-[#064E3B]">/ 10권 선택</span>
+              <div className="flex items-center gap-2 rounded-full bg-brand/10 px-4 py-2">
+                <span className="text-2xl font-bold text-brand">{selectedBooks.length}</span>
+                <span className="text-sm text-brand">/ 10권 선택</span>
               </div>
             </div>
             <div className="grid grid-cols-3 gap-4 sm:grid-cols-4 md:grid-cols-6">
@@ -450,7 +469,7 @@ export default function OnboardingPage() {
                     className={cn(
                       "group relative overflow-hidden rounded-2xl transition-all duration-300",
                       isSelected
-                        ? "ring-4 ring-[#064E3B] ring-offset-2 scale-105 shadow-xl"
+                        ? "ring-4 ring-brand ring-offset-2 scale-105 shadow-xl"
                         : "hover:scale-105 hover:shadow-lg"
                     )}
                   >
@@ -466,12 +485,12 @@ export default function OnboardingPage() {
                     <div className={cn(
                       "absolute inset-0 flex items-center justify-center transition-all duration-300",
                       isSelected
-                        ? "bg-[#064E3B]/60"
+                        ? "bg-brand/60"
                         : "bg-black/0 group-hover:bg-black/30"
                     )}>
                       {isSelected && (
                         <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white shadow-lg">
-                          <Check size={24} className="text-[#064E3B]" />
+                          <Check size={24} className="text-brand" />
                         </div>
                       )}
                     </div>
@@ -500,8 +519,8 @@ export default function OnboardingPage() {
                   className={cn(
                     "relative flex flex-col items-center gap-4 rounded-3xl p-6 transition-all duration-300",
                     isSelected
-                      ? "bg-[#064E3B] text-white shadow-xl shadow-[#064E3B]/30 scale-105"
-                      : "bg-white text-gray-700 border-2 border-gray-200 hover:border-[#064E3B] hover:shadow-lg"
+                      ? "bg-brand text-white shadow-xl shadow-brand/30 scale-105"
+                      : "bg-white text-gray-700 border-2 border-gray-200 hover:border-brand hover:shadow-lg"
                   )}
                 >
                   <span className="text-4xl">{style.emoji}</span>
@@ -520,7 +539,7 @@ export default function OnboardingPage() {
                   </div>
                   {isSelected && (
                     <div className="absolute top-4 right-4 flex h-6 w-6 items-center justify-center rounded-full bg-white">
-                      <Check size={14} className="text-[#064E3B]" />
+                      <Check size={14} className="text-brand" />
                     </div>
                   )}
                 </button>
@@ -529,40 +548,6 @@ export default function OnboardingPage() {
           </div>
         )}
 
-        {/* Step 3: Reading Frequency */}
-        {step === 3 && (
-          <div className="mx-auto max-w-xl grid gap-3 sm:grid-cols-2">
-            {readingFrequencies.map((freq) => {
-              const isSelected = readingFrequency === freq.id
-              return (
-                <button
-                  key={freq.id}
-                  onClick={() => setReadingFrequency(freq.id)}
-                  className={cn(
-                    "relative flex items-center gap-4 rounded-2xl p-5 transition-all duration-300",
-                    isSelected
-                      ? "bg-[#064E3B] text-white shadow-xl shadow-[#064E3B]/30 scale-105"
-                      : "bg-white text-gray-700 border-2 border-gray-200 hover:border-[#064E3B] hover:shadow-lg"
-                  )}
-                >
-                  <span className="text-3xl">{freq.emoji}</span>
-                  <div className="flex-1 text-left">
-                    <span className="font-bold">{freq.label}</span>
-                    <p className={cn(
-                      "text-sm",
-                      isSelected ? "text-white/70" : "text-gray-500"
-                    )}>{freq.description}</p>
-                  </div>
-                  {isSelected && (
-                    <div className="flex h-6 w-6 items-center justify-center rounded-full bg-white">
-                      <Check size={14} className="text-[#064E3B]" />
-                    </div>
-                  )}
-                </button>
-              )
-            })}
-          </div>
-        )}
       </main>
 
       {/* Bottom Navigation */}
@@ -587,9 +572,9 @@ export default function OnboardingPage() {
                 className={cn(
                   "h-2 rounded-full transition-all",
                   i === step
-                    ? "w-8 bg-[#064E3B]"
+                    ? "w-8 bg-brand"
                     : i < step
-                    ? "w-2 bg-[#10B981]"
+                    ? "w-2 bg-brand-accent"
                     : "w-2 bg-gray-300"
                 )}
               />
@@ -603,7 +588,7 @@ export default function OnboardingPage() {
               className={cn(
                 "flex items-center gap-2 rounded-full px-6 py-3 text-sm font-bold transition-all",
                 canProceed()
-                  ? "bg-[#064E3B] text-white hover:bg-[#065F46] shadow-lg"
+                  ? "bg-brand text-white hover:bg-brand-dark shadow-lg"
                   : "cursor-not-allowed bg-gray-200 text-gray-400"
               )}
             >
@@ -617,7 +602,7 @@ export default function OnboardingPage() {
               className={cn(
                 "flex items-center gap-2 rounded-full px-6 py-3 text-sm font-bold transition-all",
                 canProceed()
-                  ? "bg-gradient-to-r from-[#064E3B] to-[#10B981] text-white shadow-lg shadow-[#064E3B]/30 hover:shadow-[#064E3B]/50"
+                  ? "bg-gradient-to-r from-brand to-brand-accent text-white shadow-lg shadow-brand/30 hover:shadow-brand/50"
                   : "cursor-not-allowed bg-gray-200 text-gray-400"
               )}
             >

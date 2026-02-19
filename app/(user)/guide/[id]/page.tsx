@@ -57,7 +57,7 @@ export default function GuideDetail({ params }: { params: Promise<{ id: string }
 
         {/* Info */}
         <div className="flex flex-1 flex-col gap-3 text-center sm:text-left">
-          <h1 className="font-serif text-2xl font-bold text-foreground">
+          <h1 className="text-2xl font-bold text-foreground">
             {classic.title}
           </h1>
           <p className="text-sm text-muted-foreground">{classic.author}</p>

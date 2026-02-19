@@ -11,8 +11,7 @@ const config: Config = {
   theme: {
     extend: {
       fontFamily: {
-        sans: ['var(--font-inter)', 'system-ui', 'sans-serif'],
-        serif: ['var(--font-playfair)', 'Georgia', 'serif'],
+        sans: ['var(--font-noto-sans-kr)', 'Noto Sans KR', 'system-ui', 'sans-serif'],
       },
       colors: {
         background: 'hsl(var(--background))',
@@ -52,6 +51,29 @@ const config: Config = {
         emerald: 'hsl(var(--emerald))',
         tangerine: 'hsl(var(--tangerine))',
         mint: 'hsl(var(--mint))',
+        /* Brand semantic tokens */
+        brand: {
+          dark: 'hsl(var(--brand-dark))',
+          DEFAULT: 'hsl(var(--brand-mid))',
+          light: 'hsl(var(--brand-light))',
+          accent: 'hsl(var(--brand-accent))',
+          surface: 'hsl(var(--brand-surface))',
+        },
+        /* External service: Aladin */
+        aladin: 'hsl(var(--aladin))',
+        /* Gold / Stamp reward */
+        gold: {
+          DEFAULT: 'hsl(var(--gold))',
+          dark: 'hsl(var(--gold-dark))',
+          light: 'hsl(var(--gold-light))',
+          copper: 'hsl(var(--gold-copper))',
+        },
+        /* Disabled / unearned states */
+        disabled: {
+          border: 'hsl(var(--disabled-border))',
+          bg: 'hsl(var(--disabled-bg))',
+          'bg-dark': 'hsl(var(--disabled-bg-dark))',
+        },
         chart: {
           '1': 'hsl(var(--chart-1))',
           '2': 'hsl(var(--chart-2))',

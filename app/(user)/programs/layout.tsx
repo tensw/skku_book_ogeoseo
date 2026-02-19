@@ -12,8 +12,7 @@ export default function ProgramsLayout({ children }: { children: React.ReactNode
   // 기본 탭 + 활성화된 커스텀 프로그램
   const programTabs = [
     { href: "/programs", label: "전체", exact: true },
-    { href: "/programs/dokmo", label: "독모" },
-    { href: "/programs/dokto", label: "독토" },
+    { href: "/programs/create", label: "번독 개설" },
     ...customPrograms
       .filter((p) => p.isActive)
       .map((p) => ({

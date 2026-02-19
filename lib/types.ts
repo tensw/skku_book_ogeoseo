@@ -37,15 +37,25 @@ export interface Classic100 {
   isbn?: string
 }
 
-export interface Program {
+export interface Bundok {
   id: number
   title: string
-  description: string
+  book: string
+  bookAuthor: string
+  bookCover: string
+  host: string
+  hostAvatar: string
+  format: "offline" | "online" | "hybrid"
+  location: string
   date: string
-  status: 'upcoming' | 'ongoing' | 'completed'
-  participants: number
-  maxParticipants: number
-  category: string
+  time: string
+  duration: number
+  currentMembers: number
+  maxMembers: number
+  tags: string[]
+  status: "recruiting" | "confirmed" | "completed"
+  aiBooks?: string[]
+  discussionQuestions?: string[]
 }
 
 export interface PaginatedResponse<T> {

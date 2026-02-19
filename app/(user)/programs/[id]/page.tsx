@@ -1,144 +1,282 @@
 "use client"
 
-import { useParams, notFound } from "next/navigation"
-import { Calendar, Info, FileText } from "lucide-react"
-import { usePrograms } from "@/lib/program-context"
+import { useState } from "react"
+import { useParams, useRouter } from "next/navigation"
+import Link from "next/link"
+import {
+  ArrowLeft,
+  Users,
+  Clock,
+  MapPin,
+  Wifi,
+  Monitor,
+  BookOpen,
+  MessageSquare,
+  Sparkles,
+  CheckCircle2,
+  Share2,
+} from "lucide-react"
 import { cn } from "@/lib/utils"
+import { useSharedData } from "@/lib/shared-data-context"
 
-export default function CustomProgramPage() {
+const formatIcons: Record<string, typeof MapPin> = {
+  offline: MapPin,
+  online: Wifi,
+  hybrid: Monitor,
+}
+
+const formatLabels: Record<string, string> = {
+  offline: "오프라인",
+  online: "온라인",
+  hybrid: "하이브리드",
+}
+
+const statusLabels: Record<string, string> = {
+  recruiting: "모집 중",
+  confirmed: "확정",
+  completed: "완료",
+}
+
+const statusColors: Record<string, string> = {
+  recruiting: "bg-primary text-primary-foreground",
+  confirmed: "bg-emerald text-white",
+  completed: "bg-muted text-muted-foreground",
+}
+
+export default function BundokDetailPage() {
   const params = useParams()
-  const { customPrograms } = usePrograms()
+  const router = useRouter()
+  const { bundoks, joinedBundoks, setJoinedBundoks } = useSharedData()
 
-  const programId = params.id as string
-  const program = customPrograms.find((p) => p.id === programId)
+  const bundokId = Number(params.id)
+  const bundok = bundoks.find((b) => b.id === bundokId)
 
-  if (!program) {
+  const [joining, setJoining] = useState(false)
+
+  if (!bundok) {
     return (
       <div className="flex flex-col items-center justify-center py-20 px-5">
         <div className="rounded-full bg-muted p-4 mb-4">
-          <FileText size={32} className="text-muted-foreground" />
+          <BookOpen size={32} className="text-muted-foreground" />
         </div>
-        <h2 className="text-lg font-bold text-foreground">프로그램을 찾을 수 없습니다</h2>
+        <h2 className="text-lg font-bold text-foreground">번독을 찾을 수 없습니다</h2>
         <p className="mt-1 text-sm text-muted-foreground">
-          해당 프로그램이 삭제되었거나 존재하지 않습니다.
+          해당 번독이 삭제되었거나 존재하지 않습니다.
         </p>
+        <Link
+          href="/programs"
+          className="mt-4 rounded-full bg-primary px-5 py-2 text-sm font-semibold text-primary-foreground"
+        >
+          번독 목록으로
+        </Link>
       </div>
     )
   }
 
+  const FormatIcon = formatIcons[bundok.format] || MapPin
+  const isJoined = joinedBundoks.includes(bundok.id)
+  const isFull = bundok.currentMembers >= bundok.maxMembers
+
+  const handleJoin = () => {
+    if (isJoined) {
+      setJoinedBundoks((prev) => prev.filter((id) => id !== bundok.id))
+    } else {
+      setJoining(true)
+      setTimeout(() => {
+        setJoinedBundoks((prev) => [...prev, bundok.id])
+        setJoining(false)
+      }, 500)
+    }
+  }
+
   const formatDate = (dateStr: string) => {
-    const date = new Date(dateStr)
-    return `${date.getFullYear()}년 ${date.getMonth() + 1}월 ${date.getDate()}일`
+    const d = new Date(dateStr)
+    const days = ["일", "월", "화", "수", "목", "금", "토"]
+    return `${d.getMonth() + 1}월 ${d.getDate()}일 (${days[d.getDay()]})`
   }
 
   return (
-    <div className="flex flex-col gap-4 pb-6">
-      {/* Header with Gradient */}
-      <header className="px-5 pt-5 sm:px-8">
-        <div className={cn("relative overflow-hidden rounded-2xl bg-gradient-to-br p-6", program.gradient)}>
-          {/* 배경 큰 텍스트 */}
-          <div className="absolute -right-4 top-1/2 -translate-y-1/2 select-none">
-            <span className="text-[100px] font-black text-white/20 leading-none">
-              {program.accentText}
-            </span>
+    <div className="flex flex-col gap-0 pb-28">
+      {/* Back Button */}
+      <div className="px-5 pt-4 sm:px-8">
+        <button
+          onClick={() => router.back()}
+          className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
+        >
+          <ArrowLeft size={16} />
+          뒤로
+        </button>
+      </div>
+
+      {/* Hero Section */}
+      <section className="mt-3 px-5 sm:px-8">
+        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary/20 via-emerald/10 to-mint/10 p-5">
+          <div className="flex gap-4">
+            {/* Book Cover */}
+            <div className="relative h-36 w-24 flex-shrink-0 overflow-hidden rounded-xl shadow-lg">
+              <img
+                src={bundok.bookCover || "/placeholder.svg"}
+                alt={bundok.book}
+                className="h-full w-full object-cover"
+                crossOrigin="anonymous"
+              />
+            </div>
+
+            {/* Info */}
+            <div className="flex-1 min-w-0">
+              <span className={cn("inline-flex rounded-full px-2 py-0.5 text-[10px] font-bold", statusColors[bundok.status])}>
+                {statusLabels[bundok.status]}
+              </span>
+              <h1 className="mt-1.5 text-lg font-bold text-foreground leading-tight">{bundok.title}</h1>
+              <p className="mt-1 text-xs text-muted-foreground">
+                {bundok.book} · {bundok.bookAuthor}
+              </p>
+              <div className="mt-2 flex flex-wrap gap-1">
+                {bundok.tags.map((tag) => (
+                  <span key={tag} className="rounded-full bg-primary/10 px-2 py-0.5 text-[9px] font-medium text-primary">
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            </div>
           </div>
+        </div>
+      </section>
 
-          {/* 컨텐츠 */}
-          <div className="relative">
-            <h1 className="text-2xl font-bold text-white">{program.name}</h1>
-            <p className="mt-2 text-sm text-white/90 leading-relaxed">
-              {program.description}
-            </p>
+      {/* 모임 정보 */}
+      <section className="mt-4 px-5 sm:px-8">
+        <div className="rounded-2xl border border-border bg-card p-4">
+          <h2 className="text-sm font-bold text-foreground mb-3">모임 정보</h2>
+          <div className="flex flex-col gap-2.5">
+            <div className="flex items-center gap-3">
+              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10">
+                <Clock size={14} className="text-primary" />
+              </div>
+              <div>
+                <p className="text-xs font-medium text-foreground">{formatDate(bundok.date)} {bundok.time}</p>
+                <p className="text-[10px] text-muted-foreground">{bundok.duration}분 소요</p>
+              </div>
+            </div>
 
-            {/* 주의사항 */}
-            {program.notice && (
-              <div className="mt-4 rounded-xl bg-white/20 p-3 backdrop-blur-sm">
-                <p className="text-xs text-white/90 whitespace-pre-line">
-                  {program.notice}
+            <div className="flex items-center gap-3">
+              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-emerald/10">
+                <FormatIcon size={14} className="text-emerald" />
+              </div>
+              <div>
+                <p className="text-xs font-medium text-foreground">{formatLabels[bundok.format]}</p>
+                <p className="text-[10px] text-muted-foreground">{bundok.location}</p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3">
+              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-tangerine/10">
+                <Users size={14} className="text-tangerine" />
+              </div>
+              <div>
+                <p className="text-xs font-medium text-foreground">
+                  {bundok.currentMembers}/{bundok.maxMembers}명
+                  {isFull && <span className="ml-1 text-[10px] text-muted-foreground">(마감)</span>}
                 </p>
-              </div>
-            )}
-          </div>
-        </div>
-      </header>
-
-      {/* Calendar Section */}
-      {program.hasCalendar && program.startDate && program.endDate && (
-        <div className="px-5 sm:px-8">
-          <div className="rounded-2xl border border-border bg-card p-4">
-            <div className="flex items-center gap-2 mb-3">
-              <Calendar size={18} className="text-primary" />
-              <span className="text-sm font-bold text-foreground">프로그램 일정</span>
-            </div>
-
-            <div className="flex flex-col gap-2">
-              <div className="flex items-center justify-between rounded-xl bg-muted/50 px-4 py-3">
-                <span className="text-xs text-muted-foreground">시작일</span>
-                <span className="text-sm font-medium text-foreground">
-                  {formatDate(program.startDate)}
-                </span>
-              </div>
-              <div className="flex items-center justify-between rounded-xl bg-muted/50 px-4 py-3">
-                <span className="text-xs text-muted-foreground">종료일</span>
-                <span className="text-sm font-medium text-foreground">
-                  {formatDate(program.endDate)}
-                </span>
+                <p className="text-[10px] text-muted-foreground">소규모 모임 (최대 {bundok.maxMembers}명)</p>
               </div>
             </div>
           </div>
         </div>
-      )}
+      </section>
 
-      {/* Custom Fields */}
-      {program.customFields.length > 0 && (
-        <div className="px-5 sm:px-8">
+      {/* 개설자 */}
+      <section className="mt-3 px-5 sm:px-8">
+        <div className="flex items-center gap-3 rounded-2xl border border-border bg-card p-4">
+          <img
+            src={bundok.hostAvatar || "/placeholder.svg"}
+            alt={bundok.host}
+            className="h-10 w-10 rounded-full object-cover ring-2 ring-primary/20"
+            crossOrigin="anonymous"
+          />
+          <div>
+            <p className="text-xs font-bold text-foreground">{bundok.host}</p>
+            <p className="text-[10px] text-muted-foreground">모임 개설자</p>
+          </div>
+        </div>
+      </section>
+
+      {/* AI 추천 도서 */}
+      {bundok.aiBooks && bundok.aiBooks.length > 0 && (
+        <section className="mt-4 px-5 sm:px-8">
           <div className="rounded-2xl border border-border bg-card p-4">
-            <div className="flex items-center gap-2 mb-3">
-              <Info size={18} className="text-primary" />
-              <span className="text-sm font-bold text-foreground">프로그램 정보</span>
-            </div>
-
+            <h2 className="flex items-center gap-2 text-sm font-bold text-foreground mb-3">
+              <Sparkles size={14} className="text-tangerine" />
+              AI 추천 관련 도서
+            </h2>
             <div className="flex flex-col gap-2">
-              {program.customFields.map((field, index) => (
-                <div
-                  key={index}
-                  className="flex items-center justify-between rounded-xl bg-muted/50 px-4 py-3"
-                >
-                  <span className="text-xs text-muted-foreground">{field.label}</span>
-                  <span className="text-sm font-medium text-foreground">{field.value}</span>
+              {bundok.aiBooks.map((book, i) => (
+                <div key={i} className="flex items-center gap-2.5 rounded-xl bg-muted/50 px-3 py-2.5">
+                  <BookOpen size={14} className="text-primary flex-shrink-0" />
+                  <span className="text-xs font-medium text-foreground">{book}</span>
                 </div>
               ))}
             </div>
           </div>
-        </div>
+        </section>
       )}
 
-      {/* Program Status */}
-      <div className="px-5 sm:px-8">
-        <div className="rounded-2xl border border-border bg-card p-4">
-          <div className="flex items-center justify-between">
-            <span className="text-sm text-muted-foreground">프로그램 상태</span>
-            <span className={cn(
-              "rounded-full px-3 py-1 text-xs font-bold",
-              program.isActive
-                ? "bg-emerald-100 text-emerald-700"
-                : "bg-gray-100 text-gray-600"
-            )}>
-              {program.isActive ? "진행중" : "종료됨"}
-            </span>
+      {/* 토론 질문 */}
+      {bundok.discussionQuestions && bundok.discussionQuestions.length > 0 && (
+        <section className="mt-3 px-5 sm:px-8">
+          <div className="rounded-2xl border border-border bg-card p-4">
+            <h2 className="flex items-center gap-2 text-sm font-bold text-foreground mb-3">
+              <MessageSquare size={14} className="text-mint" />
+              토론 질문
+            </h2>
+            <div className="flex flex-col gap-2">
+              {bundok.discussionQuestions.map((q, i) => (
+                <div key={i} className="flex gap-2.5 rounded-xl bg-muted/50 px-3 py-2.5">
+                  <span className="flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-primary/20 text-[10px] font-bold text-primary">
+                    {i + 1}
+                  </span>
+                  <span className="text-xs leading-relaxed text-foreground">{q}</span>
+                </div>
+              ))}
+            </div>
           </div>
-        </div>
-      </div>
+        </section>
+      )}
 
-      {/* Guide Section */}
-      <div className="px-5 sm:px-8">
-        <div className="rounded-2xl bg-gradient-to-r from-primary/10 via-emerald/10 to-amber-500/10 p-4">
-          <p className="text-sm leading-relaxed text-foreground">
-            이 프로그램에 참여하여 서평을 작성하면 스탬프를 획득할 수 있습니다.
-          </p>
-          <p className="mt-2 text-xs text-muted-foreground">
-            서평 작성 시 프로그램 선택에서 "{program.name}"을 선택해주세요.
-          </p>
+      {/* 참여하기 Fixed Bottom CTA */}
+      <div className="fixed bottom-16 left-0 right-0 z-30 border-t border-border bg-card/95 px-5 py-3 backdrop-blur-md sm:bottom-0">
+        <div className="mx-auto flex max-w-lg items-center gap-3">
+          <button
+            className="flex h-10 w-10 items-center justify-center rounded-full border border-border bg-muted"
+            aria-label="공유"
+          >
+            <Share2 size={16} className="text-muted-foreground" />
+          </button>
+
+          {bundok.status === "completed" ? (
+            <div className="flex-1 rounded-full bg-muted px-5 py-2.5 text-center text-sm font-bold text-muted-foreground">
+              완료된 모임
+            </div>
+          ) : isJoined ? (
+            <button
+              onClick={handleJoin}
+              className="flex flex-1 items-center justify-center gap-2 rounded-full bg-emerald px-5 py-2.5 text-sm font-bold text-white transition-all hover:brightness-110"
+            >
+              <CheckCircle2 size={16} />
+              참여 중 (취소하기)
+            </button>
+          ) : isFull ? (
+            <div className="flex-1 rounded-full bg-muted px-5 py-2.5 text-center text-sm font-bold text-muted-foreground">
+              인원 마감
+            </div>
+          ) : (
+            <button
+              onClick={handleJoin}
+              disabled={joining}
+              className="flex-1 rounded-full bg-primary px-5 py-2.5 text-sm font-bold text-primary-foreground shadow-md transition-all hover:shadow-lg hover:brightness-110 disabled:opacity-50"
+            >
+              {joining ? "참여 처리 중..." : "참여하기"}
+            </button>
+          )}
         </div>
       </div>
     </div>

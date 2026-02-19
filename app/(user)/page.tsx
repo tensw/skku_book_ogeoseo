@@ -40,10 +40,10 @@ export default function Home() {
 
   if (isLoading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-[#064E3B] via-[#065F46] to-[#047857]">
+      <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-brand via-brand-dark to-brand-light">
         <div className="flex flex-col items-center gap-4">
           <div className="h-12 w-12 animate-spin rounded-full border-4 border-white/20 border-t-white" />
-          <p className="text-emerald-200/70">잠시만 기다려주세요...</p>
+          <p className="text-brand-accent/70">잠시만 기다려주세요...</p>
         </div>
       </div>
     )

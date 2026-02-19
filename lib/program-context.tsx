@@ -1,14 +1,14 @@
 "use client"
 
-import React, { createContext, useContext, useState, useCallback, useMemo, type ReactNode } from "react"
+import React, { createContext, useContext, useState, useCallback, type ReactNode } from "react"
 
 export interface CustomProgram {
   id: string
   name: string
   description: string
-  notice: string // 주의사항 및 안내
-  gradient: string // 그라데이션 색상
-  accentText: string // 배경 큰 텍스트
+  notice: string
+  gradient: string
+  accentText: string
   hasCalendar: boolean
   startDate?: string
   endDate?: string
@@ -17,7 +17,6 @@ export interface CustomProgram {
   isActive: boolean
 }
 
-// 이달의 책 타입
 export interface MonthlyBook {
   id: string
   title: string
@@ -26,38 +25,26 @@ export interface MonthlyBook {
   description: string
 }
 
-// 독서모임별 책 배정 결과 타입
-export interface WeeklyBookAssignment {
-  yeomyeong: MonthlyBook | null  // 여명독
-  yunseul: MonthlyBook | null    // 윤슬독 (여명독과 동일)
-  dalbit: MonthlyBook | null     // 달빛독 (다음 책)
-  weekNumber: number
-}
-
 interface ProgramContextType {
   customPrograms: CustomProgram[]
   addProgram: (program: Omit<CustomProgram, "id" | "createdAt">) => void
   updateProgram: (id: string, program: Partial<CustomProgram>) => void
   deleteProgram: (id: string) => void
   getAllProgramOptions: () => { id: string; label: string }[]
-  // 이달의 책 관련
   monthlyBooks: MonthlyBook[]
   setMonthlyBooks: (books: MonthlyBook[]) => void
   addMonthlyBook: (book: Omit<MonthlyBook, "id">) => void
   updateMonthlyBook: (id: string, book: Partial<MonthlyBook>) => void
   deleteMonthlyBook: (id: string) => void
   reorderMonthlyBooks: (books: MonthlyBook[]) => void
-  getWeeklyBookAssignment: () => WeeklyBookAssignment
   currentMonth: string
   setCurrentMonth: (month: string) => void
 }
 
 const ProgramContext = createContext<ProgramContextType | null>(null)
 
-// 커스텀 프로그램 (관리자가 추가한 프로그램들)
 const defaultCustomPrograms: CustomProgram[] = []
 
-// 기본 이달의 책 (예시 데이터)
 const defaultMonthlyBooks: MonthlyBook[] = [
   {
     id: "book-1",
@@ -89,25 +76,6 @@ const defaultMonthlyBooks: MonthlyBook[] = [
   },
 ]
 
-// 현재 월의 몇 번째 주인지 계산
-function getWeekOfMonth(date: Date): number {
-  const firstDayOfMonth = new Date(date.getFullYear(), date.getMonth(), 1)
-  const firstMonday = new Date(firstDayOfMonth)
-
-  // 첫 번째 월요일 찾기
-  const dayOfWeek = firstDayOfMonth.getDay()
-  const daysUntilMonday = dayOfWeek === 0 ? 1 : (dayOfWeek === 1 ? 0 : 8 - dayOfWeek)
-  firstMonday.setDate(firstDayOfMonth.getDate() + daysUntilMonday)
-
-  // 현재 날짜가 첫 월요일 이전이면 1주차
-  if (date < firstMonday) return 1
-
-  // 주차 계산
-  const diffTime = date.getTime() - firstMonday.getTime()
-  const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24))
-  return Math.floor(diffDays / 7) + 2 // +2 because we start counting from 1 and first week before monday is 1
-}
-
 export function ProgramProvider({ children }: { children: ReactNode }) {
   const [customPrograms, setCustomPrograms] = useState<CustomProgram[]>(defaultCustomPrograms)
   const [monthlyBooks, setMonthlyBooksState] = useState<MonthlyBook[]>(defaultMonthlyBooks)
@@ -136,11 +104,9 @@ export function ProgramProvider({ children }: { children: ReactNode }) {
   }, [])
 
   const getAllProgramOptions = useCallback(() => {
-    // 기본 옵션 + 커스텀 프로그램
     const baseOptions = [
       { id: "free", label: "자유 서평" },
-      { id: "dokmo", label: "독모" },
-      { id: "dokto", label: "독토" },
+      { id: "bundok", label: "번독" },
       { id: "classic100", label: "고전 100선" },
     ]
     const customOptions = customPrograms
@@ -150,7 +116,6 @@ export function ProgramProvider({ children }: { children: ReactNode }) {
     return [...baseOptions, ...customOptions]
   }, [customPrograms])
 
-  // 이달의 책 관련 함수들
   const setMonthlyBooks = useCallback((books: MonthlyBook[]) => {
     setMonthlyBooksState(books)
   }, [])
@@ -177,34 +142,6 @@ export function ProgramProvider({ children }: { children: ReactNode }) {
     setMonthlyBooksState(books)
   }, [])
 
-  // 주차별 책 배정 계산
-  // 여명독/윤슬독: 같은 책, 달빛독: 다음 책
-  // 매주 2권씩 소비 (여명/윤슬 1권 + 달빛 1권)
-  const getWeeklyBookAssignment = useCallback((): WeeklyBookAssignment => {
-    const weekNumber = getWeekOfMonth(new Date())
-
-    if (monthlyBooks.length < 2) {
-      return {
-        yeomyeong: monthlyBooks[0] || null,
-        yunseul: monthlyBooks[0] || null,
-        dalbit: monthlyBooks[1] || monthlyBooks[0] || null,
-        weekNumber,
-      }
-    }
-
-    // 주차에 따른 책 인덱스 계산
-    // 1주차: 0, 1 / 2주차: 2, 3 / 3주차: 4, 5 ...
-    const baseIndex = ((weekNumber - 1) * 2) % monthlyBooks.length
-    const nextIndex = (baseIndex + 1) % monthlyBooks.length
-
-    return {
-      yeomyeong: monthlyBooks[baseIndex],
-      yunseul: monthlyBooks[baseIndex],
-      dalbit: monthlyBooks[nextIndex],
-      weekNumber,
-    }
-  }, [monthlyBooks])
-
   return (
     <ProgramContext.Provider
       value={{
@@ -213,14 +150,12 @@ export function ProgramProvider({ children }: { children: ReactNode }) {
         updateProgram,
         deleteProgram,
         getAllProgramOptions,
-        // 이달의 책
         monthlyBooks,
         setMonthlyBooks,
         addMonthlyBook,
         updateMonthlyBook,
         deleteMonthlyBook,
         reorderMonthlyBooks,
-        getWeeklyBookAssignment,
         currentMonth,
         setCurrentMonth,
       }}

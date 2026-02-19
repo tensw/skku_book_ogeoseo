@@ -16,7 +16,7 @@ import {
   TrendingUp,
   BarChart3,
 } from "lucide-react"
-import { notices, reviews, classics, programs } from "@/lib/mock-data"
+import { notices, reviews, classics, bundoks } from "@/lib/mock-data"
 
 const stats = [
   {
@@ -45,7 +45,7 @@ const stats = [
   },
   {
     label: "프로그램",
-    count: programs.length,
+    count: bundoks.length,
     icon: Calendar,
     bgColor: "bg-purple-50",
     textColor: "text-purple-600",
@@ -97,17 +97,17 @@ const recentActivities = [
 ]
 
 const programStats = [
-  { name: "독모 (아침)", participants: 24, capacity: 30 },
-  { name: "독모 (점심)", participants: 28, capacity: 30 },
-  { name: "독모 (저녁)", participants: 18, capacity: 30 },
-  { name: "독토", participants: 45, capacity: 60 },
+  { name: "번독 (오프라인)", participants: 24, capacity: 30 },
+  { name: "번독 (온라인)", participants: 28, capacity: 30 },
+  { name: "번독 (하이브리드)", participants: 18, capacity: 30 },
+  { name: "고전 100선", participants: 45, capacity: 60 },
 ]
 
 export default function AdminDashboardPage() {
   return (
     <div className="space-y-6 p-6">
       <div>
-        <h1 className="font-serif text-2xl font-bold text-foreground">대시보드</h1>
+        <h1 className="text-2xl font-bold text-foreground">대시보드</h1>
         <p className="mt-0.5 text-sm text-muted-foreground">오거서 관리자 대시보드입니다.</p>
       </div>
 
@@ -156,7 +156,7 @@ export default function AdminDashboardPage() {
       <div className="grid gap-6 lg:grid-cols-2">
         {/* Recent Activities */}
         <div className="rounded-2xl border border-border bg-card p-5 shadow-sm">
-          <h2 className="flex items-center gap-2 font-serif text-lg font-bold text-foreground">
+          <h2 className="flex items-center gap-2 text-lg font-bold text-foreground">
             <Clock size={18} className="text-muted-foreground" />
             최근 활동
           </h2>
@@ -182,7 +182,7 @@ export default function AdminDashboardPage() {
 
         {/* Program Participation */}
         <div className="rounded-2xl border border-border bg-card p-5 shadow-sm">
-          <h2 className="flex items-center gap-2 font-serif text-lg font-bold text-foreground">
+          <h2 className="flex items-center gap-2 text-lg font-bold text-foreground">
             <BarChart3 size={18} className="text-muted-foreground" />
             프로그램 참여 현황
           </h2>
@@ -212,7 +212,7 @@ export default function AdminDashboardPage() {
 
       {/* Quick Actions */}
       <div className="rounded-2xl border border-border bg-card p-5 shadow-sm">
-        <h2 className="font-serif text-lg font-bold text-foreground">빠른 작업</h2>
+        <h2 className="text-lg font-bold text-foreground">빠른 작업</h2>
         <div className="mt-4 flex flex-wrap gap-2">
           <a
             href="/admin/notices"

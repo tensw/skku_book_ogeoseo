@@ -20,7 +20,8 @@ export function KDCBadge({ badge, onClick }: { badge: KDCBadgeData; onClick?: ()
       onClick={badge.earned ? onClick : undefined}
       role={onClick && badge.earned ? "button" : undefined}
       tabIndex={onClick && badge.earned ? 0 : undefined}
-      onKeyDown={onClick && badge.earned ? (e) => { if (e.key === "Enter" || e.key === " ") onClick() } : undefined}
+      onKeyDown={onClick && badge.earned ? (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onClick(); } } : undefined}
+      aria-label={badge.earned ? `${badge.label} (${badge.id}) 뱃지 - ${badge.count}개 획득${onClick ? ", 클릭하여 서평 보기" : ""}` : `${badge.label} (${badge.id}) 뱃지 - 미획득`}
     >
       <div
         className={cn(
@@ -34,7 +35,7 @@ export function KDCBadge({ badge, onClick }: { badge: KDCBadgeData; onClick?: ()
           style={{
             background: badge.earned
               ? badge.borderGradient
-              : "linear-gradient(135deg, #9CA3AF, #D1D5DB, #9CA3AF)",
+              : "linear-gradient(135deg, hsl(var(--disabled-border)), hsl(var(--disabled-bg-dark)), hsl(var(--disabled-border)))",
             boxShadow: badge.earned
               ? "0 2px 8px rgba(6, 78, 59, 0.25), inset 0 1px 2px rgba(255,255,255,0.4)"
               : "none",
@@ -46,7 +47,7 @@ export function KDCBadge({ badge, onClick }: { badge: KDCBadgeData; onClick?: ()
             style={{
               background: badge.earned
                 ? badge.gradient
-                : "linear-gradient(135deg, #F3F4F6, #E5E7EB)",
+                : "linear-gradient(135deg, hsl(var(--disabled-bg)), hsl(var(--disabled-bg-dark)))",
             }}
           >
             <div className={cn("text-lg", badge.earned ? "text-white" : "text-gray-400")}>
@@ -80,7 +81,7 @@ export function KDCBadge({ badge, onClick }: { badge: KDCBadgeData; onClick?: ()
           <div
             className="absolute -right-0.5 -top-0.5 flex h-4 w-4 items-center justify-center rounded-full text-[8px] font-bold text-white shadow-sm"
             style={{
-              background: "linear-gradient(135deg, #064E3B, #059669)",
+              background: "linear-gradient(135deg, hsl(var(--brand-mid)), hsl(var(--brand-light)))",
             }}
           >
             {badge.count}

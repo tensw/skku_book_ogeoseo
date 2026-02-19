@@ -14,7 +14,7 @@ body {
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
+    --background: 0 0% 98%;
     --foreground: 0 0% 3.9%;
     --card: 0 0% 100%;
     --card-foreground: 0 0% 3.9%;
@@ -47,6 +47,33 @@ body {
     --sidebar-accent-foreground: 240 5.9% 10%;
     --sidebar-border: 220 13% 91%;
     --sidebar-ring: 217.2 91.2% 59.8%;
+
+    /* Brand: Deep Teal palette (#1F5F53 ~ #2A7D6E ~ #3DA08D ~ #4DB8A4) */
+    --forest: 163 51% 25%;
+    --emerald: 163 49% 33%;
+    --tangerine: 28 62% 59%;
+    --mint: 163 42% 51%;
+
+    /* Brand extended: gradient stops & brand surface */
+    --brand-dark: 163 51% 25%;
+    --brand-mid: 163 49% 33%;
+    --brand-light: 163 44% 43%;
+    --brand-accent: 163 42% 51%;
+    --brand-surface: 0 0% 98%;
+
+    /* External service accent (알라딘 purple) */
+    --aladin: 263 70% 58%;
+
+    /* Gold / Stamp reward palette */
+    --gold: 48 90% 60%;
+    --gold-dark: 43 76% 45%;
+    --gold-light: 43 90% 72%;
+    --gold-copper: 28 40% 65%;
+
+    /* Gray palette for disabled / unearned states */
+    --disabled-border: 220 9% 76%;
+    --disabled-bg: 220 14% 96%;
+    --disabled-bg-dark: 220 13% 91%;
   }
   .dark {
     --background: 0 0% 3.9%;
@@ -81,6 +108,29 @@ body {
     --sidebar-accent-foreground: 240 4.8% 95.9%;
     --sidebar-border: 240 3.7% 15.9%;
     --sidebar-ring: 217.2 91.2% 59.8%;
+
+    /* Brand: Deep Teal palette (dark mode) */
+    --forest: 163 51% 25%;
+    --emerald: 163 49% 33%;
+    --tangerine: 28 62% 59%;
+    --mint: 163 42% 51%;
+
+    --brand-dark: 163 51% 20%;
+    --brand-mid: 163 49% 28%;
+    --brand-light: 163 44% 38%;
+    --brand-accent: 163 42% 46%;
+    --brand-surface: 0 0% 6%;
+
+    --aladin: 263 70% 58%;
+
+    --gold: 48 90% 60%;
+    --gold-dark: 43 76% 45%;
+    --gold-light: 43 90% 72%;
+    --gold-copper: 28 40% 65%;
+
+    --disabled-border: 220 9% 40%;
+    --disabled-bg: 220 14% 18%;
+    --disabled-bg-dark: 220 13% 25%;
   }
 }
 

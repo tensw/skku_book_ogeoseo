@@ -35,10 +35,10 @@ const mockStudents = [
 ]
 
 const mockStudentBooks = [
-  { id: 1, title: "사피엔스", author: "유발 하라리", readDate: "2026-01-15", program: "독모" },
-  { id: 2, title: "채식주의자", author: "한강", readDate: "2026-01-22", program: "독토" },
+  { id: 1, title: "사피엔스", author: "유발 하라리", readDate: "2026-01-15", program: "번독" },
+  { id: 2, title: "채식주의자", author: "한강", readDate: "2026-01-22", program: "자유 서평" },
   { id: 3, title: "1984", author: "조지 오웰", readDate: "2026-02-01", program: "일반" },
-  { id: 4, title: "미드나이트 라이브러리", author: "매트 헤이그", readDate: "2026-02-08", program: "독모" },
+  { id: 4, title: "미드나이트 라이브러리", author: "매트 헤이그", readDate: "2026-02-08", program: "번독" },
 ]
 
 type ExportType = "excel" | "pdf" | "student"

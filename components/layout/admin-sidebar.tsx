@@ -41,7 +41,7 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
         <Link
           href="/admin"
           onClick={onNavigate}
-          className="font-serif text-xl font-bold text-primary"
+          className="text-xl font-bold text-primary"
         >
           오거서
         </Link>
@@ -113,7 +113,7 @@ export function AdminSidebar() {
               <SidebarContent onNavigate={() => setOpen(false)} />
             </SheetContent>
           </Sheet>
-          <span className="font-serif text-lg font-bold text-primary">
+          <span className="text-lg font-bold text-primary">
             오거서
           </span>
           <span className="ml-2 text-xs text-muted-foreground">관리자</span>

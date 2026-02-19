@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useCallback } from "react"
+import React, { useState, useCallback } from "react"
 import {
   Check,
   ChevronRight,
@@ -15,10 +15,14 @@ import {
   MessageCircle,
   MoreHorizontal,
   Plus,
+  FileText,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { KDCBadge } from "@/components/kdc-badge"
 import type { KDCBadgeData } from "@/components/kdc-badge"
+import { KDC_BADGE_GRADIENTS } from "@/components/library/library-types"
+import { usePrograms } from "@/lib/program-context"
+import { useSharedData } from "@/lib/shared-data-context"
 import {
   Key,
   Brain,
@@ -61,7 +65,7 @@ const existingReviews = [
     user: { name: "수빈", avatar: "https://picsum.photos/seed/u12/80/80", badge: "역사" },
     book: { title: "사피엔스: 인류의 역사", author: "유발 하라리", cover: "https://picsum.photos/seed/rev2/100/140" },
     rating: 5,
-    text: "인류 역사를 전혀 새로운 관점에서 풀어낸 책. 농업혁명이 오히려 인류를 불행하게 만들었다는 주장은 충격적이면서도 설득력 있었어요. 독토 클럽에서 함께 읽으니 토론 거리가 끝도 없었습니다!",
+    text: "인류 역사를 전혀 새로운 관점에서 풀어낸 책. 농업혁명이 오히려 인류를 불행하게 만들었다는 주장은 충격적이면서도 설득력 있었어요. 번독 모임에서 함께 읽으니 토론 거리가 끝도 없었습니다!",
     likes: 56,
     comments: 18,
     timeAgo: "8시간 전",
@@ -93,10 +97,11 @@ const existingReviews = [
 
 /* ── stepper data ── */
 const steps = [
-  { id: 1, label: "도서 선택", icon: BookOpen },
-  { id: 2, label: "뱃지 선택", icon: Tag },
-  { id: 3, label: "서평 작성", icon: PenTool },
-  { id: 4, label: "스탬프 획득", icon: Award },
+  { id: 1, label: "프로그램", icon: FileText },
+  { id: 2, label: "도서 선택", icon: BookOpen },
+  { id: 3, label: "뱃지 선택", icon: Tag },
+  { id: 4, label: "서평 작성", icon: PenTool },
+  { id: 5, label: "스탬프 획득", icon: Award },
 ]
 
 const availableBooks = [
@@ -131,18 +136,25 @@ type BookItem = {
   isbn?: string
 }
 
-const badgeOptions: KDCBadgeData[] = [
-  { id: "000", label: "총류", icon: <Key size={18} />, earned: true, count: 0, gradient: "linear-gradient(135deg, #064E3B 0%, #0D7349 50%, #042F24 100%)", borderGradient: "linear-gradient(135deg, #34D399, #6EE7B7, #10B981)" },
-  { id: "100", label: "철학", icon: <Brain size={18} />, earned: true, count: 0, gradient: "linear-gradient(135deg, #042F24 0%, #064E3B 50%, #021A14 100%)", borderGradient: "linear-gradient(135deg, #6EE7B7, #A7F3D0, #34D399)" },
-  { id: "200", label: "종교", icon: <Church size={18} />, earned: true, count: 0, gradient: "linear-gradient(135deg, #1A3C34 0%, #2D5A4E 50%, #0F2820 100%)", borderGradient: "linear-gradient(135deg, #86EFAC, #BBF7D0, #4ADE80)" },
-  { id: "300", label: "사회과학", icon: <Scale size={18} />, earned: true, count: 0, gradient: "linear-gradient(135deg, #047857 0%, #059669 50%, #065F46 100%)", borderGradient: "linear-gradient(135deg, #A7F3D0, #D1FAE5, #6EE7B7)" },
-  { id: "400", label: "자연과학", icon: <Leaf size={18} />, earned: true, count: 0, gradient: "linear-gradient(135deg, #022C1E 0%, #064E3B 50%, #011B12 100%)", borderGradient: "linear-gradient(135deg, #34D399, #6EE7B7, #10B981)" },
-  { id: "500", label: "기술과학", icon: <Cpu size={18} />, earned: true, count: 0, gradient: "linear-gradient(135deg, #14532D 0%, #166534 50%, #0A3B1E 100%)", borderGradient: "linear-gradient(135deg, #4ADE80, #86EFAC, #22C55E)" },
-  { id: "600", label: "예술", icon: <Palette size={18} />, earned: true, count: 0, gradient: "linear-gradient(135deg, #115E45 0%, #0D9065 50%, #0A4030 100%)", borderGradient: "linear-gradient(135deg, #5EEAD4, #99F6E4, #2DD4BF)" },
-  { id: "700", label: "언어", icon: <Languages size={18} />, earned: true, count: 0, gradient: "linear-gradient(135deg, #1A3A30 0%, #2D6B55 50%, #102820 100%)", borderGradient: "linear-gradient(135deg, #6EE7B7, #A7F3D0, #34D399)" },
-  { id: "800", label: "문학", icon: <BookMarked size={18} />, earned: true, count: 0, gradient: "linear-gradient(135deg, #064E3B 0%, #10B981 50%, #022C22 100%)", borderGradient: "linear-gradient(135deg, #6EE7B7, #D1FAE5, #34D399)" },
-  { id: "900", label: "역사", icon: <Landmark size={18} />, earned: true, count: 0, gradient: "linear-gradient(135deg, #1B4D3E 0%, #2F7A5E 50%, #0E3328 100%)", borderGradient: "linear-gradient(135deg, #86EFAC, #D1FAE5, #4ADE80)" },
-]
+const badgeIcons: Record<string, React.ReactNode> = {
+  "000": <Key size={18} />,
+  "100": <Brain size={18} />,
+  "200": <Church size={18} />,
+  "300": <Scale size={18} />,
+  "400": <Leaf size={18} />,
+  "500": <Cpu size={18} />,
+  "600": <Palette size={18} />,
+  "700": <Languages size={18} />,
+  "800": <BookMarked size={18} />,
+  "900": <Landmark size={18} />,
+}
+
+const badgeOptions: KDCBadgeData[] = KDC_BADGE_GRADIENTS.map((g) => ({
+  ...g,
+  icon: badgeIcons[g.id],
+  earned: true,
+  count: 0,
+}))
 
 const badgeColorMap: Record<string, string> = {
   "총류": "bg-primary/10 text-primary",
@@ -177,7 +189,7 @@ function ReviewList({ onWrite }: { onWrite: () => void }) {
       {/* Header */}
       <header className="flex items-center justify-between px-5 pt-5 sm:px-8">
         <div>
-          <h1 className="font-serif text-2xl font-bold text-foreground">서평</h1>
+          <h1 className="text-2xl font-bold text-foreground">서평</h1>
           <p className="mt-0.5 text-xs text-muted-foreground sm:text-sm">
             {existingReviews.length}개의 서평이 등록되어 있습니다
           </p>
@@ -192,10 +204,12 @@ function ReviewList({ onWrite }: { onWrite: () => void }) {
       </header>
 
       {/* Badge Filters */}
-      <div className="no-scrollbar mt-4 flex gap-2 overflow-x-auto px-5 sm:px-8">
+      <div role="tablist" aria-label="분류별 필터" className="no-scrollbar mt-4 flex gap-2 overflow-x-auto px-5 sm:px-8">
         {badgeFilters.map((badge) => (
           <button
             key={badge}
+            role="tab"
+            aria-selected={filterBadge === badge || (!filterBadge && badge === "전체")}
             onClick={() => setFilterBadge(badge === "전체" ? null : badge)}
             className={cn(
               "flex-shrink-0 rounded-full px-3.5 py-1.5 text-xs font-medium transition-all",
@@ -277,6 +291,8 @@ function ReviewList({ onWrite }: { onWrite: () => void }) {
                 <button
                   onClick={() => toggleLike(review.id)}
                   className="flex items-center gap-1.5 text-xs text-muted-foreground transition-colors"
+                  aria-label={liked ? "좋아요 취소" : "좋아요"}
+                  aria-pressed={liked}
                 >
                   <Heart
                     size={15}
@@ -286,7 +302,7 @@ function ReviewList({ onWrite }: { onWrite: () => void }) {
                     {review.likes + (liked ? 1 : 0)}
                   </span>
                 </button>
-                <button className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                <button className="flex items-center gap-1.5 text-xs text-muted-foreground" aria-label={`댓글 ${review.comments}개`}>
                   <MessageCircle size={15} />
                   {review.comments}
                 </button>
@@ -301,7 +317,12 @@ function ReviewList({ onWrite }: { onWrite: () => void }) {
 
 /* ── Review Writer (stepper form) sub-component ── */
 function ReviewWriter({ onBack }: { onBack: () => void }) {
+  const { getAllProgramOptions } = usePrograms()
+  const { bundoks, joinedBundoks } = useSharedData()
+  const programOptions = getAllProgramOptions()
+
   const [currentStep, setCurrentStep] = useState(1)
+  const [selectedProgram, setSelectedProgram] = useState<string | null>(null)
   const [selectedBook, setSelectedBook] = useState<BookItem | null>(null)
   const [selectedBadge, setSelectedBadge] = useState<string | null>(null)
   const [reviewText, setReviewText] = useState("")
@@ -310,6 +331,9 @@ function ReviewWriter({ onBack }: { onBack: () => void }) {
   const [rating, setRating] = useState(0)
   const [bookSearchTab, setBookSearchTab] = useState<"library" | "aladin">("library")
   const [isSearching, setIsSearching] = useState(false)
+
+  // 참여한 번독 목록
+  const myBundoks = bundoks.filter((b) => joinedBundoks.includes(b.id))
 
   const charCount = reviewText.length
   const isReviewValid = charCount >= 100
@@ -333,10 +357,10 @@ function ReviewWriter({ onBack }: { onBack: () => void }) {
   const currentBooks = bookSearchTab === "library" ? filteredLibraryBooks : filteredAladinBooks
 
   const handleNext = useCallback(() => {
-    if (currentStep === 3 && isReviewValid) {
-      setCurrentStep(4)
+    if (currentStep === 4 && isReviewValid) {
+      setCurrentStep(5)
       setShowStamp(true)
-    } else if (currentStep < 3) {
+    } else if (currentStep < 4) {
       setCurrentStep((prev) => prev + 1)
     }
   }, [currentStep, isReviewValid])
@@ -347,7 +371,7 @@ function ReviewWriter({ onBack }: { onBack: () => void }) {
     <div className="flex flex-col gap-6 pb-6">
       {/* Header with back button */}
       <header className="flex items-center gap-3 px-5 pt-5 sm:px-8">
-        {currentStep < 4 && (
+        {currentStep < 5 && (
           <button
             onClick={currentStep === 1 ? onBack : () => setCurrentStep((p) => p - 1)}
             className="flex h-9 w-9 items-center justify-center rounded-full bg-muted text-foreground transition-colors hover:bg-muted/80"
@@ -357,7 +381,7 @@ function ReviewWriter({ onBack }: { onBack: () => void }) {
           </button>
         )}
         <div>
-          <h1 className="font-serif text-2xl font-bold text-foreground">서평 작성</h1>
+          <h1 className="text-2xl font-bold text-foreground">서평 작성</h1>
           <p className="mt-0.5 text-xs text-muted-foreground sm:text-sm">
             독서 감상을 나누고 스탬프를 획득하세요
           </p>
@@ -409,8 +433,54 @@ function ReviewWriter({ onBack }: { onBack: () => void }) {
 
       {/* Step Content */}
       <div className="px-5 sm:px-8">
-        {/* Step 1: Select Book */}
+        {/* Step 1: Program Selection */}
         {currentStep === 1 && (
+          <div className="animate-fade-in-up">
+            <p className="mb-4 text-sm text-muted-foreground">
+              어떤 프로그램으로 서평을 작성하시나요?
+            </p>
+            <div className="flex flex-col gap-2">
+              {programOptions.map((opt) => (
+                <button
+                  key={opt.id}
+                  onClick={() => setSelectedProgram(opt.id)}
+                  className={cn(
+                    "flex items-center gap-3 rounded-2xl border p-4 text-left transition-all",
+                    selectedProgram === opt.id
+                      ? "border-primary bg-primary/5 shadow-md"
+                      : "border-border bg-card hover:bg-muted/50"
+                  )}
+                >
+                  <FileText size={16} className={cn(
+                    selectedProgram === opt.id ? "text-primary" : "text-muted-foreground"
+                  )} />
+                  <span className="text-sm font-medium text-foreground">{opt.label}</span>
+                  {selectedProgram === opt.id && (
+                    <Check size={14} className="ml-auto text-primary" />
+                  )}
+                </button>
+              ))}
+
+              {/* 참여한 번독 목록 */}
+              {selectedProgram === "bundok" && myBundoks.length > 0 && (
+                <div className="mt-2 rounded-2xl border border-border bg-muted/30 p-3">
+                  <p className="mb-2 text-xs font-semibold text-foreground">참여한 번독 모임</p>
+                  <div className="flex flex-col gap-1.5">
+                    {myBundoks.map((b) => (
+                      <div key={b.id} className="flex items-center gap-2 rounded-xl bg-card px-3 py-2">
+                        <span className="text-xs font-medium text-foreground">{b.title}</span>
+                        <span className="text-[10px] text-muted-foreground">({b.book})</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Step 2: Select Book */}
+        {currentStep === 2 && (
           <div className="animate-fade-in-up">
             {/* 도서 검색 탭 (도서관/알라딘) */}
             <div className="mb-4 flex gap-2">
@@ -430,7 +500,7 @@ function ReviewWriter({ onBack }: { onBack: () => void }) {
                 className={cn(
                   "flex-1 rounded-xl py-2 text-xs font-medium transition-all",
                   bookSearchTab === "aladin"
-                    ? "bg-[#7C3AED] text-white shadow-sm"
+                    ? "bg-aladin text-white shadow-sm"
                     : "bg-muted text-muted-foreground hover:bg-muted/80"
                 )}
               >
@@ -452,8 +522,8 @@ function ReviewWriter({ onBack }: { onBack: () => void }) {
 
             {/* 알라딘 탭 안내 */}
             {bookSearchTab === "aladin" && searchQuery.length < 2 && (
-              <div className="mb-4 rounded-xl bg-[#7C3AED]/10 p-3 text-center">
-                <p className="text-xs text-[#7C3AED]">
+              <div className="mb-4 rounded-xl bg-aladin/10 p-3 text-center">
+                <p className="text-xs text-aladin">
                   도서관에 없는 책도 검색할 수 있어요!<br />
                   2글자 이상 입력하면 알라딘에서 검색됩니다.
                 </p>
@@ -488,7 +558,7 @@ function ReviewWriter({ onBack }: { onBack: () => void }) {
                         "rounded-full px-1.5 py-0.5 text-[9px] font-medium",
                         book.source === "library"
                           ? "bg-emerald/20 text-emerald-700"
-                          : "bg-[#7C3AED]/15 text-[#7C3AED]"
+                          : "bg-aladin/15 text-aladin"
                       )}>
                         {book.source === "library" ? "소장" : "알라딘"}
                       </span>
@@ -509,8 +579,8 @@ function ReviewWriter({ onBack }: { onBack: () => void }) {
           </div>
         )}
 
-        {/* Step 2: Choose Badge */}
-        {currentStep === 2 && (
+        {/* Step 3: Choose Badge */}
+        {currentStep === 3 && (
           <div className="animate-fade-in-up">
             <p className="mb-4 text-sm text-muted-foreground">
               읽은 도서에 가장 알맞은 KDC 분류를 선택하세요:
@@ -532,8 +602,8 @@ function ReviewWriter({ onBack }: { onBack: () => void }) {
           </div>
         )}
 
-        {/* Step 3: Write Review */}
-        {currentStep === 3 && (
+        {/* Step 4: Write Review */}
+        {currentStep === 4 && (
           <div className="animate-fade-in-up">
             {selectedBook && selectedBadgeData && (
               <div className="mb-4 flex items-center gap-3 rounded-2xl border border-border bg-muted/50 p-3">
@@ -547,7 +617,7 @@ function ReviewWriter({ onBack }: { onBack: () => void }) {
                       "rounded-full px-1.5 py-0.5 text-[9px] font-medium",
                       selectedBook.source === "library"
                         ? "bg-emerald/20 text-emerald-700"
-                        : "bg-[#7C3AED]/15 text-[#7C3AED]"
+                        : "bg-aladin/15 text-aladin"
                     )}>
                       {selectedBook.source === "library" ? "소장" : "알라딘"}
                     </span>
@@ -571,10 +641,11 @@ function ReviewWriter({ onBack }: { onBack: () => void }) {
                 value={reviewText}
                 onChange={(e) => setReviewText(e.target.value)}
                 placeholder="이 도서에 대한 감상을 나눠주세요 (최소 100자)..."
+                aria-label="서평 내용 작성 (최소 100자)"
                 className="min-h-[180px] w-full resize-none rounded-2xl border border-border bg-card p-4 text-sm text-foreground shadow-sm outline-none placeholder:text-muted-foreground focus:border-primary focus:ring-1 focus:ring-primary"
               />
               <div className="mt-2 flex items-center justify-between">
-                <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-muted">
+                <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-muted" role="progressbar" aria-valuenow={Math.min(charCount, 100)} aria-valuemin={0} aria-valuemax={100} aria-label={`서평 작성 진행률 ${charCount}/100자`}>
                   <div
                     className={cn("h-full rounded-full transition-all", isReviewValid ? "bg-primary" : "bg-emerald")}
                     style={{ width: `${Math.min((charCount / 100) * 100, 100)}%` }}
@@ -588,8 +659,8 @@ function ReviewWriter({ onBack }: { onBack: () => void }) {
           </div>
         )}
 
-        {/* Step 4: Stamp Animation */}
-        {currentStep === 4 && showStamp && selectedBadgeData && (
+        {/* Step 5: Stamp Animation */}
+        {currentStep === 5 && showStamp && selectedBadgeData && (
           <div className="animate-fade-in-up flex flex-col items-center gap-6 py-8">
             <div className="animate-stamp-drop">
               <div className="relative">
@@ -609,7 +680,7 @@ function ReviewWriter({ onBack }: { onBack: () => void }) {
               </div>
             </div>
             <div className="text-center">
-              <h3 className="font-serif text-xl font-bold text-foreground">스탬프를 획득했습니다!</h3>
+              <h3 className="text-xl font-bold text-foreground">스탬프를 획득했습니다!</h3>
               <p className="mt-1 text-sm text-muted-foreground">{selectedBadgeData.label} ({selectedBadgeData.id})</p>
               <p className="mt-3 text-xs text-muted-foreground">서평이 성공적으로 등록되었습니다.</p>
             </div>
@@ -624,25 +695,27 @@ function ReviewWriter({ onBack }: { onBack: () => void }) {
       </div>
 
       {/* Navigation Buttons */}
-      {currentStep < 4 && (
+      {currentStep < 5 && (
         <div className="px-5 sm:px-8">
           <button
             onClick={handleNext}
             disabled={
-              (currentStep === 1 && !selectedBook) ||
-              (currentStep === 2 && !selectedBadge) ||
-              (currentStep === 3 && !isReviewValid)
+              (currentStep === 1 && !selectedProgram) ||
+              (currentStep === 2 && !selectedBook) ||
+              (currentStep === 3 && !selectedBadge) ||
+              (currentStep === 4 && !isReviewValid)
             }
             className={cn(
               "flex w-full items-center justify-center gap-2 rounded-2xl py-3 text-sm font-medium transition-all",
-              (currentStep === 1 && selectedBook !== null) ||
-                (currentStep === 2 && selectedBadge) ||
-                (currentStep === 3 && isReviewValid)
+              (currentStep === 1 && selectedProgram !== null) ||
+                (currentStep === 2 && selectedBook !== null) ||
+                (currentStep === 3 && selectedBadge) ||
+                (currentStep === 4 && isReviewValid)
                 ? "bg-primary text-primary-foreground shadow-md hover:shadow-lg hover:brightness-110"
                 : "cursor-not-allowed bg-muted text-muted-foreground"
             )}
           >
-            {currentStep === 3 ? "제출 후 스탬프 받기" : "다음"}
+            {currentStep === 4 ? "제출 후 스탬프 받기" : "다음"}
             <ChevronRight size={14} />
           </button>
         </div>

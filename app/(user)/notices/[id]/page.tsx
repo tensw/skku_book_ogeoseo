@@ -44,7 +44,7 @@ export default function NoticeDetail({ params }: { params: Promise<{ id: string 
             중요
           </span>
         )}
-        <h1 className="font-serif text-2xl font-bold leading-tight text-foreground">
+        <h1 className="text-2xl font-bold leading-tight text-foreground">
           {notice.title}
         </h1>
         <div className="mt-3 flex flex-wrap items-center gap-4 text-xs text-muted-foreground">

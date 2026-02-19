@@ -84,22 +84,22 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#064E3B] via-[#065F46] to-[#047857]">
+    <div className="min-h-screen bg-gradient-to-br from-brand via-brand-dark to-brand-light">
       {/* Decorative background elements */}
       <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute -top-40 -right-40 h-80 w-80 rounded-full bg-emerald-400/10 blur-3xl" />
-        <div className="absolute -bottom-40 -left-40 h-80 w-80 rounded-full bg-teal-400/10 blur-3xl" />
-        <div className="absolute top-1/2 left-1/2 h-96 w-96 -translate-x-1/2 -translate-y-1/2 rounded-full bg-emerald-300/5 blur-3xl" />
+        <div className="absolute -top-40 -right-40 h-80 w-80 rounded-full bg-brand-accent/10 blur-3xl" />
+        <div className="absolute -bottom-40 -left-40 h-80 w-80 rounded-full bg-brand-light/10 blur-3xl" />
+        <div className="absolute top-1/2 left-1/2 h-96 w-96 -translate-x-1/2 -translate-y-1/2 rounded-full bg-brand-accent/5 blur-3xl" />
       </div>
 
       <div className="relative flex min-h-screen flex-col items-center justify-center px-6 py-12">
         {/* Logo */}
         <div className="mb-8 text-center">
           <div className="mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-2xl bg-white/10 backdrop-blur-sm">
-            <BookOpen size={40} className="text-emerald-300" />
+            <BookOpen size={40} className="text-brand-accent" />
           </div>
-          <h1 className="font-serif text-3xl font-bold text-white">오거서</h1>
-          <p className="mt-2 text-emerald-200/70">성균관대학교 독서 플랫폼</p>
+          <h1 className="text-3xl font-bold text-white">오거서</h1>
+          <p className="mt-2 text-brand-accent/70">성균관대학교 독서 플랫폼</p>
         </div>
 
         {/* Login Card */}
@@ -109,7 +109,7 @@ export default function LoginPage() {
               {/* Login Header */}
               <div className="border-b border-white/10 px-8 py-6 text-center">
                 <h2 className="text-xl font-bold text-white">로그인</h2>
-                <p className="mt-1 text-sm text-emerald-200/70">오거서에 오신 것을 환영합니다</p>
+                <p className="mt-1 text-sm text-brand-accent/70">오거서에 오신 것을 환영합니다</p>
               </div>
 
               {/* Login Form */}
@@ -132,7 +132,7 @@ export default function LoginPage() {
                       value={loginId}
                       onChange={(e) => setLoginId(e.target.value)}
                       placeholder="아이디를 입력하세요"
-                      className="w-full rounded-xl border border-white/20 bg-white/10 px-4 py-3 text-white placeholder:text-white/40 outline-none transition-all focus:border-emerald-400 focus:bg-white/15"
+                      className="w-full rounded-xl border border-white/20 bg-white/10 px-4 py-3 text-white placeholder:text-white/40 outline-none transition-all focus:border-brand-accent focus:bg-white/15"
                     />
                   </div>
 
@@ -147,7 +147,7 @@ export default function LoginPage() {
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                         placeholder="비밀번호를 입력하세요"
-                        className="w-full rounded-xl border border-white/20 bg-white/10 px-4 py-3 pr-12 text-white placeholder:text-white/40 outline-none transition-all focus:border-emerald-400 focus:bg-white/15"
+                        className="w-full rounded-xl border border-white/20 bg-white/10 px-4 py-3 pr-12 text-white placeholder:text-white/40 outline-none transition-all focus:border-brand-accent focus:bg-white/15"
                       />
                       <button
                         type="button"
@@ -164,7 +164,7 @@ export default function LoginPage() {
                 <button
                   type="submit"
                   disabled={isLoggingIn}
-                  className="mt-6 flex w-full items-center justify-center gap-2 rounded-xl bg-white py-3.5 font-bold text-[#064E3B] transition-all hover:bg-emerald-100 disabled:opacity-50"
+                  className="mt-6 flex w-full items-center justify-center gap-2 rounded-xl bg-white py-3.5 font-bold text-brand transition-all hover:bg-brand-accent/10 disabled:opacity-50"
                 >
                   {isLoggingIn ? (
                     <>
@@ -189,11 +189,11 @@ export default function LoginPage() {
             <>
               {/* Nickname Header */}
               <div className="border-b border-white/10 px-8 py-6 text-center">
-                <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-emerald-500/20">
-                  <Sparkles size={24} className="text-emerald-300" />
+                <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-brand-accent/20">
+                  <Sparkles size={24} className="text-brand-accent" />
                 </div>
                 <h2 className="text-xl font-bold text-white">첫 로그인이시네요!</h2>
-                <p className="mt-1 text-sm text-emerald-200/70">닉네임을 설정해보세요</p>
+                <p className="mt-1 text-sm text-brand-accent/70">닉네임을 설정해보세요</p>
               </div>
 
               {/* Nickname Form */}
@@ -217,16 +217,16 @@ export default function LoginPage() {
                           className={cn(
                             "w-full rounded-xl border bg-white/10 px-4 py-3 text-white placeholder:text-white/40 outline-none transition-all focus:bg-white/15",
                             isNicknameAvailable === true
-                              ? "border-emerald-400"
+                              ? "border-brand-accent"
                               : isNicknameAvailable === false
                               ? "border-red-400"
-                              : "border-white/20 focus:border-emerald-400"
+                              : "border-white/20 focus:border-brand-accent"
                           )}
                         />
                         {isNicknameAvailable !== null && (
                           <div className="absolute right-3 top-1/2 -translate-y-1/2">
                             {isNicknameAvailable ? (
-                              <Check size={20} className="text-emerald-400" />
+                              <Check size={20} className="text-brand-accent" />
                             ) : (
                               <X size={20} className="text-red-400" />
                             )}
@@ -252,7 +252,7 @@ export default function LoginPage() {
                       <p className="mt-2 text-sm text-red-300">{nicknameError}</p>
                     )}
                     {isNicknameAvailable && (
-                      <p className="mt-2 text-sm text-emerald-300">
+                      <p className="mt-2 text-sm text-brand-accent">
                         사용 가능한 닉네임이에요! ✨
                       </p>
                     )}
@@ -276,7 +276,7 @@ export default function LoginPage() {
                   className={cn(
                     "mt-6 flex w-full items-center justify-center gap-2 rounded-xl py-3.5 font-bold transition-all",
                     isNicknameAvailable
-                      ? "bg-gradient-to-r from-emerald-400 to-teal-400 text-white shadow-lg shadow-emerald-500/30 hover:shadow-emerald-500/50"
+                      ? "bg-gradient-to-r from-brand-accent to-brand-light text-white shadow-lg shadow-brand-accent/30 hover:shadow-brand-accent/50"
                       : "cursor-not-allowed bg-white/20 text-white/50"
                   )}
                 >
@@ -289,7 +289,7 @@ export default function LoginPage() {
         </div>
 
         {/* Footer */}
-        <p className="mt-8 text-center text-xs text-emerald-200/50">
+        <p className="mt-8 text-center text-xs text-brand-accent/50">
           © 2026 오거서. 성균관대학교 독서 플랫폼
         </p>
       </div>

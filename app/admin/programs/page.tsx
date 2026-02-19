@@ -1,17 +1,17 @@
 "use client"
 
 import { useState } from "react"
-import { Plus, Pencil, Trash2, Book, GripVertical, X, ChevronDown, ChevronUp, CalendarIcon } from "lucide-react"
+import { Plus, Pencil, Trash2, Book, X, ChevronDown, ChevronUp, CalendarIcon } from "lucide-react"
 import { format } from "date-fns"
 import { ko } from "date-fns/locale"
-import { programs as initialPrograms } from "@/lib/mock-data"
-import type { Program } from "@/lib/types"
+import { bundoks as initialBundoks } from "@/lib/mock-data"
+import type { Bundok } from "@/lib/types"
 import { PageHeader } from "@/components/shared/page-header"
 import { DataTable } from "@/components/shared/data-table"
 import { SearchBar } from "@/components/shared/search-bar"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
+// Textarea removed - not needed for bundok form
 import { Label } from "@/components/ui/label"
 import { Calendar } from "@/components/ui/calendar"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
@@ -33,34 +33,34 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog"
 
-const statusLabels: Record<Program["status"], string> = {
-  upcoming: "예정",
-  ongoing: "진행중",
-  completed: "종료",
+const statusLabels: Record<Bundok["status"], string> = {
+  recruiting: "모집 중",
+  confirmed: "확정",
+  completed: "완료",
 }
 
-const statusColors: Record<Program["status"], string> = {
-  upcoming: "bg-blue-50 text-blue-600",
-  ongoing: "bg-green-50 text-green-600",
+const statusColors: Record<Bundok["status"], string> = {
+  recruiting: "bg-blue-50 text-blue-600",
+  confirmed: "bg-green-50 text-green-600",
   completed: "bg-gray-100 text-gray-500",
 }
 
-const statusOptions: Program["status"][] = ["upcoming", "ongoing", "completed"]
+const statusOptions: Bundok["status"][] = ["recruiting", "confirmed", "completed"]
 
 export default function AdminProgramsPage() {
-  const [programList, setProgramList] = useState<Program[]>(() => [...initialPrograms])
+  const [bundokList, setBundokList] = useState<Bundok[]>(() => [...initialBundoks])
   const [search, setSearch] = useState("")
   const [dialogOpen, setDialogOpen] = useState(false)
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
-  const [editingProgram, setEditingProgram] = useState<Program | null>(null)
+  const [editingBundok, setEditingBundok] = useState<Bundok | null>(null)
   const [deletingId, setDeletingId] = useState<number | null>(null)
 
   const [formTitle, setFormTitle] = useState("")
-  const [formDescription, setFormDescription] = useState("")
-  const [formStartDate, setFormStartDate] = useState<Date | undefined>(undefined)
-  const [formEndDate, setFormEndDate] = useState<Date | undefined>(undefined)
-  const [formMaxParticipants, setFormMaxParticipants] = useState("")
-  const [formStatus, setFormStatus] = useState<Program["status"]>("upcoming")
+  const [formBook, setFormBook] = useState("")
+  const [formBookAuthor, setFormBookAuthor] = useState("")
+  const [formDate, setFormDate] = useState<Date | undefined>(undefined)
+  const [formMaxMembers, setFormMaxMembers] = useState("")
+  const [formStatus, setFormStatus] = useState<Bundok["status"]>("recruiting")
 
   // 이달의 책 관련 상태
   const {
@@ -69,7 +69,6 @@ export default function AdminProgramsPage() {
     updateMonthlyBook,
     deleteMonthlyBook,
     reorderMonthlyBooks,
-    getWeeklyBookAssignment,
     setMonthlyBooks,
   } = usePrograms()
   const [isMonthlyBooksOpen, setIsMonthlyBooksOpen] = useState(true)
@@ -86,78 +85,75 @@ export default function AdminProgramsPage() {
   const [deletingBookId, setDeletingBookId] = useState<string | null>(null)
   const [deleteAllDialogOpen, setDeleteAllDialogOpen] = useState(false)
 
-  const weeklyAssignment = getWeeklyBookAssignment()
-
-  const filtered = programList.filter(
-    (p) =>
-      p.title.toLowerCase().includes(search.toLowerCase()) ||
-      p.description.toLowerCase().includes(search.toLowerCase())
+  const filtered = bundokList.filter(
+    (b) =>
+      b.title.toLowerCase().includes(search.toLowerCase()) ||
+      b.book.toLowerCase().includes(search.toLowerCase())
   )
 
   function openCreate() {
-    setEditingProgram(null)
+    setEditingBundok(null)
     setFormTitle("")
-    setFormDescription("")
-    setFormStartDate(undefined)
-    setFormEndDate(undefined)
-    setFormMaxParticipants("")
-    setFormStatus("upcoming")
+    setFormBook("")
+    setFormBookAuthor("")
+    setFormDate(undefined)
+    setFormMaxMembers("5")
+    setFormStatus("recruiting")
     setDialogOpen(true)
   }
 
-  function openEdit(program: Program) {
-    setEditingProgram(program)
-    setFormTitle(program.title)
-    setFormDescription(program.description)
-    // Parse date string to Date objects (format: "2026-03-02 ~ 2026-06-20")
-    const dateParts = program.date.split(" ~ ")
-    if (dateParts.length === 2) {
-      setFormStartDate(new Date(dateParts[0]))
-      setFormEndDate(new Date(dateParts[1]))
-    } else {
-      setFormStartDate(undefined)
-      setFormEndDate(undefined)
-    }
-    setFormMaxParticipants(String(program.maxParticipants))
-    setFormStatus(program.status)
+  function openEdit(bundok: Bundok) {
+    setEditingBundok(bundok)
+    setFormTitle(bundok.title)
+    setFormBook(bundok.book)
+    setFormBookAuthor(bundok.bookAuthor)
+    setFormDate(new Date(bundok.date))
+    setFormMaxMembers(String(bundok.maxMembers))
+    setFormStatus(bundok.status)
     setDialogOpen(true)
   }
 
   function handleSubmit() {
     if (!formTitle.trim()) return
 
-    // Format date string
-    const dateStr = formStartDate && formEndDate
-      ? `${format(formStartDate, "yyyy-MM-dd")} ~ ${format(formEndDate, "yyyy-MM-dd")}`
-      : ""
+    const dateStr = formDate ? format(formDate, "yyyy-MM-dd") : ""
 
-    if (editingProgram) {
-      setProgramList((prev) =>
-        prev.map((p) =>
-          p.id === editingProgram.id
+    if (editingBundok) {
+      setBundokList((prev) =>
+        prev.map((b) =>
+          b.id === editingBundok.id
             ? {
-                ...p,
+                ...b,
                 title: formTitle,
-                description: formDescription,
+                book: formBook,
+                bookAuthor: formBookAuthor,
                 date: dateStr,
-                maxParticipants: Number(formMaxParticipants) || p.maxParticipants,
+                maxMembers: Number(formMaxMembers) || b.maxMembers,
                 status: formStatus,
               }
-            : p
+            : b
         )
       )
     } else {
-      const newProgram: Program = {
-        id: Math.max(0, ...programList.map((p) => p.id)) + 1,
+      const newBundok: Bundok = {
+        id: Math.max(0, ...bundokList.map((b) => b.id)) + 1,
         title: formTitle,
-        description: formDescription,
+        book: formBook,
+        bookAuthor: formBookAuthor,
+        bookCover: "https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=200&h=280&fit=crop",
+        host: "관리자",
+        hostAvatar: "https://picsum.photos/seed/admin/80/80",
+        format: "offline",
+        location: "스터디룸",
         date: dateStr,
+        time: "19:00",
+        duration: 90,
+        currentMembers: 0,
+        maxMembers: Number(formMaxMembers) || 5,
+        tags: [],
         status: formStatus,
-        participants: 0,
-        maxParticipants: Number(formMaxParticipants) || 100,
-        category: "",
       }
-      setProgramList((prev) => [newProgram, ...prev])
+      setBundokList((prev) => [newBundok, ...prev])
     }
     setDialogOpen(false)
   }
@@ -169,7 +165,7 @@ export default function AdminProgramsPage() {
 
   function handleDelete() {
     if (deletingId !== null) {
-      setProgramList((prev) => prev.filter((p) => p.id !== deletingId))
+      setBundokList((prev) => prev.filter((b) => b.id !== deletingId))
     }
     setDeleteDialogOpen(false)
     setDeletingId(null)
@@ -264,20 +260,21 @@ export default function AdminProgramsPage() {
 
   const columns = [
     { key: "id", label: "번호", className: "w-16", hideOnMobile: true },
-    { key: "title", label: "프로그램명" },
-    { key: "date", label: "날짜", className: "w-44", hideOnMobile: true },
+    { key: "title", label: "번독명" },
+    { key: "book", label: "도서", hideOnMobile: true },
+    { key: "date", label: "날짜", className: "w-28", hideOnMobile: true },
     {
-      key: "participants",
-      label: "참가자",
-      className: "w-24",
+      key: "currentMembers",
+      label: "인원",
+      className: "w-20",
       hideOnMobile: true,
-      render: (_: number, row: Program) => `${row.participants}/${row.maxParticipants}`,
+      render: (_: number, row: Bundok) => `${row.currentMembers}/${row.maxMembers}`,
     },
     {
       key: "status",
       label: "상태",
       className: "w-20",
-      render: (val: Program["status"]) => (
+      render: (val: Bundok["status"]) => (
         <span
           className={`inline-flex rounded-full px-2 py-0.5 text-[11px] font-semibold ${statusColors[val]}`}
         >
@@ -289,7 +286,7 @@ export default function AdminProgramsPage() {
       key: "actions",
       label: "관리",
       className: "w-28",
-      render: (_: unknown, row: Program) => (
+      render: (_: unknown, row: Bundok) => (
         <div className="flex items-center gap-1">
           <Button variant="ghost" size="sm" onClick={() => openEdit(row)}>
             <Pencil size={14} />
@@ -328,7 +325,7 @@ export default function AdminProgramsPage() {
               <div>
                 <h2 className="font-bold text-foreground">이달의 책</h2>
                 <p className="text-xs text-muted-foreground">
-                  독서모임(독모)에 자동 배정됩니다 · 현재 {weeklyAssignment.weekNumber}주차
+                  추천 도서 목록 · 현재 {monthlyBooks.length}권
                 </p>
               </div>
             </div>
@@ -342,36 +339,6 @@ export default function AdminProgramsPage() {
 
           {isMonthlyBooksOpen && (
             <div className="border-t border-border p-4">
-              {/* 주간 배정 현황 */}
-              <div className="mb-4 rounded-lg bg-muted/50 p-3">
-                <p className="text-xs font-semibold text-foreground mb-2">
-                  {weeklyAssignment.weekNumber}주차 배정 현황
-                </p>
-                <div className="grid grid-cols-3 gap-2 text-xs">
-                  <div className="rounded-lg bg-amber-50 p-2 text-center">
-                    <p className="font-bold text-amber-700">여명독</p>
-                    <p className="text-amber-600 truncate">
-                      {weeklyAssignment.yeomyeong?.title || "미정"}
-                    </p>
-                  </div>
-                  <div className="rounded-lg bg-sky-50 p-2 text-center">
-                    <p className="font-bold text-sky-700">윤슬독</p>
-                    <p className="text-sky-600 truncate">
-                      {weeklyAssignment.yunseul?.title || "미정"}
-                    </p>
-                  </div>
-                  <div className="rounded-lg bg-indigo-50 p-2 text-center">
-                    <p className="font-bold text-indigo-700">달빛독</p>
-                    <p className="text-indigo-600 truncate">
-                      {weeklyAssignment.dalbit?.title || "미정"}
-                    </p>
-                  </div>
-                </div>
-                <p className="mt-2 text-[10px] text-muted-foreground">
-                  * 여명독/윤슬독은 같은 책, 달빛독은 다음 책을 읽습니다. 매주 자동으로 변경됩니다.
-                </p>
-              </div>
-
               {/* 책 목록 */}
               <div className="space-y-2">
                 {monthlyBooks.map((book, index) => (
@@ -462,116 +429,99 @@ export default function AdminProgramsPage() {
         <DataTable columns={columns} data={filtered} />
       </div>
 
-      {/* 프로그램 등록/수정 다이얼로그 */}
+      {/* 번독 등록/수정 다이얼로그 */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>{editingProgram ? "프로그램 수정" : "프로그램 등록"}</DialogTitle>
+            <DialogTitle>{editingBundok ? "번독 수정" : "번독 등록"}</DialogTitle>
             <DialogDescription>
-              {editingProgram ? "프로그램 정보를 수정합니다." : "새 프로그램을 등록합니다."}
+              {editingBundok ? "번독 정보를 수정합니다." : "새 번독 모임을 등록합니다."}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="program-title">프로그램명</Label>
+              <Label htmlFor="bundok-title">모임 주제</Label>
               <Input
-                id="program-title"
+                id="bundok-title"
                 value={formTitle}
                 onChange={(e) => setFormTitle(e.target.value)}
-                placeholder="프로그램명"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="program-desc">설명</Label>
-              <Textarea
-                id="program-desc"
-                value={formDescription}
-                onChange={(e) => setFormDescription(e.target.value)}
-                placeholder="프로그램 설명"
-                rows={3}
+                placeholder="카페에서 읽는 데미안"
               />
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label>시작일</Label>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant="outline"
-                      className={cn(
-                        "w-full justify-start text-left font-normal",
-                        !formStartDate && "text-muted-foreground"
-                      )}
-                    >
-                      <CalendarIcon className="mr-2 h-4 w-4" />
-                      {formStartDate ? format(formStartDate, "yyyy-MM-dd", { locale: ko }) : "날짜 선택"}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar
-                      mode="single"
-                      selected={formStartDate}
-                      onSelect={setFormStartDate}
-                      locale={ko}
-                      initialFocus
-                    />
-                  </PopoverContent>
-                </Popover>
-              </div>
-              <div className="space-y-2">
-                <Label>종료일</Label>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant="outline"
-                      className={cn(
-                        "w-full justify-start text-left font-normal",
-                        !formEndDate && "text-muted-foreground"
-                      )}
-                    >
-                      <CalendarIcon className="mr-2 h-4 w-4" />
-                      {formEndDate ? format(formEndDate, "yyyy-MM-dd", { locale: ko }) : "날짜 선택"}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar
-                      mode="single"
-                      selected={formEndDate}
-                      onSelect={setFormEndDate}
-                      locale={ko}
-                      disabled={(date) => formStartDate ? date < formStartDate : false}
-                      initialFocus
-                    />
-                  </PopoverContent>
-                </Popover>
-              </div>
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="program-max">최대 참가자</Label>
+                <Label htmlFor="bundok-book">도서명</Label>
                 <Input
-                  id="program-max"
-                  type="number"
-                  value={formMaxParticipants}
-                  onChange={(e) => setFormMaxParticipants(e.target.value)}
-                  placeholder="200"
+                  id="bundok-book"
+                  value={formBook}
+                  onChange={(e) => setFormBook(e.target.value)}
+                  placeholder="데미안"
                 />
               </div>
               <div className="space-y-2">
-                <Label>상태</Label>
-                <Select value={formStatus} onValueChange={(val) => setFormStatus(val as Program["status"])}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {statusOptions.map((s) => (
-                      <SelectItem key={s} value={s}>
-                        {statusLabels[s]}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <Label htmlFor="bundok-author">저자</Label>
+                <Input
+                  id="bundok-author"
+                  value={formBookAuthor}
+                  onChange={(e) => setFormBookAuthor(e.target.value)}
+                  placeholder="헤르만 헤세"
+                />
               </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>날짜</Label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className={cn(
+                        "w-full justify-start text-left font-normal",
+                        !formDate && "text-muted-foreground"
+                      )}
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {formDate ? format(formDate, "yyyy-MM-dd", { locale: ko }) : "날짜 선택"}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={formDate}
+                      onSelect={setFormDate}
+                      locale={ko}
+                      initialFocus
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="bundok-max">최대 인원 (2-5)</Label>
+                <Input
+                  id="bundok-max"
+                  type="number"
+                  min={2}
+                  max={5}
+                  value={formMaxMembers}
+                  onChange={(e) => setFormMaxMembers(e.target.value)}
+                  placeholder="5"
+                />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label>상태</Label>
+              <Select value={formStatus} onValueChange={(val) => setFormStatus(val as Bundok["status"])}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {statusOptions.map((s) => (
+                    <SelectItem key={s} value={s}>
+                      {statusLabels[s]}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           </div>
           <DialogFooter>
@@ -579,18 +529,18 @@ export default function AdminProgramsPage() {
               취소
             </Button>
             <Button onClick={handleSubmit}>
-              {editingProgram ? "수정" : "등록"}
+              {editingBundok ? "수정" : "등록"}
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
-      {/* 프로그램 삭제 다이얼로그 */}
+      {/* 번독 삭제 다이얼로그 */}
       <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>프로그램 삭제</DialogTitle>
-            <DialogDescription>정말로 이 프로그램을 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.</DialogDescription>
+            <DialogTitle>번독 삭제</DialogTitle>
+            <DialogDescription>정말로 이 번독 모임을 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.</DialogDescription>
           </DialogHeader>
           <DialogFooter>
             <Button variant="outline" onClick={() => setDeleteDialogOpen(false)}>

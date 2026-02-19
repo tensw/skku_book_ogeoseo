@@ -59,8 +59,8 @@ export function GNB() {
 
   return (
     <>
-      <header className="fixed top-0 left-0 right-0 z-50 hidden border-b border-border bg-card/95 backdrop-blur-xl lg:block">
-        <div className="mx-auto flex h-16 max-w-5xl items-center justify-between px-8">
+      <header className="fixed top-0 left-0 right-0 z-50 hidden border-b border-[#E8E8E8] bg-white lg:block">
+        <div className="mx-auto flex h-[48px] max-w-5xl items-center justify-between px-4">
           <Link href="/" className="font-serif text-xl font-bold text-primary">
             오거서
           </Link>
@@ -96,7 +96,7 @@ export function GNB() {
 
               {/* Profile Dropdown Menu */}
               {isProfileMenuOpen && (
-                <div className="absolute right-0 top-full mt-2 w-48 overflow-hidden rounded-xl border border-border bg-card shadow-lg">
+                <div className="absolute right-0 top-full mt-2 w-48 overflow-hidden rounded-lg border border-[#E8E8E8] bg-white shadow-[0_2px_8px_rgba(0,0,0,0.08)]">
                   <div className="border-b border-border px-4 py-3">
                     <p className="text-sm font-medium text-foreground">{user?.name}</p>
                     <p className="text-xs text-muted-foreground">{isAdmin ? "관리자" : "학생"}</p>
@@ -144,11 +144,11 @@ export function GNB() {
       {/* Login Modal */}
       {isLoginModalOpen && (
         <div
-          className="fixed inset-0 z-[100] flex items-center justify-center bg-foreground/50 p-4 backdrop-blur-sm"
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 p-4"
           onClick={() => setIsLoginModalOpen(false)}
         >
           <div
-            className="relative w-full max-w-md overflow-hidden rounded-3xl border border-border bg-card shadow-2xl"
+            className="relative w-full max-w-md overflow-hidden rounded-2xl bg-white shadow-[0_4px_16px_rgba(0,0,0,0.12)]"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Modal Header */}
@@ -193,7 +193,7 @@ export function GNB() {
                       setLoginError("")
                     }}
                     placeholder="아이디 입력"
-                    className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+                    className="w-full h-[44px] px-3 bg-[#F5F6F8] rounded-lg text-sm text-[#1E1E1E] placeholder:text-[#A0A0A0] focus:ring-2 focus:ring-primary/30 focus:bg-white border border-transparent focus:border-primary transition-colors outline-none"
                   />
                 </div>
                 <div>
@@ -208,7 +208,7 @@ export function GNB() {
                       setLoginError("")
                     }}
                     placeholder="비밀번호 입력"
-                    className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+                    className="w-full h-[44px] px-3 bg-[#F5F6F8] rounded-lg text-sm text-[#1E1E1E] placeholder:text-[#A0A0A0] focus:ring-2 focus:ring-primary/30 focus:bg-white border border-transparent focus:border-primary transition-colors outline-none"
                   />
                 </div>
               </div>
@@ -218,7 +218,7 @@ export function GNB() {
             <div className="border-t border-border bg-muted/30 px-6 py-4">
               <button
                 onClick={handleLogin}
-                className="w-full rounded-xl bg-primary py-3 text-sm font-bold text-primary-foreground shadow-md transition-all hover:brightness-110"
+                className="w-full h-[48px] bg-primary text-white rounded-lg text-[15px] font-semibold transition-all hover:brightness-110"
               >
                 확인
               </button>

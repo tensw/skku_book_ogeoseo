@@ -185,7 +185,7 @@ export function HomePage() {
   const currentBook = books[currentSlide]
 
   return (
-    <div className="flex flex-col gap-0 pb-6">
+    <div className="flex flex-col gap-2 bg-[#F5F6F8] pb-20">
       {/* Hero Banner */}
       <section className="relative h-56 overflow-hidden sm:h-72">
         <img
@@ -219,7 +219,7 @@ export function HomePage() {
       </section>
 
       {/* Book Carousel - compact horizontal scroll */}
-      <section className="px-5 pt-5 sm:px-8">
+      <section className="bg-white px-4 py-4">
         <div className="mb-3 flex items-center justify-between">
           <h2 className="flex items-center gap-2 text-sm font-bold text-foreground">
             <Sparkles size={14} className="text-tangerine" />
@@ -255,7 +255,7 @@ export function HomePage() {
                 i === currentSlide ? "opacity-100" : "opacity-60"
               )}
             >
-              <div className="relative h-32 w-22 overflow-hidden rounded-2xl shadow-md ring-1 ring-border sm:h-36 sm:w-24 transition-transform group-hover:scale-105">
+              <div className="relative h-32 w-22 overflow-hidden rounded-lg shadow-sm sm:h-36 sm:w-24 transition-transform group-hover:scale-105">
                 <img src={book.cover || "/placeholder.svg"} alt={book.title} className="h-full w-full object-cover" crossOrigin="anonymous" />
                 {isAdmin && (
                   <div className="absolute inset-0 flex items-center justify-center gap-1 bg-foreground/50 opacity-0 transition-opacity group-hover:opacity-100">
@@ -284,7 +284,7 @@ export function HomePage() {
       </section>
 
       {/* 이번주 독모 - Horizontal Slider */}
-      <section className="mt-5 px-5 sm:px-8">
+      <section className="bg-white px-4 py-4">
         <div className="mb-3 flex items-center justify-between">
           <h2 className="flex items-center gap-2 text-sm font-bold text-foreground">
             <Sun size={14} className="text-amber-500" />
@@ -315,7 +315,7 @@ export function HomePage() {
                 key={group.id}
                 onClick={() => setSelectedDokmoGroup(group)}
                 className={cn(
-                  "relative w-44 flex-shrink-0 overflow-hidden rounded-2xl shadow-sm transition-all hover:shadow-md bg-gradient-to-br cursor-pointer hover:scale-[1.02]",
+                  "relative w-44 flex-shrink-0 overflow-hidden rounded-xl transition-all hover:shadow-sm bg-gradient-to-br cursor-pointer hover:scale-[1.02]",
                   gradientClass
                 )}
               >
@@ -360,7 +360,7 @@ export function HomePage() {
       </section>
 
       {/* 이달의 독토 - Horizontal Slider */}
-      <section className="mt-5 px-5 sm:px-8">
+      <section className="bg-white px-4 py-4">
         <div className="mb-3 flex items-center justify-between">
           <h2 className="flex items-center gap-2 text-sm font-bold text-foreground">
             <BookOpen size={14} className="text-emerald" />
@@ -390,7 +390,7 @@ export function HomePage() {
                 key={club.id}
                 onClick={() => setSelectedClub(club.detail)}
                 className={cn(
-                  "group relative w-56 flex-shrink-0 overflow-hidden rounded-2xl shadow-sm transition-all hover:shadow-md bg-gradient-to-br cursor-pointer hover:scale-[1.02]",
+                  "group relative w-56 flex-shrink-0 overflow-hidden rounded-xl transition-all hover:shadow-sm bg-gradient-to-br cursor-pointer hover:scale-[1.02]",
                   gradientClass
                 )}
               >
@@ -449,7 +449,7 @@ export function HomePage() {
       </section>
 
       {/* Live Talk Talk Feed */}
-      <section className="mt-5 px-5 sm:px-8">
+      <section className="bg-white px-4 py-4">
         <div className="mb-3 flex items-center justify-between">
           <h2 className="flex items-center gap-2 text-sm font-bold text-foreground">
             <MessageCircle size={14} className="text-mint" />
@@ -465,7 +465,7 @@ export function HomePage() {
             <Link
               key={post.id}
               href="/talk"
-              className="block overflow-hidden rounded-2xl border border-border bg-card shadow-sm transition-all hover:shadow-md hover:border-mint/30"
+              className="block overflow-hidden rounded-xl border border-[#F0F0F0] bg-white transition-all hover:border-[#E8E8E8]"
             >
               {/* Photo area */}
               {post.photos && post.photos.length > 0 && (
@@ -525,11 +525,11 @@ export function HomePage() {
       {/* Banner Edit Modal */}
       {editingBanner && (
         <div
-          className="fixed inset-0 z-[100] flex items-center justify-center bg-foreground/50 p-4 backdrop-blur-sm"
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 p-4"
           onClick={() => setEditingBanner(null)}
         >
           <div
-            className="relative w-full max-w-lg overflow-hidden rounded-3xl border border-border bg-card shadow-2xl"
+            className="relative w-full max-w-lg overflow-hidden rounded-2xl bg-white shadow-[0_4px_16px_rgba(0,0,0,0.12)]"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between border-b border-border px-6 py-4">
@@ -550,7 +550,7 @@ export function HomePage() {
                   value={editingBanner.imageUrl}
                   onChange={(e) => setEditingBanner({ ...editingBanner, imageUrl: e.target.value })}
                   placeholder="https://..."
-                  className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+                  className="w-full h-[44px] px-3 bg-[#F5F6F8] rounded-lg text-sm text-[#1E1E1E] placeholder:text-[#A0A0A0] focus:ring-2 focus:ring-primary/30 focus:bg-white border border-transparent focus:border-primary transition-colors outline-none"
                 />
               </div>
 
@@ -561,7 +561,7 @@ export function HomePage() {
                   value={editingBanner.title}
                   onChange={(e) => setEditingBanner({ ...editingBanner, title: e.target.value })}
                   placeholder="예: 함께 읽고, 함께 나누는"
-                  className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+                  className="w-full h-[44px] px-3 bg-[#F5F6F8] rounded-lg text-sm text-[#1E1E1E] placeholder:text-[#A0A0A0] focus:ring-2 focus:ring-primary/30 focus:bg-white border border-transparent focus:border-primary transition-colors outline-none"
                 />
               </div>
 
@@ -572,7 +572,7 @@ export function HomePage() {
                   value={editingBanner.subtitle}
                   onChange={(e) => setEditingBanner({ ...editingBanner, subtitle: e.target.value })}
                   placeholder="예: 오거서에서 당신의 독서 라이프를 시작하세요"
-                  className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+                  className="w-full h-[44px] px-3 bg-[#F5F6F8] rounded-lg text-sm text-[#1E1E1E] placeholder:text-[#A0A0A0] focus:ring-2 focus:ring-primary/30 focus:bg-white border border-transparent focus:border-primary transition-colors outline-none"
                 />
               </div>
             </div>
@@ -610,11 +610,11 @@ export function HomePage() {
       {/* Book Detail Modal */}
       {selectedBook && (
         <div
-          className="fixed inset-0 z-[100] flex items-center justify-center bg-foreground/50 p-4 backdrop-blur-sm"
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 p-4"
           onClick={() => setSelectedBook(null)}
         >
           <div
-            className="relative w-full max-w-sm overflow-hidden rounded-3xl border border-border bg-card shadow-2xl"
+            className="relative w-full max-w-sm overflow-hidden rounded-2xl bg-white shadow-[0_4px_16px_rgba(0,0,0,0.12)]"
             onClick={(e) => e.stopPropagation()}
           >
             {/* 책 표지 */}
@@ -750,7 +750,7 @@ function DokmoTimeSelectModal({ group, isOpen, onClose, onApply, appliedInfo }: 
       onClick={onClose}
     >
       <div
-        className="relative w-full max-w-md overflow-hidden rounded-3xl border border-border bg-card shadow-2xl"
+        className="relative w-full max-w-md overflow-hidden rounded-2xl bg-white shadow-[0_4px_16px_rgba(0,0,0,0.12)]"
         onClick={(e) => e.stopPropagation()}
       >
         {/* 헤더 */}

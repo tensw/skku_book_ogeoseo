@@ -1,14 +1,13 @@
 import React from "react"
 import type { Metadata, Viewport } from 'next'
-import { Inter, Playfair_Display } from 'next/font/google'
+import { Noto_Sans_KR } from 'next/font/google'
 import { AuthProvider } from "@/lib/auth-context"
 import { ProgramProvider } from "@/lib/program-context"
 import { SharedDataProvider } from "@/lib/shared-data-context"
 
 import './globals.css'
 
-const inter = Inter({ subsets: ['latin'], variable: '--font-inter' })
-const playfair = Playfair_Display({ subsets: ['latin'], variable: '--font-playfair' })
+const notoSansKR = Noto_Sans_KR({ subsets: ['latin'], variable: '--font-noto-sans-kr', weight: ['300', '400', '500', '700'] })
 
 export const metadata: Metadata = {
   title: '오거서 - 함께 읽고, 함께 나누는 | 독서 토론 플랫폼',
@@ -16,11 +15,11 @@ export const metadata: Metadata = {
 }
 
 export const viewport: Viewport = {
-  themeColor: '#064E3B',
+  /* Brand primary (--brand-mid). Must be a static hex for the <meta> tag. */
+  themeColor: '#2A7D6E',
   width: 'device-width',
   initialScale: 1,
-  maximumScale: 1,
-  userScalable: false,
+  userScalable: true,
 }
 
 export default function RootLayout({
@@ -33,7 +32,7 @@ export default function RootLayout({
       <head>
         <link rel="stylesheet" href="https://spoqa.github.io/spoqa-han-sans/css/SpoqaHanSansNeo.css" />
       </head>
-      <body className={`${inter.variable} ${playfair.variable} font-sans antialiased`}>
+      <body className={`${notoSansKR.variable} font-sans antialiased`}>
         <AuthProvider>
           <ProgramProvider>
             <SharedDataProvider>

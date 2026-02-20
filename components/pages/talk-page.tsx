@@ -200,6 +200,7 @@ export function TalkPage() {
               value={newPost}
               onChange={(e) => setNewPost(e.target.value)}
               placeholder="지금 무엇을 읽고 계신가요?"
+              aria-label="새 게시물 작성"
               className="min-h-[48px] w-full resize-none bg-transparent text-sm text-foreground outline-none placeholder:text-muted-foreground"
               rows={2}
             />
@@ -288,14 +289,14 @@ export function TalkPage() {
                           "rounded-full p-1 transition-colors",
                           isHidden ? "text-amber-600 hover:text-amber-700" : "text-muted-foreground hover:text-amber-600"
                         )}
-                        title={isHidden ? "숨김 해제" : "숨기기"}
+                        aria-label={isHidden ? "숨김 해제" : "숨기기"}
                       >
                         {isHidden ? <Eye size={14} /> : <EyeOff size={14} />}
                       </button>
                       <button
                         onClick={() => handleDelete(post.id)}
                         className="rounded-full p-1 text-muted-foreground transition-colors hover:text-red-500"
-                        title="삭제"
+                        aria-label="게시물 삭제"
                       >
                         <Trash2 size={14} />
                       </button>
@@ -376,7 +377,7 @@ export function TalkPage() {
                         <span className="text-[10px] text-muted-foreground">{reply.time}</span>
                       </div>
                       <p className="mt-0.5 text-xs leading-relaxed text-foreground">{reply.content}</p>
-                      <button className="mt-1 flex items-center gap-1 text-[10px] text-muted-foreground hover:text-tangerine">
+                      <button className="mt-1 flex items-center gap-1 text-[10px] text-muted-foreground hover:text-tangerine" aria-label={`좋아요 ${reply.likes}개`}>
                         <Heart size={10} />
                         {reply.likes}
                       </button>
@@ -394,17 +395,21 @@ export function TalkPage() {
         <div
           className="fixed inset-0 z-[100] flex items-center justify-center bg-foreground/50 p-4 backdrop-blur-sm"
           onClick={() => setDeleteConfirm(null)}
+          role="alertdialog"
+          aria-modal="true"
+          aria-labelledby="delete-post-title"
+          aria-describedby="delete-post-desc"
         >
           <div
             className="w-full max-w-sm overflow-hidden rounded-2xl border border-border bg-card shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="px-6 py-6 text-center">
-              <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-red-100">
+              <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-red-100" aria-hidden="true">
                 <Trash2 size={24} className="text-red-500" />
               </div>
-              <h3 className="text-lg font-bold text-foreground">게시물 삭제</h3>
-              <p className="mt-2 text-sm text-muted-foreground">
+              <h3 id="delete-post-title" className="text-lg font-bold text-foreground">게시물 삭제</h3>
+              <p id="delete-post-desc" className="mt-2 text-sm text-muted-foreground">
                 정말 이 게시물을 삭제하시겠습니까?<br />
                 이 작업은 되돌릴 수 없습니다.
               </p>

@@ -13,19 +13,12 @@ interface BookCardProps {
 }
 
 export function BookCard({ id, title, author, cover, category, publisher, onClick, className }: BookCardProps) {
-  const content = (
-    <div
-      className={cn(
-        "overflow-hidden rounded-2xl border border-border bg-card shadow-sm transition-all hover:shadow-md",
-        onClick && "cursor-pointer",
-        className
-      )}
-      onClick={onClick}
-    >
+  const inner = (
+    <>
       <div className="aspect-[3/4] overflow-hidden">
         <img
           src={cover || "/placeholder.svg"}
-          alt={title}
+          alt={`${title} 표지`}
           className="h-full w-full object-cover transition-transform duration-300 hover:scale-105"
           crossOrigin="anonymous"
         />
@@ -42,16 +35,35 @@ export function BookCard({ id, title, author, cover, category, publisher, onClic
           </span>
         )}
       </div>
-    </div>
+    </>
   )
 
   if (onClick) {
-    return content
+    return (
+      <button
+        type="button"
+        className={cn(
+          "overflow-hidden rounded-2xl border border-border bg-card shadow-sm transition-all hover:shadow-md hover:-translate-y-0.5 text-left w-full",
+          className
+        )}
+        onClick={onClick}
+        aria-label={`${title} - ${author}`}
+      >
+        {inner}
+      </button>
+    )
   }
 
   return (
-    <Link href={`/guide/${id}`} className="block">
-      {content}
+    <Link href={`/guide/${id}`} className="block" aria-label={`${title} - ${author} 상세보기`}>
+      <div
+        className={cn(
+          "overflow-hidden rounded-2xl border border-border bg-card shadow-sm transition-all hover:shadow-md hover:-translate-y-0.5",
+          className
+        )}
+      >
+        {inner}
+      </div>
     </Link>
   )
 }

@@ -45,6 +45,9 @@ export function DataTable({ columns, data, onRowClick, className }: DataTablePro
               <TableRow
                 key={row.id ?? i}
                 onClick={() => onRowClick?.(row)}
+                onKeyDown={onRowClick ? (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onRowClick(row); } } : undefined}
+                tabIndex={onRowClick ? 0 : undefined}
+                role={onRowClick ? "button" : undefined}
                 className={cn(onRowClick && "cursor-pointer")}
               >
                 {columns.map((col) => (
@@ -74,6 +77,9 @@ export function DataTable({ columns, data, onRowClick, className }: DataTablePro
           <div
             key={row.id ?? i}
             onClick={() => onRowClick?.(row)}
+            onKeyDown={onRowClick ? (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onRowClick(row); } } : undefined}
+            tabIndex={onRowClick ? 0 : undefined}
+            role={onRowClick ? "button" : undefined}
             className={cn(
               "border-b border-border px-5 py-4 sm:px-8",
               onRowClick && "cursor-pointer active:bg-muted/50"

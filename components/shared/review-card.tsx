@@ -20,7 +20,7 @@ export function ReviewCard({ review, className }: ReviewCardProps) {
         <div className="flex items-center gap-3">
           <img
             src={review.user.avatar || "/placeholder.svg"}
-            alt={review.user.name}
+            alt={`${review.user.name} 프로필 사진`}
             className="h-9 w-9 rounded-full object-cover ring-2 ring-border"
             crossOrigin="anonymous"
           />
@@ -46,7 +46,7 @@ export function ReviewCard({ review, className }: ReviewCardProps) {
         <div className="h-14 w-10 flex-shrink-0 overflow-hidden rounded-lg shadow-sm">
           <img
             src={review.book.cover || "/placeholder.svg"}
-            alt={review.book.title}
+            alt={`${review.book.title} 표지`}
             className="h-full w-full object-cover"
             crossOrigin="anonymous"
           />
@@ -54,11 +54,12 @@ export function ReviewCard({ review, className }: ReviewCardProps) {
         <div className="flex-1">
           <p className="text-xs font-bold text-foreground">{review.book.title}</p>
           <p className="text-[11px] text-muted-foreground">{review.book.author}</p>
-          <div className="mt-1 flex gap-0.5">
+          <div className="mt-1 flex gap-0.5" role="img" aria-label={`${review.rating}점 (5점 만점)`}>
             {[1, 2, 3, 4, 5].map((s) => (
               <Star
                 key={s}
                 size={11}
+                aria-hidden="true"
                 className={cn(s <= review.rating ? "fill-tangerine text-tangerine" : "text-border")}
               />
             ))}
@@ -76,6 +77,8 @@ export function ReviewCard({ review, className }: ReviewCardProps) {
         <button
           onClick={() => setLiked((prev) => !prev)}
           className="flex items-center gap-1.5 text-xs text-muted-foreground transition-colors"
+          aria-label={liked ? "좋아요 취소" : "좋아요"}
+          aria-pressed={liked}
         >
           <Heart
             size={15}
@@ -85,7 +88,7 @@ export function ReviewCard({ review, className }: ReviewCardProps) {
             {review.likes + (liked ? 1 : 0)}
           </span>
         </button>
-        <button className="flex items-center gap-1.5 text-xs text-muted-foreground">
+        <button className="flex items-center gap-1.5 text-xs text-muted-foreground" aria-label={`댓글 ${review.comments}개`}>
           <MessageCircle size={15} />
           {review.comments}
         </button>

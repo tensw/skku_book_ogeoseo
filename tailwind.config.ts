@@ -11,8 +11,7 @@ const config: Config = {
   theme: {
     extend: {
       fontFamily: {
-        sans: ['"Spoqa Han Sans Neo"', 'var(--font-inter)', 'system-ui', 'sans-serif'],
-        serif: ['var(--font-playfair)', 'Georgia', 'serif'],
+        sans: ['var(--font-noto-sans-kr)', 'Noto Sans KR', 'system-ui', 'sans-serif'],
       },
       colors: {
         background: 'hsl(var(--background))',
@@ -52,17 +51,29 @@ const config: Config = {
         emerald: 'hsl(var(--emerald))',
         tangerine: 'hsl(var(--tangerine))',
         mint: 'hsl(var(--mint))',
-        /* 네이버 모바일 시맨틱 색상 */
-        page: '#F5F6F8',
-        surface: '#FFFFFF',
-        divider: 'hsl(var(--divider))',
-        'text-primary': '#1E1E1E',
-        'text-secondary': '#787878',
-        'text-tertiary': '#A0A0A0',
-        'border-light': '#E8E8E8',
-        badge: '#FF3B30',
-        link: '#4A89DC',
-        urgent: '#FF6600',
+        /* Brand semantic tokens */
+        brand: {
+          dark: 'hsl(var(--brand-dark))',
+          DEFAULT: 'hsl(var(--brand-mid))',
+          light: 'hsl(var(--brand-light))',
+          accent: 'hsl(var(--brand-accent))',
+          surface: 'hsl(var(--brand-surface))',
+        },
+        /* External service: Aladin */
+        aladin: 'hsl(var(--aladin))',
+        /* Gold / Stamp reward */
+        gold: {
+          DEFAULT: 'hsl(var(--gold))',
+          dark: 'hsl(var(--gold-dark))',
+          light: 'hsl(var(--gold-light))',
+          copper: 'hsl(var(--gold-copper))',
+        },
+        /* Disabled / unearned states */
+        disabled: {
+          border: 'hsl(var(--disabled-border))',
+          bg: 'hsl(var(--disabled-bg))',
+          'bg-dark': 'hsl(var(--disabled-bg-dark))',
+        },
         chart: {
           '1': 'hsl(var(--chart-1))',
           '2': 'hsl(var(--chart-2))',

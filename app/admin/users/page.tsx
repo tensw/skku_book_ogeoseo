@@ -567,7 +567,7 @@ export default function AdminUsersPage() {
                     </div>
                     <div>
                       <p className="text-sm font-bold text-foreground">{selectedUser.programs.dokmo}</p>
-                      <p className="text-[10px] text-muted-foreground">독모 참여</p>
+                      <p className="text-[10px] text-muted-foreground">번독 참여</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
@@ -576,7 +576,7 @@ export default function AdminUsersPage() {
                     </div>
                     <div>
                       <p className="text-sm font-bold text-foreground">{selectedUser.programs.dokto}</p>
-                      <p className="text-[10px] text-muted-foreground">독토 참여</p>
+                      <p className="text-[10px] text-muted-foreground">고전100선 참여</p>
                     </div>
                   </div>
                 </div>

@@ -1,9 +1,8 @@
 "use client"
 
-import { useState } from "react"
+import React, { useState, useEffect } from "react"
 import {
   BookOpen,
-  Award,
   FileText,
   ChevronRight,
   Sparkles,
@@ -17,23 +16,23 @@ import {
   Languages,
   BookMarked,
   Landmark,
-  X,
   Star,
-  Heart,
-  MessageCircle,
   Users,
   Clock,
-  GraduationCap,
-  Sun,
-  Sunset,
-  Moon,
+  MapPin,
+  Wifi,
+  Monitor,
+  User,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
-import { KDCBadge } from "@/components/kdc-badge"
 import type { KDCBadgeData } from "@/components/kdc-badge"
 import { KDCRadarChart } from "@/components/radar-chart"
 import { useSharedData } from "@/lib/shared-data-context"
-import { usePrograms } from "@/lib/program-context"
+import { StampBoard } from "@/components/library/stamp-board"
+import { BadgeCollection } from "@/components/library/badge-collection"
+import { BadgeReviewModal } from "@/components/library/badge-review-modal"
+import { AllReviewsModal } from "@/components/library/all-reviews-modal"
+import { myReviews, programColors, programLabels, KDC_BADGE_GRADIENTS } from "@/components/library/library-types"
 
 const radarData = [
   { label: "총류", value: 30, shortLabel: "000" },
@@ -48,332 +47,121 @@ const radarData = [
   { label: "역사", value: 70, shortLabel: "900" },
 ]
 
-const kdcBadges: KDCBadgeData[] = [
-  {
-    id: "000",
-    label: "총류",
-    icon: <Key size={18} />,
-    earned: true,
-    count: 1,
-    gradient: "linear-gradient(135deg, #064E3B 0%, #0D7349 50%, #042F24 100%)",
-    borderGradient: "linear-gradient(135deg, #34D399, #6EE7B7, #10B981)",
-  },
-  {
-    id: "100",
-    label: "철학",
-    icon: <Brain size={18} />,
-    earned: true,
-    count: 2,
-    gradient: "linear-gradient(135deg, #042F24 0%, #064E3B 50%, #021A14 100%)",
-    borderGradient: "linear-gradient(135deg, #6EE7B7, #A7F3D0, #34D399)",
-  },
-  {
-    id: "200",
-    label: "종교",
-    icon: <Church size={18} />,
-    earned: false,
-    count: 0,
-    gradient: "linear-gradient(135deg, #1A3C34 0%, #2D5A4E 50%, #0F2820 100%)",
-    borderGradient: "linear-gradient(135deg, #86EFAC, #BBF7D0, #4ADE80)",
-  },
-  {
-    id: "300",
-    label: "사회과학",
-    icon: <Scale size={18} />,
-    earned: true,
-    count: 2,
-    gradient: "linear-gradient(135deg, #047857 0%, #059669 50%, #065F46 100%)",
-    borderGradient: "linear-gradient(135deg, #A7F3D0, #D1FAE5, #6EE7B7)",
-  },
-  {
-    id: "400",
-    label: "자연과학",
-    icon: <Leaf size={18} />,
-    earned: true,
-    count: 1,
-    gradient: "linear-gradient(135deg, #022C1E 0%, #064E3B 50%, #011B12 100%)",
-    borderGradient: "linear-gradient(135deg, #34D399, #6EE7B7, #10B981)",
-  },
-  {
-    id: "500",
-    label: "기술과학",
-    icon: <Cpu size={18} />,
-    earned: true,
-    count: 1,
-    gradient: "linear-gradient(135deg, #14532D 0%, #166534 50%, #0A3B1E 100%)",
-    borderGradient: "linear-gradient(135deg, #4ADE80, #86EFAC, #22C55E)",
-  },
-  {
-    id: "600",
-    label: "예술",
-    icon: <Palette size={18} />,
-    earned: true,
-    count: 1,
-    gradient: "linear-gradient(135deg, #115E45 0%, #0D9065 50%, #0A4030 100%)",
-    borderGradient: "linear-gradient(135deg, #5EEAD4, #99F6E4, #2DD4BF)",
-  },
-  {
-    id: "700",
-    label: "언어",
-    icon: <Languages size={18} />,
-    earned: false,
-    count: 0,
-    gradient: "linear-gradient(135deg, #1A3A30 0%, #2D6B55 50%, #102820 100%)",
-    borderGradient: "linear-gradient(135deg, #6EE7B7, #A7F3D0, #34D399)",
-  },
-  {
-    id: "800",
-    label: "문학",
-    icon: <BookMarked size={18} />,
-    earned: true,
-    count: 2,
-    gradient: "linear-gradient(135deg, #064E3B 0%, #10B981 50%, #022C22 100%)",
-    borderGradient: "linear-gradient(135deg, #6EE7B7, #D1FAE5, #34D399)",
-  },
-  {
-    id: "900",
-    label: "역사",
-    icon: <Landmark size={18} />,
-    earned: true,
-    count: 1,
-    gradient: "linear-gradient(135deg, #1B4D3E 0%, #2F7A5E 50%, #0E3328 100%)",
-    borderGradient: "linear-gradient(135deg, #86EFAC, #D1FAE5, #4ADE80)",
-  },
-]
-
-/* ── 프로그램 타입 정의 ── */
-type ProgramType = "dokmo" | "dokto" | "general"
-
-const programLabels: Record<ProgramType, string> = {
-  dokmo: "독모",
-  dokto: "독토",
-  general: "일반",
+const kdcBadgeIcons: Record<string, React.ReactNode> = {
+  "000": <Key size={18} />,
+  "100": <Brain size={18} />,
+  "200": <Church size={18} />,
+  "300": <Scale size={18} />,
+  "400": <Leaf size={18} />,
+  "500": <Cpu size={18} />,
+  "600": <Palette size={18} />,
+  "700": <Languages size={18} />,
+  "800": <BookMarked size={18} />,
+  "900": <Landmark size={18} />,
 }
 
-const programColors: Record<ProgramType, { bg: string; text: string }> = {
-  dokmo: { bg: "bg-emerald", text: "text-white" },
-  dokto: { bg: "bg-tangerine", text: "text-white" },
-  general: { bg: "bg-primary", text: "text-white" },
+const kdcBadgeMeta: Record<string, { earned: boolean; count: number }> = {
+  "000": { earned: true, count: 1 },
+  "100": { earned: true, count: 2 },
+  "200": { earned: false, count: 0 },
+  "300": { earned: true, count: 2 },
+  "400": { earned: true, count: 1 },
+  "500": { earned: true, count: 1 },
+  "600": { earned: true, count: 1 },
+  "700": { earned: false, count: 0 },
+  "800": { earned: true, count: 2 },
+  "900": { earned: true, count: 1 },
 }
 
-/* ── My Reviews (프로그램별 분류) ── */
-const myReviews = [
-  {
-    id: 1,
-    badgeId: "800",
-    program: "dokmo" as ProgramType,
-    book: { title: "미드나이트 라이브러리", author: "매트 헤이그", cover: "https://picsum.photos/seed/rev4/100/140" },
-    rating: 5,
-    text: "살아보지 못한 삶들을 돌아보며 지금 이 순간의 소중함을 다시 느끼게 해준 책. 매트 헤이그의 따뜻한 문장들이 마음속에 오래 남았습니다.",
-    likes: 42,
-    comments: 7,
-    timeAgo: "2일 전",
-  },
-  {
-    id: 2,
-    badgeId: "800",
-    program: "dokto" as ProgramType,
-    book: { title: "1984", author: "조지 오웰", cover: "https://picsum.photos/seed/rev6/100/140" },
-    rating: 5,
-    text: "디스토피아의 고전을 다시 읽으니 소름이 돋을 정도로 현실과 겹치는 부분이 많았어요. 필독서 중의 필독서.",
-    likes: 67,
-    comments: 23,
-    timeAgo: "5일 전",
-  },
-  {
-    id: 3,
-    badgeId: "300",
-    program: "dokmo" as ProgramType,
-    book: { title: "아주 작은 습관의 힘", author: "제임스 클리어", cover: "https://picsum.photos/seed/rev3/100/140" },
-    rating: 4,
-    text: "습관을 '정체성의 변화'로 바라보는 시선이 인상 깊었어요. 내가 어떤 사람이 되고 싶은지에서 출발하는 접근이 실천력을 높여주네요.",
-    likes: 38,
-    comments: 12,
-    timeAgo: "1주 전",
-  },
-  {
-    id: 4,
-    badgeId: "900",
-    program: "dokto" as ProgramType,
-    book: { title: "사피엔스", author: "유발 하라리", cover: "https://picsum.photos/seed/rev2/100/140" },
-    rating: 5,
-    text: "인류 역사를 전혀 새로운 관점에서 풀어낸 책. 농업혁명이 오히려 인류를 불행하게 만들었다는 주장은 충격적이면서도 설득력 있었어요.",
-    likes: 56,
-    comments: 18,
-    timeAgo: "1주 전",
-  },
-  {
-    id: 5,
-    badgeId: "100",
-    program: "general" as ProgramType,
-    book: { title: "생각에 관한 생각", author: "대니얼 카너먼", cover: "https://picsum.photos/seed/rev5/100/140" },
-    rating: 4,
-    text: "시스템1과 시스템2의 개념을 알고 나면 일상에서 내 생각의 오류가 보이기 시작합니다. 재독할 가치가 충분한 명저!",
-    likes: 31,
-    comments: 9,
-    timeAgo: "2주 전",
-  },
-  {
-    id: 6,
-    badgeId: "000",
-    program: "dokmo" as ProgramType,
-    book: { title: "정보의 세계사", author: "제임스 글릭", cover: "https://picsum.photos/seed/rev7/100/140" },
-    rating: 4,
-    text: "정보라는 개념이 인류 문명에 미친 영향을 방대하게 조망한 책. 아날로그에서 디지털까지의 여정이 흥미롭습니다.",
-    likes: 19,
-    comments: 5,
-    timeAgo: "3주 전",
-  },
-  {
-    id: 7,
-    badgeId: "400",
-    program: "dokto" as ProgramType,
-    book: { title: "코스모스", author: "칼 세이건", cover: "https://picsum.photos/seed/rev8/100/140" },
-    rating: 5,
-    text: "우주의 광활함 앞에서 인간의 존재를 다시 생각하게 만드는 명저. 칼 세이건의 시적인 문체가 과학에 아름다움을 더합니다.",
-    likes: 44,
-    comments: 14,
-    timeAgo: "3주 전",
-  },
-  {
-    id: 8,
-    badgeId: "500",
-    program: "general" as ProgramType,
-    book: { title: "클린 코드", author: "로버트 C. 마틴", cover: "https://picsum.photos/seed/rev9/100/140" },
-    rating: 4,
-    text: "개발자라면 한 번쯤 읽어야 할 책. 깨끗한 코드 작성의 원칙과 실전 사례가 유익했어요.",
-    likes: 27,
-    comments: 8,
-    timeAgo: "1달 전",
-  },
-  {
-    id: 9,
-    badgeId: "600",
-    program: "dokmo" as ProgramType,
-    book: { title: "미술관에 간 화학자", author: "전창림", cover: "https://picsum.photos/seed/rev10/100/140" },
-    rating: 4,
-    text: "화학적 시선으로 명화를 분석하는 독특한 접근. 예술과 과학의 만남이 신선합니다.",
-    likes: 22,
-    comments: 6,
-    timeAgo: "1달 전",
-  },
-  {
-    id: 10,
-    badgeId: "300",
-    program: "dokto" as ProgramType,
-    book: { title: "정의란 무엇인가", author: "마이클 샌델", cover: "https://picsum.photos/seed/rev11/100/140" },
-    rating: 5,
-    text: "정의에 대한 철학적 논쟁을 현실 사례와 엮어 풀어내는 샌델 교수의 필력이 돋보입니다.",
-    likes: 53,
-    comments: 20,
-    timeAgo: "1달 전",
-  },
-]
+const kdcBadges: KDCBadgeData[] = KDC_BADGE_GRADIENTS.map((g) => ({
+  ...g,
+  icon: kdcBadgeIcons[g.id],
+  earned: kdcBadgeMeta[g.id].earned,
+  count: kdcBadgeMeta[g.id].count,
+}))
 
-const badgeIdToLabel: Record<string, string> = {
-  "000": "총류", "100": "철학", "200": "종교", "300": "사회과학",
-  "400": "자연과학", "500": "기술과학", "600": "예술", "700": "언어",
-  "800": "문학", "900": "역사",
+const formatIcons: Record<string, typeof MapPin> = {
+  offline: MapPin,
+  online: Wifi,
+  hybrid: Monitor,
 }
 
-// 독모 그룹 아이콘 매핑
-const dokmoGroupIcons: Record<string, typeof Sun> = {
-  yeomyeong: Sun,
-  yunseul: Sunset,
-  dalbit: Moon,
+const statusLabels: Record<string, string> = {
+  recruiting: "모집 중",
+  confirmed: "확정",
+  completed: "완료",
 }
 
-const dokmoGroupColors: Record<string, string> = {
-  yeomyeong: "bg-amber-500",
-  yunseul: "bg-orange-500",
-  dalbit: "bg-indigo-500",
+const statusColors: Record<string, string> = {
+  recruiting: "bg-primary/10 text-primary",
+  confirmed: "bg-emerald/10 text-emerald",
+  completed: "bg-muted text-muted-foreground",
 }
+
+type TabType = "history" | "reviews" | "certificate"
 
 export function LibraryPage() {
-  // Shared data context
-  const {
-    readingGroups,
-    discussions,
-    joinedDoktoClubs,
-    appliedDokmoSessions,
-  } = useSharedData()
-  const { getWeeklyBookAssignment } = usePrograms()
+  const { bundoks, joinedBundoks } = useSharedData()
 
   const totalBadges = kdcBadges.filter((b) => b.earned).length
   const totalReviews = kdcBadges.reduce((sum, b) => sum + b.count, 0)
+
+  const [activeTab, setActiveTab] = useState<TabType>("history")
   const [selectedBadgeId, setSelectedBadgeId] = useState<string | null>(null)
   const [likedReviews, setLikedReviews] = useState<number[]>([])
   const [showAllReviews, setShowAllReviews] = useState(false)
-  const [reviewProgramFilter, setReviewProgramFilter] = useState<ProgramType | null>(null)
+  const [nickname, setNickname] = useState("")
 
-  const selectedBadge = kdcBadges.find((b) => b.id === selectedBadgeId)
-  const filteredReviews = myReviews.filter((r) => r.badgeId === selectedBadgeId)
+  useEffect(() => {
+    const saved = localStorage.getItem("ogeoseo_nickname")
+    if (saved) setNickname(saved)
+  }, [])
 
-  // 전체보기에서 프로그램별 필터링
-  const allFilteredReviews = reviewProgramFilter
-    ? myReviews.filter((r) => r.program === reviewProgramFilter)
-    : myReviews
+  const selectedBadge = kdcBadges.find((b) => b.id === selectedBadgeId) ?? null
+  const badgeReviews = myReviews.filter((r) => r.badgeId === selectedBadgeId)
 
-  // 프로그램별 서평 개수
-  const reviewCountByProgram: Record<ProgramType, number> = {
-    dokmo: myReviews.filter((r) => r.program === "dokmo").length,
-    dokto: myReviews.filter((r) => r.program === "dokto").length,
-    general: myReviews.filter((r) => r.program === "general").length,
-  }
-
-  // 신청한 독토 목록
-  const myDoktoClubs = discussions.filter((d) => joinedDoktoClubs.includes(d.id))
-
-  // 신청한 독모 세션 파싱 (format: "groupId-time-date")
-  const parsedDokmoSessions = appliedDokmoSessions.map((session) => {
-    const [groupId, time, date] = session.split("-")
-    const group = readingGroups.find((g) => g.id === groupId)
-    const timeSlot = group?.timeSlots.find((t) => t.time === time)
-    const weeklyAssignment = getWeeklyBookAssignment()
-    const book = groupId === "dalbit" ? weeklyAssignment.dalbit : weeklyAssignment.yeomyeong
-    return {
-      sessionKey: session,
-      groupId,
-      groupName: group?.name || "",
-      time,
-      displayTime: timeSlot?.displayTime || time,
-      location: timeSlot?.location || "",
-      date,
-      book,
-    }
-  })
+  // 참여한 번독 목록
+  const myBundoks = bundoks.filter((b) => joinedBundoks.includes(b.id))
 
   const toggleLike = (id: number) => {
     setLikedReviews((prev) => prev.includes(id) ? prev.filter((r) => r !== id) : [...prev, id])
   }
 
-  return (
-    <div className="flex flex-col gap-6 pb-24">
-      {/* Header */}
-      <header className="px-5 pt-5 sm:px-8">
-        <h1 className="font-serif text-2xl font-bold text-foreground">
-          내 서재
-        </h1>
-        <p className="mt-1 text-xs text-muted-foreground sm:text-sm">
-          뱃지 {totalBadges}개 획득 / 서평 {totalReviews}편 작성
-        </p>
-      </header>
+  const tabs: { id: TabType; label: string }[] = [
+    { id: "history", label: "모임 이력" },
+    { id: "reviews", label: "내 서평" },
+    { id: "certificate", label: "독서인증서" },
+  ]
 
-      {/* Radar Chart Section */}
-      <section className="mx-5 overflow-hidden rounded-3xl border border-border bg-card shadow-lg sm:mx-8">
+  return (
+    <div className="flex flex-col gap-0 pb-24">
+      {/* Profile Card */}
+      <section className="px-5 pt-5 sm:px-8">
+        <div className="flex items-center gap-4 rounded-2xl border border-border bg-card p-4 shadow-sm">
+          <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary/10">
+            <User size={24} className="text-primary" />
+          </div>
+          <div className="flex-1">
+            <h1 className="text-lg font-bold text-foreground">{nickname || "독서인"}</h1>
+            <p className="text-xs text-muted-foreground">
+              뱃지 {totalBadges}개 · 서평 {totalReviews}편
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* Radar Chart */}
+      <section className="mt-4 mx-5 overflow-hidden rounded-3xl border border-border bg-card shadow-lg sm:mx-8">
         <div className="flex items-center justify-between px-5 pt-4">
           <h2 className="flex items-center gap-2 text-sm font-bold text-foreground">
             <Sparkles size={16} className="text-emerald" />
             지식 레이더
           </h2>
-          <span className="text-[10px] text-muted-foreground">
-            KDC 10개 분류
-          </span>
+          <span className="text-[10px] text-muted-foreground">KDC 10개 분류</span>
         </div>
         <div className="mx-auto flex h-56 w-56 items-center justify-center p-2">
           <KDCRadarChart data={radarData} />
         </div>
-        {/* Preferred Category */}
         <div className="border-t border-border bg-gradient-to-r from-primary/5 to-emerald/5 px-5 py-3">
           <p className="text-center text-sm text-foreground">
             <span className="font-medium">당신은 </span>
@@ -383,671 +171,168 @@ export function LibraryPage() {
         </div>
       </section>
 
-      {/* Stamp Board Section - Gold Ginkgo Leaf */}
-      <section className="mx-5 overflow-hidden rounded-3xl border border-amber-200 bg-gradient-to-br from-amber-50 to-yellow-50 shadow-lg sm:mx-8">
-        {/* Premium Gold Header */}
-        <div
-          className="h-1 w-full"
-          style={{
-            background: "linear-gradient(90deg, #D4A574, #F4D03F, #E6B800, #F4D03F, #D4A574)",
-          }}
-        />
-        <div className="flex items-center justify-between px-5 pt-4">
-          <h2 className="flex items-center gap-2 text-sm font-bold text-amber-800">
-            <Award size={16} className="text-amber-600" />
-            서평 스탬프
-          </h2>
-          <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-semibold text-amber-700">
-            {totalReviews}/20개 수집
-          </span>
-        </div>
-
-        {/* Stamp Grid */}
-        <div className="grid grid-cols-5 gap-3 p-4">
-          {Array.from({ length: 20 }).map((_, index) => {
-            const isFilled = index < totalReviews
-            const isReward10 = index === 9
-            const isReward20 = index === 19
-            return (
-              <div
-                key={index}
-                className="relative flex items-center justify-center"
-              >
-                {isFilled ? (
-                  /* Gold Ginkgo Leaf - Filled */
-                  <div className="relative">
-                    <svg
-                      viewBox="0 0 40 48"
-                      className="h-12 w-10 drop-shadow-md"
-                      style={{ filter: "drop-shadow(0 2px 4px rgba(212, 165, 116, 0.4))" }}
-                    >
-                      <defs>
-                        <linearGradient id={`goldGradient-${index}`} x1="0%" y1="0%" x2="100%" y2="100%">
-                          <stop offset="0%" stopColor="#F4D03F" />
-                          <stop offset="30%" stopColor="#E6B800" />
-                          <stop offset="50%" stopColor="#F4D03F" />
-                          <stop offset="70%" stopColor="#D4A574" />
-                          <stop offset="100%" stopColor="#C9A227" />
-                        </linearGradient>
-                        <linearGradient id={`goldShine-${index}`} x1="0%" y1="0%" x2="100%" y2="0%">
-                          <stop offset="0%" stopColor="rgba(255,255,255,0)" />
-                          <stop offset="50%" stopColor="rgba(255,255,255,0.3)" />
-                          <stop offset="100%" stopColor="rgba(255,255,255,0)" />
-                        </linearGradient>
-                      </defs>
-                      {/* Ginkgo Leaf Shape */}
-                      <path
-                        d="M20 2 C20 2 8 10 6 22 C4 32 10 40 20 46 C30 40 36 32 34 22 C32 10 20 2 20 2 Z"
-                        fill={`url(#goldGradient-${index})`}
-                        stroke="#C9A227"
-                        strokeWidth="1"
-                      />
-                      {/* Center split */}
-                      <path
-                        d="M20 8 L20 42"
-                        stroke="#B8860B"
-                        strokeWidth="0.5"
-                        opacity="0.5"
-                      />
-                      {/* Leaf veins */}
-                      <path
-                        d="M20 15 C15 20 12 28 14 36"
-                        stroke="#B8860B"
-                        strokeWidth="0.3"
-                        fill="none"
-                        opacity="0.4"
-                      />
-                      <path
-                        d="M20 15 C25 20 28 28 26 36"
-                        stroke="#B8860B"
-                        strokeWidth="0.3"
-                        fill="none"
-                        opacity="0.4"
-                      />
-                      {/* Shine effect */}
-                      <ellipse
-                        cx="15"
-                        cy="18"
-                        rx="4"
-                        ry="6"
-                        fill="rgba(255,255,255,0.2)"
-                      />
-                    </svg>
-                  </div>
-                ) : (
-                  /* Empty Slot */
-                  <div className="flex h-12 w-10 items-center justify-center rounded-lg border-2 border-dashed border-amber-200 bg-amber-50/50">
-                    <span className="text-[10px] font-medium text-amber-300">{index + 1}</span>
-                  </div>
-                )}
-                {/* Reward markers */}
-                {isReward10 && (
-                  <div className="absolute -bottom-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-gradient-to-br from-orange-400 to-orange-600 text-[8px] font-bold text-white shadow-sm">
-                    🎁
-                  </div>
-                )}
-                {isReward20 && (
-                  <div className="absolute -bottom-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-gradient-to-br from-purple-400 to-purple-600 text-[8px] font-bold text-white shadow-sm">
-                    🏆
-                  </div>
-                )}
-              </div>
-            )
-          })}
-        </div>
-
-        {/* Reward Info */}
-        <div className="border-t border-amber-200 bg-gradient-to-r from-amber-100/50 to-yellow-100/50 px-4 py-3">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <div className={cn(
-                "flex h-7 w-7 items-center justify-center rounded-full text-[10px] font-bold shadow-sm",
-                totalReviews >= 10
-                  ? "bg-gradient-to-br from-orange-400 to-orange-600 text-white"
-                  : "bg-amber-100 text-amber-400"
-              )}>
-                10
-              </div>
-              <span className={cn(
-                "text-xs",
-                totalReviews >= 10 ? "font-semibold text-orange-600" : "text-amber-600"
-              )}>
-                {totalReviews >= 10 ? "🎉 스타벅스 기프티콘 획득!" : "스타벅스 기프티콘"}
-              </span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className={cn(
-                "flex h-7 w-7 items-center justify-center rounded-full text-[10px] font-bold shadow-sm",
-                totalReviews >= 20
-                  ? "bg-gradient-to-br from-purple-400 to-purple-600 text-white"
-                  : "bg-amber-100 text-amber-400"
-              )}>
-                20
-              </div>
-              <span className={cn(
-                "text-xs",
-                totalReviews >= 20 ? "font-semibold text-purple-600" : "text-amber-600"
-              )}>
-                {totalReviews >= 20 ? "🏆 도서 상품권 획득!" : "도서 상품권"}
-              </span>
-            </div>
-          </div>
-        </div>
-        {/* Bottom Gold Accent */}
-        <div
-          className="h-0.5 w-full"
-          style={{
-            background: "linear-gradient(90deg, transparent, #F4D03F, #E6B800, #F4D03F, transparent)",
-          }}
-        />
-      </section>
-
-      {/* 나의 독모 - My Reading Groups */}
-      <section className="px-5 sm:px-8">
-        <div className="mb-3 flex items-center justify-between">
-          <h2 className="flex items-center gap-2 text-sm font-bold text-foreground">
-            <Sun size={16} className="text-amber-500" />
-            나의 독모
-          </h2>
-          <span className="rounded-full bg-amber-500/10 px-2.5 py-0.5 text-[10px] font-medium text-amber-600">
-            {parsedDokmoSessions.length}개 신청
-          </span>
-        </div>
-        {parsedDokmoSessions.length === 0 ? (
-          <div className="rounded-2xl border border-dashed border-border bg-muted/30 p-6 text-center">
-            <Sun size={24} className="mx-auto mb-2 text-muted-foreground" />
-            <p className="text-xs text-muted-foreground">
-              아직 신청한 독모가 없어요
-            </p>
-            <p className="mt-1 text-[10px] text-muted-foreground">
-              독모 페이지에서 시간대를 선택해 신청해보세요
-            </p>
-          </div>
-        ) : (
-          <div className="no-scrollbar flex gap-3 overflow-x-auto pb-1">
-            {parsedDokmoSessions.map((session) => {
-              const IconComponent = dokmoGroupIcons[session.groupId] || Sun
-              const bgColor = dokmoGroupColors[session.groupId] || "bg-amber-500"
-              return (
-                <div
-                  key={session.sessionKey}
-                  className="relative flex min-w-[230px] items-center gap-3 rounded-3xl border border-border bg-card p-3 shadow-md"
-                >
-                  {/* Group Badge */}
-                  <div className={cn("absolute right-3 top-3 rounded-full px-2 py-0.5 text-[9px] font-bold text-white shadow-sm", bgColor)}>
-                    {session.groupName}
-                  </div>
-                  <div className={cn("flex h-16 w-12 flex-shrink-0 items-center justify-center rounded-xl", bgColor)}>
-                    <IconComponent size={24} className="text-white" />
-                  </div>
-                  <div className="flex-1 pr-12">
-                    <h3 className="text-xs font-bold text-foreground">
-                      {session.book?.title || "도서 미정"}
-                    </h3>
-                    <p className="mt-0.5 flex items-center gap-1 text-[10px] text-muted-foreground">
-                      <Clock size={10} />
-                      {session.displayTime}
-                    </p>
-                    <p className="mt-0.5 text-[10px] text-muted-foreground">
-                      {session.location} · {session.date}
-                    </p>
-                  </div>
-                  <ChevronRight size={14} className="flex-shrink-0 text-muted-foreground" />
-                </div>
-              )
-            })}
-          </div>
-        )}
-      </section>
-
-      {/* 나의 독토 - My Discussion Clubs */}
-      <section className="px-5 sm:px-8">
-        <div className="mb-3 flex items-center justify-between">
-          <h2 className="flex items-center gap-2 text-sm font-bold text-foreground">
-            <GraduationCap size={16} className="text-tangerine" />
-            나의 독토
-          </h2>
-          <span className="rounded-full bg-tangerine/10 px-2.5 py-0.5 text-[10px] font-medium text-tangerine">
-            {myDoktoClubs.length}개 참여 중
-          </span>
-        </div>
-        {myDoktoClubs.length === 0 ? (
-          <div className="rounded-2xl border border-dashed border-border bg-muted/30 p-6 text-center">
-            <GraduationCap size={24} className="mx-auto mb-2 text-muted-foreground" />
-            <p className="text-xs text-muted-foreground">
-              아직 참여 중인 독토가 없어요
-            </p>
-            <p className="mt-1 text-[10px] text-muted-foreground">
-              독토 페이지에서 관심 있는 토론회에 참여해보세요
-            </p>
-          </div>
-        ) : (
-          <div className="no-scrollbar flex gap-3 overflow-x-auto pb-1">
-            {myDoktoClubs.map((club) => (
-              <div
-                key={club.id}
-                className="relative flex min-w-[230px] items-center gap-3 rounded-3xl border border-border bg-card p-3 shadow-md"
-              >
-                {/* Leader Type Badge */}
-                <div className={cn(
-                  "absolute right-3 top-3 rounded-full px-2 py-0.5 text-[9px] font-bold text-white shadow-sm",
-                  club.leaderType === "student" ? "bg-emerald" :
-                  club.leaderType === "professor" ? "bg-sky-500" : "bg-tangerine"
-                )}>
-                  {club.leaderType === "student" ? "학생 주도" :
-                   club.leaderType === "professor" ? "교수" : "작가"}
-                </div>
-                <div className="h-16 w-12 flex-shrink-0 overflow-hidden rounded-xl ring-1 ring-border">
-                  <img
-                    src={club.bookCover || "/placeholder.svg"}
-                    alt={club.book}
-                    className="h-full w-full object-cover"
-                    crossOrigin="anonymous"
-                  />
-                </div>
-                <div className="flex-1 pr-12">
-                  <h3 className="text-xs font-bold text-foreground">
-                    {club.title}
-                  </h3>
-                  <p className="mt-0.5 text-[10px] text-muted-foreground">
-                    {club.book}
-                  </p>
-                  <p className="mt-0.5 flex items-center gap-1 text-[10px] text-muted-foreground">
-                    <Users size={10} />
-                    {club.members}/{club.maxMembers}명 · {club.nextMeeting}
-                  </p>
-                </div>
-                <ChevronRight size={14} className="flex-shrink-0 text-muted-foreground" />
-              </div>
-            ))}
-          </div>
-        )}
-      </section>
-
-      {/* My Reviews - Horizontal Scroll */}
-      <section className="px-5 sm:px-8">
-        <div className="mb-3 flex items-center justify-between">
-          <h2 className="flex items-center gap-2 text-sm font-bold text-foreground">
-            <BookOpen size={16} className="text-emerald" />
-            나의 서평
-          </h2>
+      {/* Tab Navigation */}
+      <div className="mt-5 flex gap-0 border-b border-border px-5 sm:px-8">
+        {tabs.map((tab) => (
           <button
-            onClick={() => setShowAllReviews(true)}
-            className="text-xs font-medium text-primary"
+            key={tab.id}
+            onClick={() => setActiveTab(tab.id)}
+            className={cn(
+              "flex-1 py-3 text-center text-xs font-semibold transition-all",
+              activeTab === tab.id
+                ? "border-b-2 border-primary text-primary"
+                : "text-muted-foreground hover:text-foreground"
+            )}
           >
-            전체 보기
+            {tab.label}
           </button>
-        </div>
-        <div className="no-scrollbar flex gap-3 overflow-x-auto pb-1">
-          {myReviews.slice(0, 4).map((review) => {
-            const programColor = programColors[review.program]
-            return (
-            <div
-              key={review.id}
-              className="relative flex min-w-[230px] items-center gap-3 rounded-3xl border border-border bg-card p-3 shadow-md"
-            >
-              {/* Program Badge */}
-              <div className={cn("absolute right-3 top-3 rounded-full px-2 py-0.5 text-[9px] font-bold shadow-sm", programColor.bg, programColor.text)}>
-                {programLabels[review.program]}
+        ))}
+      </div>
+
+      {/* Tab Content */}
+      <div className="mt-4">
+        {/* 모임 이력 탭 */}
+        {activeTab === "history" && (
+          <div className="px-5 sm:px-8">
+            {myBundoks.length === 0 ? (
+              <div className="flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-border py-12">
+                <Users size={32} className="text-muted-foreground" />
+                <p className="mt-2 text-sm font-medium text-muted-foreground">참여한 번독이 없습니다</p>
+                <p className="mt-1 text-[10px] text-muted-foreground">번독에 참여하면 여기에 표시됩니다</p>
               </div>
-              <div className="h-16 w-12 flex-shrink-0 overflow-hidden rounded-xl ring-1 ring-border">
-                <img
-                  src={review.book.cover || "/placeholder.svg"}
-                  alt={review.book.title}
-                  className="h-full w-full object-cover"
-                  crossOrigin="anonymous"
-                />
+            ) : (
+              <div className="flex flex-col gap-3">
+                {myBundoks.map((bundok) => {
+                  const FormatIcon = formatIcons[bundok.format] || MapPin
+                  return (
+                    <div
+                      key={bundok.id}
+                      className="flex items-start gap-3.5 rounded-2xl border border-border bg-card p-4 shadow-sm"
+                    >
+                      <div className="relative h-16 w-11 flex-shrink-0 overflow-hidden rounded-xl shadow-sm">
+                        <img
+                          src={bundok.bookCover || "/placeholder.svg"}
+                          alt={bundok.book}
+                          className="h-full w-full object-cover"
+                          crossOrigin="anonymous"
+                        />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-start justify-between gap-2">
+                          <h3 className="text-sm font-bold text-foreground line-clamp-1">{bundok.title}</h3>
+                          <span className={cn("flex-shrink-0 rounded-full px-2 py-0.5 text-[9px] font-bold", statusColors[bundok.status])}>
+                            {statusLabels[bundok.status]}
+                          </span>
+                        </div>
+                        <p className="mt-0.5 text-[11px] text-muted-foreground">{bundok.book} · {bundok.bookAuthor}</p>
+                        <div className="mt-1.5 flex flex-wrap items-center gap-3 text-[10px] text-muted-foreground">
+                          <span className="flex items-center gap-0.5">
+                            <Clock size={10} />
+                            {bundok.date.slice(5)} {bundok.time}
+                          </span>
+                          <span className="flex items-center gap-0.5">
+                            <FormatIcon size={10} />
+                            {bundok.location}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  )
+                })}
               </div>
-              <div className="flex-1 pr-12">
-                <h3 className="text-xs font-bold text-foreground">
-                  {review.book.title}
-                </h3>
-                <p className="mt-0.5 text-[10px] text-muted-foreground">
-                  {review.book.author}
-                </p>
-                <div className="mt-1 flex gap-0.5">
-                  {[1, 2, 3, 4, 5].map((s) => (
-                    <Star
-                      key={s}
-                      size={9}
-                      className={cn(
-                        s <= review.rating ? "fill-tangerine text-tangerine" : "text-border"
-                      )}
-                    />
-                  ))}
-                </div>
-              </div>
-              <ChevronRight size={14} className="flex-shrink-0 text-muted-foreground" />
+            )}
+          </div>
+        )}
+
+        {/* 내 서평 탭 */}
+        {activeTab === "reviews" && (
+          <div className="px-5 sm:px-8">
+            <div className="mb-3 flex items-center justify-between">
+              <span className="text-xs text-muted-foreground">{myReviews.length}편의 서평</span>
+              <button
+                onClick={() => setShowAllReviews(true)}
+                className="text-xs font-medium text-primary"
+              >
+                전체 보기
+              </button>
             </div>
-          )})}
-        </div>
-      </section>
-
-      {/* Badge Collection */}
-      <section className="mx-5 overflow-hidden rounded-3xl border border-border bg-card shadow-lg sm:mx-8">
-        {/* Premium top bar */}
-        <div
-          className="h-1.5 w-full"
-          style={{
-            background:
-              "linear-gradient(90deg, #064E3B, #059669, #34D399, #059669, #064E3B)",
-          }}
-        />
-        <div className="p-5">
-          <div className="mb-4 flex items-center justify-between">
-            <h2 className="flex items-center gap-2 text-sm font-bold text-foreground">
-              <Award size={16} className="text-emerald" />
-              지식 뱃지 진열장
-            </h2>
-            <span className="text-[10px] text-muted-foreground">
-              {totalBadges}/10개 획득
-            </span>
+            <div className="flex flex-col gap-3">
+              {myReviews.slice(0, 5).map((review) => {
+                const programColor = programColors[review.program]
+                return (
+                  <div
+                    key={review.id}
+                    className="flex items-start gap-3 rounded-2xl border border-border bg-card p-3.5 shadow-sm"
+                  >
+                    <div className="h-14 w-10 flex-shrink-0 overflow-hidden rounded-lg shadow-sm">
+                      <img
+                        src={review.book.cover || "/placeholder.svg"}
+                        alt={review.book.title}
+                        className="h-full w-full object-cover"
+                        crossOrigin="anonymous"
+                      />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <h3 className="text-xs font-bold text-foreground line-clamp-1">{review.book.title}</h3>
+                        <span className={cn("flex-shrink-0 rounded-full px-1.5 py-0.5 text-[8px] font-bold", programColor.bg, programColor.text)}>
+                          {programLabels[review.program]}
+                        </span>
+                      </div>
+                      <p className="mt-0.5 text-[10px] text-muted-foreground">{review.book.author}</p>
+                      <div className="mt-1 flex gap-0.5">
+                        {[1, 2, 3, 4, 5].map((s) => (
+                          <Star
+                            key={s}
+                            size={9}
+                            className={cn(s <= review.rating ? "fill-tangerine text-tangerine" : "text-border")}
+                          />
+                        ))}
+                      </div>
+                      <p className="mt-1 line-clamp-2 text-[11px] leading-relaxed text-foreground">{review.text}</p>
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
           </div>
-          <div className="grid grid-cols-5 gap-x-2 gap-y-4">
-            {kdcBadges.map((badge) => (
-              <KDCBadge
-                key={badge.id}
-                badge={badge}
-                onClick={badge.earned ? () => setSelectedBadgeId(badge.id) : undefined}
+        )}
+
+        {/* 독서인증서 탭 */}
+        {activeTab === "certificate" && (
+          <div>
+            <StampBoard totalReviews={totalReviews} />
+
+            <div className="mt-4">
+              <BadgeCollection
+                badges={kdcBadges}
+                totalBadges={totalBadges}
+                onBadgeClick={setSelectedBadgeId}
               />
-            ))}
+            </div>
           </div>
-        </div>
-        {/* Bottom metallic accent */}
-        <div
-          className="h-0.5 w-full"
-          style={{
-            background:
-              "linear-gradient(90deg, transparent, #34D399, #6EE7B7, #34D399, transparent)",
-          }}
-        />
-      </section>
-
-      {/* Floating Certificate Button */}
-      <div className="fixed bottom-20 left-1/2 z-40 -translate-x-1/2">
-        <button
-          className="flex items-center gap-2 rounded-full px-6 py-3 text-sm font-bold text-white shadow-lg transition-transform hover:scale-105"
-          style={{
-            background:
-              "linear-gradient(135deg, #064E3B, #059669)",
-          }}
-        >
-          <FileText size={16} />
-          독서 인증서
-        </button>
+        )}
       </div>
 
       {/* Badge Review Modal */}
-      {selectedBadgeId && selectedBadge && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/40 p-4 backdrop-blur-sm"
-          onClick={() => setSelectedBadgeId(null)}
-        >
-          <div
-            className="relative flex max-h-[85vh] w-full max-w-lg flex-col overflow-hidden rounded-3xl border border-border bg-card shadow-2xl"
-            onClick={(e) => e.stopPropagation()}
-          >
-            {/* Modal Header */}
-            <div className="flex items-center gap-3 border-b border-border px-5 py-4">
-              {/* Mini badge icon */}
-              <div
-                className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full"
-                style={{
-                  background: selectedBadge.gradient,
-                  boxShadow: "0 2px 8px rgba(6, 78, 59, 0.25)",
-                }}
-              >
-                <span className="text-sm text-white">{selectedBadge.icon}</span>
-              </div>
-              <div className="flex-1">
-                <h3 className="text-sm font-bold text-foreground">
-                  {selectedBadge.label} ({selectedBadge.id})
-                </h3>
-                <p className="text-xs text-muted-foreground">
-                  내가 작성한 서평 {filteredReviews.length}편
-                </p>
-              </div>
-              <button
-                onClick={() => setSelectedBadgeId(null)}
-                className="flex h-8 w-8 items-center justify-center rounded-full bg-muted text-foreground transition-colors hover:bg-muted/70"
-                aria-label="닫기"
-              >
-                <X size={16} />
-              </button>
-            </div>
-
-            {/* Modal Content - Review List */}
-            <div className="flex-1 overflow-y-auto">
-              {filteredReviews.length === 0 ? (
-                <div className="flex flex-col items-center gap-3 py-12 text-center">
-                  <div className="flex h-16 w-16 items-center justify-center rounded-full bg-muted">
-                    <BookOpen size={24} className="text-muted-foreground" />
-                  </div>
-                  <p className="text-sm font-medium text-muted-foreground">
-                    아직 작성한 서평이 없어요
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    이 분류의 도서를 읽고 서평을 작성해보세요
-                  </p>
-                </div>
-              ) : (
-                filteredReviews.map((review) => {
-                  const liked = likedReviews.includes(review.id)
-                  return (
-                    <article
-                      key={review.id}
-                      className="border-b border-border px-5 py-4 last:border-b-0"
-                    >
-                      {/* Book card */}
-                      <div className="flex items-center gap-3 rounded-2xl bg-muted/50 p-3">
-                        <div className="h-14 w-10 flex-shrink-0 overflow-hidden rounded-lg shadow-sm">
-                          <img
-                            src={review.book.cover || "/placeholder.svg"}
-                            alt={review.book.title}
-                            className="h-full w-full object-cover"
-                            crossOrigin="anonymous"
-                          />
-                        </div>
-                        <div className="flex-1">
-                          <p className="text-xs font-bold text-foreground">{review.book.title}</p>
-                          <p className="text-[11px] text-muted-foreground">{review.book.author}</p>
-                          <div className="mt-1 flex gap-0.5">
-                            {[1, 2, 3, 4, 5].map((s) => (
-                              <Star
-                                key={s}
-                                size={11}
-                                className={cn(
-                                  s <= review.rating ? "fill-tangerine text-tangerine" : "text-border"
-                                )}
-                              />
-                            ))}
-                          </div>
-                        </div>
-                        <span className="text-[10px] text-muted-foreground">{review.timeAgo}</span>
-                      </div>
-
-                      {/* Review text */}
-                      <p className="mt-3 text-[13px] leading-relaxed text-foreground">
-                        {review.text}
-                      </p>
-
-                      {/* Actions */}
-                      <div className="mt-3 flex items-center gap-5">
-                        <button
-                          onClick={() => toggleLike(review.id)}
-                          className="flex items-center gap-1.5 text-xs text-muted-foreground transition-colors"
-                        >
-                          <Heart
-                            size={15}
-                            className={cn(liked ? "fill-tangerine text-tangerine" : "text-muted-foreground")}
-                          />
-                          <span className={cn(liked ? "font-medium text-tangerine" : "")}>
-                            {review.likes + (liked ? 1 : 0)}
-                          </span>
-                        </button>
-                        <button className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                          <MessageCircle size={15} />
-                          {review.comments}
-                        </button>
-                      </div>
-                    </article>
-                  )
-                })
-              )}
-            </div>
-          </div>
-        </div>
+      {selectedBadgeId && (
+        <BadgeReviewModal
+          badge={selectedBadge}
+          reviews={badgeReviews}
+          likedReviews={likedReviews}
+          onToggleLike={toggleLike}
+          onClose={() => setSelectedBadgeId(null)}
+        />
       )}
 
       {/* All Reviews Modal */}
       {showAllReviews && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/40 p-4 backdrop-blur-sm"
-          onClick={() => {
-            setShowAllReviews(false)
-            setReviewProgramFilter(null)
-          }}
-        >
-          <div
-            className="relative flex max-h-[90vh] w-full max-w-lg flex-col overflow-hidden rounded-3xl border border-border bg-card shadow-2xl"
-            onClick={(e) => e.stopPropagation()}
-          >
-            {/* Modal Header */}
-            <div className="border-b border-border px-5 py-4">
-              <div className="flex items-center justify-between">
-                <h3 className="text-lg font-bold text-foreground">나의 서평</h3>
-                <button
-                  onClick={() => {
-                    setShowAllReviews(false)
-                    setReviewProgramFilter(null)
-                  }}
-                  className="flex h-8 w-8 items-center justify-center rounded-full bg-muted text-foreground transition-colors hover:bg-muted/70"
-                  aria-label="닫기"
-                >
-                  <X size={16} />
-                </button>
-              </div>
-              <p className="mt-1 text-xs text-muted-foreground">
-                총 {myReviews.length}편의 서평을 작성했어요
-              </p>
-
-              {/* Program Filter Chips */}
-              <div className="mt-3 flex flex-wrap gap-2">
-                <button
-                  onClick={() => setReviewProgramFilter(null)}
-                  className={cn(
-                    "rounded-full px-3 py-1.5 text-xs font-semibold transition-all",
-                    reviewProgramFilter === null
-                      ? "bg-primary text-primary-foreground shadow-md"
-                      : "bg-muted text-muted-foreground hover:bg-border"
-                  )}
-                >
-                  전체 ({myReviews.length})
-                </button>
-                {(["dokmo", "dokto", "general"] as ProgramType[]).map((program) => {
-                  const colors = programColors[program]
-                  const count = reviewCountByProgram[program]
-                  return (
-                    <button
-                      key={program}
-                      onClick={() => setReviewProgramFilter(program)}
-                      className={cn(
-                        "rounded-full px-3 py-1.5 text-xs font-semibold transition-all",
-                        reviewProgramFilter === program
-                          ? `${colors.bg} ${colors.text} shadow-md`
-                          : "bg-muted text-muted-foreground hover:bg-border"
-                      )}
-                    >
-                      {programLabels[program]} ({count})
-                    </button>
-                  )
-                })}
-              </div>
-            </div>
-
-            {/* Modal Content - Review List */}
-            <div className="flex-1 overflow-y-auto">
-              {allFilteredReviews.length === 0 ? (
-                <div className="flex flex-col items-center gap-3 py-12 text-center">
-                  <div className="flex h-16 w-16 items-center justify-center rounded-full bg-muted">
-                    <BookOpen size={24} className="text-muted-foreground" />
-                  </div>
-                  <p className="text-sm font-medium text-muted-foreground">
-                    아직 작성한 서평이 없어요
-                  </p>
-                </div>
-              ) : (
-                allFilteredReviews.map((review) => {
-                  const liked = likedReviews.includes(review.id)
-                  return (
-                    <article
-                      key={review.id}
-                      className="border-b border-border px-5 py-4 last:border-b-0"
-                    >
-                      {/* Book card */}
-                      <div className="flex items-center gap-3 rounded-2xl bg-muted/50 p-3">
-                        <div className="h-14 w-10 flex-shrink-0 overflow-hidden rounded-lg shadow-sm">
-                          <img
-                            src={review.book.cover || "/placeholder.svg"}
-                            alt={review.book.title}
-                            className="h-full w-full object-cover"
-                            crossOrigin="anonymous"
-                          />
-                        </div>
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2">
-                            <p className="text-xs font-bold text-foreground">{review.book.title}</p>
-                            <span className={cn("rounded-full px-1.5 py-0.5 text-[9px] font-semibold", programColors[review.program].bg, programColors[review.program].text)}>
-                              {programLabels[review.program]}
-                            </span>
-                          </div>
-                          <p className="text-[11px] text-muted-foreground">{review.book.author}</p>
-                          <div className="mt-1 flex gap-0.5">
-                            {[1, 2, 3, 4, 5].map((s) => (
-                              <Star
-                                key={s}
-                                size={11}
-                                className={cn(
-                                  s <= review.rating ? "fill-tangerine text-tangerine" : "text-border"
-                                )}
-                              />
-                            ))}
-                          </div>
-                        </div>
-                        <span className="text-[10px] text-muted-foreground">{review.timeAgo}</span>
-                      </div>
-
-                      {/* Review text */}
-                      <p className="mt-3 text-[13px] leading-relaxed text-foreground">
-                        {review.text}
-                      </p>
-
-                      {/* Actions */}
-                      <div className="mt-3 flex items-center gap-5">
-                        <button
-                          onClick={() => toggleLike(review.id)}
-                          className="flex items-center gap-1.5 text-xs text-muted-foreground transition-colors"
-                        >
-                          <Heart
-                            size={15}
-                            className={cn(liked ? "fill-tangerine text-tangerine" : "text-muted-foreground")}
-                          />
-                          <span className={cn(liked ? "font-medium text-tangerine" : "")}>
-                            {review.likes + (liked ? 1 : 0)}
-                          </span>
-                        </button>
-                        <button className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                          <MessageCircle size={15} />
-                          {review.comments}
-                        </button>
-                      </div>
-                    </article>
-                  )
-                })
-              )}
-            </div>
-          </div>
-        </div>
+        <AllReviewsModal
+          reviews={myReviews}
+          likedReviews={likedReviews}
+          onToggleLike={toggleLike}
+          onClose={() => setShowAllReviews(false)}
+        />
       )}
     </div>
   )

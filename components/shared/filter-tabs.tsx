@@ -17,10 +17,12 @@ interface FilterTabsProps {
 
 export function FilterTabs({ tabs, activeTab, onTabChange, className }: FilterTabsProps) {
   return (
-    <div className={cn("no-scrollbar flex gap-2 overflow-x-auto", className)}>
+    <div role="tablist" aria-label="필터" className={cn("no-scrollbar flex gap-2 overflow-x-auto", className)}>
       {tabs.map((tab) => (
         <button
           key={tab.id}
+          role="tab"
+          aria-selected={activeTab === tab.id}
           onClick={() => onTabChange(tab.id)}
           className={cn(
             "flex-shrink-0 rounded-full px-4 py-2 text-xs font-semibold transition-all",

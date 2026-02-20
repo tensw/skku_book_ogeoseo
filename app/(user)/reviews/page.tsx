@@ -12,7 +12,7 @@ import { reviews as initialReviews } from "@/lib/mock-data"
 const programOptions = [
   { id: "all", label: "전체" },
   { id: "free", label: "자유 서평" },
-  { id: "dokto", label: "독토 프로그램" },
+  { id: "bundok", label: "번독" },
   { id: "classic100", label: "고전100선" },
 ]
 

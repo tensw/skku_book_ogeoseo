@@ -3,9 +3,10 @@
 import { useState, useRef, useEffect } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { X, User, LogOut, BookOpen, Settings } from "lucide-react"
+import { User, LogOut, BookOpen, Settings } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useAuth } from "@/lib/auth-context"
+import { LoginModal } from "@/components/auth/login-modal"
 
 const menuItems = [
   { href: "/programs", label: "프로그램" },
@@ -18,12 +19,9 @@ const menuItems = [
 
 export function GNB() {
   const pathname = usePathname()
-  const { user, isLoggedIn, isAdmin, login, logout } = useAuth()
+  const { user, isLoggedIn, isAdmin, logout } = useAuth()
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false)
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false)
-  const [loginId, setLoginId] = useState("")
-  const [loginPassword, setLoginPassword] = useState("")
-  const [loginError, setLoginError] = useState("")
   const profileMenuRef = useRef<HTMLDivElement>(null)
 
   // 프로필 메뉴 외부 클릭 시 닫기
@@ -37,18 +35,6 @@ export function GNB() {
     return () => document.removeEventListener("mousedown", handleClickOutside)
   }, [])
 
-  const handleLogin = () => {
-    const success = login(loginId, loginPassword)
-    if (success) {
-      setIsLoginModalOpen(false)
-      setLoginId("")
-      setLoginPassword("")
-      setLoginError("")
-    } else {
-      setLoginError("아이디 또는 비밀번호가 올바르지 않습니다.")
-    }
-  }
-
   const handleLogout = () => {
     setIsProfileMenuOpen(false)
     logout()
@@ -59,9 +45,9 @@ export function GNB() {
 
   return (
     <>
-      <header className="fixed top-0 left-0 right-0 z-50 hidden border-b border-[#E8E8E8] bg-white lg:block">
-        <div className="mx-auto flex h-[48px] max-w-5xl items-center justify-between px-4">
-          <Link href="/" className="font-serif text-xl font-bold text-primary">
+      <header className="fixed top-0 left-0 right-0 z-50 hidden border-b border-border bg-card/95 backdrop-blur-xl lg:block">
+        <div className="mx-auto flex h-16 max-w-5xl items-center justify-between px-8">
+          <Link href="/" className="text-xl font-bold text-primary">
             오거서
           </Link>
           <nav className="flex items-center gap-1">
@@ -90,13 +76,16 @@ export function GNB() {
               <button
                 onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
                 className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-full bg-gradient-to-br from-primary to-primary/70 text-sm font-bold text-primary-foreground ring-2 ring-transparent transition-all hover:ring-primary/30"
+                aria-label="프로필 메뉴"
+                aria-expanded={isProfileMenuOpen}
+                aria-haspopup="true"
               >
                 {user?.name?.charAt(0) || "U"}
               </button>
 
               {/* Profile Dropdown Menu */}
               {isProfileMenuOpen && (
-                <div className="absolute right-0 top-full mt-2 w-48 overflow-hidden rounded-lg border border-[#E8E8E8] bg-white shadow-[0_2px_8px_rgba(0,0,0,0.08)]">
+                <div className="absolute right-0 top-full mt-2 w-48 overflow-hidden rounded-2xl border border-border bg-card shadow-xl" role="menu">
                   <div className="border-b border-border px-4 py-3">
                     <p className="text-sm font-medium text-foreground">{user?.name}</p>
                     <p className="text-xs text-muted-foreground">{isAdmin ? "관리자" : "학생"}</p>
@@ -141,91 +130,7 @@ export function GNB() {
         </div>
       </header>
 
-      {/* Login Modal */}
-      {isLoginModalOpen && (
-        <div
-          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 p-4"
-          onClick={() => setIsLoginModalOpen(false)}
-        >
-          <div
-            className="relative w-full max-w-md overflow-hidden rounded-2xl bg-white shadow-[0_4px_16px_rgba(0,0,0,0.12)]"
-            onClick={(e) => e.stopPropagation()}
-          >
-            {/* Modal Header */}
-            <div className="flex items-center justify-between border-b border-border px-6 py-4">
-              <h2 className="text-xl font-bold text-foreground">로그인</h2>
-              <button
-                onClick={() => setIsLoginModalOpen(false)}
-                className="flex h-8 w-8 items-center justify-center rounded-full bg-muted text-muted-foreground transition-colors hover:bg-border hover:text-foreground"
-              >
-                <X size={18} />
-              </button>
-            </div>
-
-            {/* Modal Body */}
-            <div className="px-6 py-6">
-              {/* Test Account Info */}
-              <div className="mb-4 rounded-xl bg-amber-50 p-4 text-xs">
-                <p className="mb-2 font-semibold text-amber-800">테스트 계정</p>
-                <div className="space-y-1 text-amber-700">
-                  <p><span className="font-medium">학생:</span> student / student123</p>
-                </div>
-              </div>
-
-              {/* Error Message */}
-              {loginError && (
-                <div className="mb-4 rounded-xl bg-red-50 p-3 text-center text-sm text-red-600">
-                  {loginError}
-                </div>
-              )}
-
-              {/* Form */}
-              <div className="flex flex-col gap-4">
-                <div>
-                  <label className="mb-1.5 block text-sm font-medium text-foreground">
-                    아이디
-                  </label>
-                  <input
-                    type="text"
-                    value={loginId}
-                    onChange={(e) => {
-                      setLoginId(e.target.value)
-                      setLoginError("")
-                    }}
-                    placeholder="아이디 입력"
-                    className="w-full h-[44px] px-3 bg-[#F5F6F8] rounded-lg text-sm text-[#1E1E1E] placeholder:text-[#A0A0A0] focus:ring-2 focus:ring-primary/30 focus:bg-white border border-transparent focus:border-primary transition-colors outline-none"
-                  />
-                </div>
-                <div>
-                  <label className="mb-1.5 block text-sm font-medium text-foreground">
-                    비밀번호
-                  </label>
-                  <input
-                    type="password"
-                    value={loginPassword}
-                    onChange={(e) => {
-                      setLoginPassword(e.target.value)
-                      setLoginError("")
-                    }}
-                    placeholder="비밀번호 입력"
-                    className="w-full h-[44px] px-3 bg-[#F5F6F8] rounded-lg text-sm text-[#1E1E1E] placeholder:text-[#A0A0A0] focus:ring-2 focus:ring-primary/30 focus:bg-white border border-transparent focus:border-primary transition-colors outline-none"
-                  />
-                </div>
-              </div>
-            </div>
-
-            {/* Modal Footer */}
-            <div className="border-t border-border bg-muted/30 px-6 py-4">
-              <button
-                onClick={handleLogin}
-                className="w-full h-[48px] bg-primary text-white rounded-lg text-[15px] font-semibold transition-all hover:brightness-110"
-              >
-                확인
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <LoginModal isOpen={isLoginModalOpen} onClose={() => setIsLoginModalOpen(false)} />
     </>
   )
 }

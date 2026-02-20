@@ -58,6 +58,8 @@ export default function AdminClassicsPage() {
   const [formCategory, setFormCategory] = useState("문학")
   const [formYear, setFormYear] = useState("")
   const [formDescription, setFormDescription] = useState("")
+  const [formCover, setFormCover] = useState("")
+  const [formIsbn, setFormIsbn] = useState("")
 
   const filtered = classicList
     .filter((c) => activeTab === "all" || c.category === activeTab)
@@ -75,6 +77,8 @@ export default function AdminClassicsPage() {
     setFormCategory("문학")
     setFormYear("")
     setFormDescription("")
+    setFormCover("")
+    setFormIsbn("")
     setDialogOpen(true)
   }
 
@@ -86,6 +90,8 @@ export default function AdminClassicsPage() {
     setFormCategory(classic.category)
     setFormYear(String(classic.year))
     setFormDescription(classic.description)
+    setFormCover(classic.cover)
+    setFormIsbn(classic.isbn || "")
     setDialogOpen(true)
   }
 
@@ -104,6 +110,8 @@ export default function AdminClassicsPage() {
                 category: formCategory,
                 year: Number(formYear) || c.year,
                 description: formDescription,
+                cover: formCover || c.cover,
+                isbn: formIsbn || c.isbn,
               }
             : c
         )
@@ -117,7 +125,8 @@ export default function AdminClassicsPage() {
         year: Number(formYear) || new Date().getFullYear(),
         category: formCategory,
         description: formDescription,
-        cover: "https://picsum.photos/seed/classic-default/200/280",
+        cover: formCover || "https://picsum.photos/seed/classic-default/200/280",
+        isbn: formIsbn || undefined,
       }
       setClassicList((prev) => [newClassic, ...prev])
     }
@@ -140,8 +149,8 @@ export default function AdminClassicsPage() {
   const columns = [
     { key: "id", label: "번호", className: "w-16", hideOnMobile: true },
     { key: "title", label: "도서명" },
-    { key: "author", label: "저자", className: "w-32", hideOnMobile: true },
-    { key: "publisher", label: "출판사", className: "w-28", hideOnMobile: true },
+    { key: "author", label: "저자", className: "w-40 whitespace-nowrap", hideOnMobile: true },
+    { key: "publisher", label: "출판사", className: "w-32 whitespace-nowrap", hideOnMobile: true },
     {
       key: "category",
       label: "분류",
@@ -267,6 +276,24 @@ export default function AdminClassicsPage() {
                   placeholder="2024"
                 />
               </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="classic-cover">표지 이미지 URL</Label>
+              <Input
+                id="classic-cover"
+                value={formCover}
+                onChange={(e) => setFormCover(e.target.value)}
+                placeholder="https://example.com/cover.jpg"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="classic-isbn">ISBN</Label>
+              <Input
+                id="classic-isbn"
+                value={formIsbn}
+                onChange={(e) => setFormIsbn(e.target.value)}
+                placeholder="978-89-000-0000-0"
+              />
             </div>
             <div className="space-y-2">
               <Label htmlFor="classic-desc">설명</Label>

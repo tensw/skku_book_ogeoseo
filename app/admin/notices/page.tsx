@@ -20,18 +20,11 @@ import {
   DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog"
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetDescription,
-} from "@/components/ui/sheet"
 
 export default function AdminNoticesPage() {
   const [noticeList, setNoticeList] = useState<Notice[]>(() => [...initialNotices])
   const [search, setSearch] = useState("")
-  const [sheetOpen, setSheetOpen] = useState(false)
+  const [dialogOpen, setDialogOpen] = useState(false)
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [editingNotice, setEditingNotice] = useState<Notice | null>(null)
   const [deletingId, setDeletingId] = useState<number | null>(null)
@@ -56,7 +49,7 @@ export default function AdminNoticesPage() {
     setFormTitle("")
     setFormContent("")
     setFormImportant(false)
-    setSheetOpen(true)
+    setDialogOpen(true)
   }
 
   function openEdit(notice: Notice) {
@@ -64,7 +57,7 @@ export default function AdminNoticesPage() {
     setFormTitle(notice.title)
     setFormContent(notice.content)
     setFormImportant(notice.important)
-    setSheetOpen(true)
+    setDialogOpen(true)
   }
 
   function handleSubmit() {
@@ -91,7 +84,7 @@ export default function AdminNoticesPage() {
       }
       setNoticeList((prev) => [newNotice, ...prev])
     }
-    setSheetOpen(false)
+    setDialogOpen(false)
   }
 
   function confirmDelete(id: number) {
@@ -181,24 +174,21 @@ export default function AdminNoticesPage() {
         <DataTable columns={columns} data={filtered} className="[&_td]:py-1.5 [&_th]:h-9" />
       </div>
 
-      {/* Create / Edit Sheet */}
-      <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
-        <SheetContent
-          side="right"
-          className="flex w-full flex-col sm:max-w-xl"
-        >
-          <SheetHeader>
-            <SheetTitle>
+      {/* Create / Edit Dialog */}
+      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>
               {editingNotice ? "공지사항 수정" : "공지사항 등록"}
-            </SheetTitle>
-            <SheetDescription>
+            </DialogTitle>
+            <DialogDescription>
               {editingNotice
                 ? "공지사항을 수정합니다."
                 : "새 공지사항을 등록합니다."}
-            </SheetDescription>
-          </SheetHeader>
+            </DialogDescription>
+          </DialogHeader>
 
-          <div className="flex flex-1 flex-col gap-5 overflow-y-auto py-4">
+          <div className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="notice-title">제목</Label>
               <Input
@@ -209,7 +199,7 @@ export default function AdminNoticesPage() {
               />
             </div>
 
-            <div className="flex flex-1 flex-col space-y-2">
+            <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <Label htmlFor="notice-content">내용</Label>
                 <span className="text-xs text-muted-foreground">
@@ -221,7 +211,7 @@ export default function AdminNoticesPage() {
                 value={formContent}
                 onChange={(e) => setFormContent(e.target.value)}
                 placeholder="공지사항 내용을 입력하세요"
-                className="min-h-[300px] flex-1 resize-none"
+                className="min-h-[280px] resize-none"
               />
             </div>
 
@@ -237,20 +227,16 @@ export default function AdminNoticesPage() {
             </div>
           </div>
 
-          <div className="flex gap-2 border-t border-border pt-4">
-            <Button
-              variant="outline"
-              className="flex-1"
-              onClick={() => setSheetOpen(false)}
-            >
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDialogOpen(false)}>
               취소
             </Button>
-            <Button className="flex-1" onClick={handleSubmit} disabled={!formTitle.trim()}>
+            <Button onClick={handleSubmit} disabled={!formTitle.trim()}>
               {editingNotice ? "수정" : "등록"}
             </Button>
-          </div>
-        </SheetContent>
-      </Sheet>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Delete Confirmation Dialog */}
       <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>

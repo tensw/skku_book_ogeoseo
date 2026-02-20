@@ -149,12 +149,12 @@ export default function BundokDetailPage() {
           <h2 className="text-sm font-bold text-foreground mb-3">모임 정보</h2>
           <div className="flex flex-col gap-2.5">
             <div className="flex items-center gap-3">
-              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10">
-                <Clock size={14} className="text-primary" />
+              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-amber-100">
+                <Clock size={14} className="text-amber-600" />
               </div>
               <div>
-                <p className="text-xs font-medium text-foreground">{formatDate(bundok.date)} {bundok.time}</p>
-                <p className="text-[10px] text-muted-foreground">{bundok.duration}분 소요</p>
+                <p className="text-xs font-semibold text-amber-700">{formatDate(bundok.date)} {bundok.time}</p>
+                <p className="text-[10px] text-amber-500">{bundok.duration}분 소요</p>
               </div>
             </div>
 
@@ -194,7 +194,10 @@ export default function BundokDetailPage() {
             crossOrigin="anonymous"
           />
           <div>
-            <p className="text-xs font-bold text-foreground">{bundok.host}</p>
+            <p className="text-xs font-bold text-foreground">
+              {bundok.hostNickname}
+              <span className="ml-1 text-[10px] font-normal text-muted-foreground">{bundok.host}</span>
+            </p>
             <p className="text-[10px] text-muted-foreground">모임 개설자</p>
           </div>
         </div>
@@ -242,43 +245,41 @@ export default function BundokDetailPage() {
         </section>
       )}
 
-      {/* 참여하기 Fixed Bottom CTA */}
-      <div className="fixed bottom-16 left-0 right-0 z-30 border-t border-border bg-card/95 px-5 py-3 backdrop-blur-md sm:bottom-0">
-        <div className="mx-auto flex max-w-lg items-center gap-3">
-          <button
-            className="flex h-10 w-10 items-center justify-center rounded-full border border-border bg-muted"
-            aria-label="공유"
-          >
-            <Share2 size={16} className="text-muted-foreground" />
-          </button>
+      {/* 신청하기 Fixed Bottom CTA — 모집 중일 때만 표시 */}
+      {bundok.status === "recruiting" && (
+        <div className="fixed bottom-16 left-0 right-0 z-30 border-t border-border bg-card/95 px-5 py-3 backdrop-blur-md sm:bottom-0">
+          <div className="mx-auto flex max-w-lg items-center gap-3">
+            <button
+              className="flex h-10 w-10 items-center justify-center rounded-full border border-border bg-muted"
+              aria-label="공유"
+            >
+              <Share2 size={16} className="text-muted-foreground" />
+            </button>
 
-          {bundok.status === "completed" ? (
-            <div className="flex-1 rounded-full bg-muted px-5 py-2.5 text-center text-sm font-bold text-muted-foreground">
-              완료된 모임
-            </div>
-          ) : isJoined ? (
-            <button
-              onClick={handleJoin}
-              className="flex flex-1 items-center justify-center gap-2 rounded-full bg-emerald px-5 py-2.5 text-sm font-bold text-white transition-all hover:brightness-110"
-            >
-              <CheckCircle2 size={16} />
-              참여 중 (취소하기)
-            </button>
-          ) : isFull ? (
-            <div className="flex-1 rounded-full bg-muted px-5 py-2.5 text-center text-sm font-bold text-muted-foreground">
-              인원 마감
-            </div>
-          ) : (
-            <button
-              onClick={handleJoin}
-              disabled={joining}
-              className="flex-1 rounded-full bg-primary px-5 py-2.5 text-sm font-bold text-primary-foreground shadow-md transition-all hover:shadow-lg hover:brightness-110 disabled:opacity-50"
-            >
-              {joining ? "참여 처리 중..." : "참여하기"}
-            </button>
-          )}
+            {isJoined ? (
+              <button
+                onClick={handleJoin}
+                className="flex flex-1 items-center justify-center gap-2 rounded-full bg-emerald px-5 py-2.5 text-sm font-bold text-white transition-all hover:brightness-110"
+              >
+                <CheckCircle2 size={16} />
+                신청 완료 (취소하기)
+              </button>
+            ) : isFull ? (
+              <div className="flex-1 rounded-full bg-muted px-5 py-2.5 text-center text-sm font-bold text-muted-foreground">
+                인원 마감
+              </div>
+            ) : (
+              <button
+                onClick={handleJoin}
+                disabled={joining}
+                className="flex-1 rounded-full bg-gradient-to-r from-amber-500 to-orange-500 px-5 py-2.5 text-sm font-bold text-white shadow-md shadow-amber-200/40 transition-all hover:shadow-lg hover:brightness-110 disabled:opacity-50"
+              >
+                {joining ? "신청 처리 중..." : "신청하기"}
+              </button>
+            )}
+          </div>
         </div>
-      </div>
+      )}
     </div>
   )
 }

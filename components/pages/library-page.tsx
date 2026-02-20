@@ -17,6 +17,7 @@ import {
   BookMarked,
   Landmark,
   Star,
+  Award,
   Users,
   Clock,
   MapPin,
@@ -147,6 +148,16 @@ export function LibraryPage() {
               뱃지 {totalBadges}개 · 서평 {totalReviews}편
             </p>
           </div>
+          <button
+            onClick={() => {
+              setActiveTab("certificate")
+              alert("독서인증서 발급이 준비 중입니다.")
+            }}
+            className="flex flex-col items-center gap-1 rounded-xl bg-gradient-to-br from-primary to-emerald px-3 py-2.5 shadow-md transition-all hover:shadow-lg hover:scale-105 active:scale-95"
+          >
+            <Award size={18} className="text-white" />
+            <span className="text-[9px] font-bold text-white whitespace-nowrap">인증서 발급</span>
+          </button>
         </div>
       </section>
 

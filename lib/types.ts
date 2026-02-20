@@ -45,6 +45,7 @@ export interface Bundok {
   bookAuthor: string
   bookCover: string
   host: string
+  hostNickname: string
   hostAvatar: string
   format: "offline" | "online" | "hybrid"
   location: string

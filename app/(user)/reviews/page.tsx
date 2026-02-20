@@ -119,7 +119,7 @@ export default function Reviews() {
       </div>
 
       {/* Review Cards */}
-      <div className="grid grid-cols-1 gap-0 sm:grid-cols-2">
+      <div className="grid grid-cols-1 gap-0 sm:grid-cols-2 lg:grid-cols-3">
         {paged.map((review) => (
           <div key={review.id}>
             <ReviewCard review={review} />

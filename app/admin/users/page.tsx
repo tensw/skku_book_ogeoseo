@@ -342,7 +342,7 @@ export default function AdminUsersPage() {
                   스탬프
                 </th>
                 <th className="px-4 py-3 text-center text-xs font-medium text-muted-foreground">
-                  활동
+                  서평 / 뱃지
                 </th>
                 <th className="px-4 py-3 text-center text-xs font-medium text-muted-foreground">
                   관리

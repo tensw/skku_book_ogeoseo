@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useMemo } from "react"
-import { Trash2, FileSpreadsheet, FileText, Download, Star, Eye, ChevronLeft, List, FileOutput } from "lucide-react"
+import { Trash2, FileSpreadsheet, FileText, Download, Star, Eye, ChevronLeft, List, FileOutput, BookOpen, Users, TrendingUp, BarChart3 } from "lucide-react"
 import { format, subHours, subDays } from "date-fns"
 import { reviews as initialReviews, mockStudents } from "@/lib/mock-data"
 import type { BookReview } from "@/lib/types"
@@ -56,6 +56,33 @@ export default function AdminReviewsPage() {
   const [activeTab, setActiveTab] = useState("student")
   const { getAllProgramOptions } = usePrograms()
   const programOptions = getAllProgramOptions()
+
+  /* ── 대시보드 통계 ── */
+  const dashboardStats = useMemo(() => {
+    const total = reviewList.length
+    const avgRating = total > 0 ? reviewList.reduce((s, r) => s + r.rating, 0) / total : 0
+    const uniqueStudents = new Set(reviewList.map((r) => r.user.studentId).filter(Boolean)).size
+    const programCount = reviewList.filter((r) => r.type === "program").length
+
+    // 프로그램별 분포
+    const programDist = new Map<string, number>()
+    for (const r of reviewList) {
+      const pid = r.programId ?? "unknown"
+      programDist.set(pid, (programDist.get(pid) ?? 0) + 1)
+    }
+    const programDistArr = Array.from(programDist.entries())
+      .map(([id, count]) => ({ id, label: getProgramLabel(id, programOptions), count }))
+      .sort((a, b) => b.count - a.count)
+
+    // 평점 분포
+    const ratingDist = [0, 0, 0, 0, 0]
+    for (const r of reviewList) {
+      if (r.rating >= 1 && r.rating <= 5) ratingDist[r.rating - 1]++
+    }
+    const maxRating = Math.max(...ratingDist, 1)
+
+    return { total, avgRating, uniqueStudents, programCount, programDistArr, ratingDist, maxRating }
+  }, [reviewList, programOptions])
 
   // 공통: 삭제
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
@@ -305,6 +332,100 @@ export default function AdminReviewsPage() {
   return (
     <div className="space-y-6">
       <PageHeader title="서평 관리" />
+
+      {/* ───────── 대시보드 ───────── */}
+      <div className="px-5 sm:px-8">
+        {/* 요약 카드 */}
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+          <div className="rounded-xl border border-border bg-card p-4">
+            <div className="flex items-center gap-2 text-muted-foreground">
+              <BookOpen size={16} />
+              <span className="text-xs">총 서평</span>
+            </div>
+            <p className="mt-2 text-2xl font-bold text-foreground">{dashboardStats.total}</p>
+          </div>
+          <div className="rounded-xl border border-border bg-card p-4">
+            <div className="flex items-center gap-2 text-amber-500">
+              <Star size={16} />
+              <span className="text-xs">평균 평점</span>
+            </div>
+            <p className="mt-2 text-2xl font-bold text-amber-500">{dashboardStats.avgRating.toFixed(1)}</p>
+          </div>
+          <div className="rounded-xl border border-border bg-card p-4">
+            <div className="flex items-center gap-2 text-blue-600">
+              <Users size={16} />
+              <span className="text-xs">참여 학생</span>
+            </div>
+            <p className="mt-2 text-2xl font-bold text-blue-600">{dashboardStats.uniqueStudents}</p>
+          </div>
+          <div className="rounded-xl border border-border bg-card p-4">
+            <div className="flex items-center gap-2 text-emerald-600">
+              <TrendingUp size={16} />
+              <span className="text-xs">프로그램 서평</span>
+            </div>
+            <p className="mt-2 text-2xl font-bold text-emerald-600">
+              {dashboardStats.programCount}
+              <span className="ml-1 text-sm font-normal text-muted-foreground">
+                / {dashboardStats.total}
+              </span>
+            </p>
+          </div>
+        </div>
+
+        {/* 프로그램별 분포 + 평점 분포 */}
+        <div className="mt-4 grid gap-4 sm:grid-cols-2">
+          {/* 프로그램별 분포 */}
+          <div className="rounded-xl border border-border bg-card p-4">
+            <h3 className="mb-3 flex items-center gap-2 text-xs font-bold text-muted-foreground">
+              <BarChart3 size={14} />
+              프로그램별 서평 분포
+            </h3>
+            <div className="space-y-2.5">
+              {dashboardStats.programDistArr.map((p) => (
+                <div key={p.id}>
+                  <div className="mb-1 flex items-center justify-between text-xs">
+                    <span className="font-medium text-foreground">{p.label}</span>
+                    <span className="text-muted-foreground">{p.count}편</span>
+                  </div>
+                  <div className="h-2 overflow-hidden rounded-full bg-muted">
+                    <div
+                      className="h-full rounded-full bg-primary transition-all"
+                      style={{ width: `${(p.count / dashboardStats.total) * 100}%` }}
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* 평점 분포 */}
+          <div className="rounded-xl border border-border bg-card p-4">
+            <h3 className="mb-3 flex items-center gap-2 text-xs font-bold text-muted-foreground">
+              <Star size={14} />
+              평점 분포
+            </h3>
+            <div className="space-y-2">
+              {[5, 4, 3, 2, 1].map((rating) => {
+                const count = dashboardStats.ratingDist[rating - 1]
+                return (
+                  <div key={rating} className="flex items-center gap-2">
+                    <span className="flex w-10 items-center gap-0.5 text-xs font-medium text-amber-500">
+                      {rating} <Star size={10} fill="currentColor" />
+                    </span>
+                    <div className="h-2 flex-1 overflow-hidden rounded-full bg-muted">
+                      <div
+                        className="h-full rounded-full bg-amber-400 transition-all"
+                        style={{ width: `${(count / dashboardStats.maxRating) * 100}%` }}
+                      />
+                    </div>
+                    <span className="w-6 text-right text-xs text-muted-foreground">{count}</span>
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+        </div>
+      </div>
 
       <div className="px-5 sm:px-8">
         <FilterTabs tabs={tabs} activeTab={activeTab} onTabChange={setActiveTab} />

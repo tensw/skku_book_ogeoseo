@@ -1,7 +1,6 @@
 "use client"
 
 import { useState, useMemo } from "react"
-import { Download } from "lucide-react"
 import { PageHeader } from "@/components/shared/page-header"
 import { FilterTabs } from "@/components/shared/filter-tabs"
 import { SearchBar } from "@/components/shared/search-bar"
@@ -58,15 +57,6 @@ export default function Guide() {
       <PageHeader
         title="오거서 추천도서"
         description="성균 고전 100선"
-        action={
-          <button
-            onClick={() => alert("준비 중입니다")}
-            className="flex items-center gap-1.5 rounded-full bg-emerald/10 px-4 py-2 text-xs font-semibold text-emerald transition-colors hover:bg-emerald/20"
-          >
-            <Download size={14} />
-            엑셀 다운로드
-          </button>
-        }
       />
 
       <div className="flex flex-col gap-3 px-5 sm:px-8">

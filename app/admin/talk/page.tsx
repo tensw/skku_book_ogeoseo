@@ -355,22 +355,16 @@ export default function AdminTalkPage() {
                   post.isHidden && "bg-red-50/50"
                 )}
               >
-                <td className="px-4 py-3">
+                <td className="whitespace-nowrap px-4 py-3">
                   <div className="flex items-center gap-2">
                     <img
                       src={post.avatar}
                       alt={post.author}
-                      className="h-8 w-8 rounded-full object-cover"
+                      className="h-7 w-7 shrink-0 rounded-full object-cover"
                       crossOrigin="anonymous"
                     />
-                    <div>
-                      <p className="text-sm font-medium text-foreground">
-                        {post.author}
-                      </p>
-                      <p className="text-[10px] text-muted-foreground">
-                        {post.department}
-                      </p>
-                    </div>
+                    <span className="text-sm font-medium text-foreground">{post.author}</span>
+                    <span className="text-[11px] text-muted-foreground">{post.department}</span>
                   </div>
                 </td>
                 <td className="px-4 py-3">

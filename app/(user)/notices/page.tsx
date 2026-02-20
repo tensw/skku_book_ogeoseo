@@ -18,10 +18,18 @@ export default function Notices() {
   const [notices] = useState(initialNotices)
 
   const filtered = useMemo(() => {
-    if (!search.trim()) return notices
-    return notices.filter((n) =>
-      n.title.toLowerCase().includes(search.toLowerCase())
-    )
+    let result = notices
+    if (search.trim()) {
+      result = result.filter((n) =>
+        n.title.toLowerCase().includes(search.toLowerCase())
+      )
+    }
+    // 중요 공지 상단 고정
+    return [...result].sort((a, b) => {
+      if (a.important && !b.important) return -1
+      if (!a.important && b.important) return 1
+      return 0
+    })
   }, [search, notices])
 
   const totalPages = Math.ceil(filtered.length / PAGE_SIZE)
@@ -40,9 +48,12 @@ export default function Notices() {
       render: (_: string, row: (typeof notices)[0]) => (
         <span className="flex items-center gap-2">
           {row.important && (
-            <AlertCircle size={14} className="flex-shrink-0 text-red-500" />
+            <span className="flex items-center gap-1 flex-shrink-0 rounded bg-red-50 px-1.5 py-0.5 text-[10px] font-bold text-red-500">
+              <AlertCircle size={11} />
+              중요
+            </span>
           )}
-          <span className="line-clamp-1">{row.title}</span>
+          <span className={row.important ? "font-semibold line-clamp-1" : "line-clamp-1"}>{row.title}</span>
         </span>
       ),
     },

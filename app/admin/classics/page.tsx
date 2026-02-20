@@ -202,7 +202,7 @@ export default function AdminClassicsPage() {
       </div>
 
       <div className="px-5 sm:px-8">
-        <DataTable columns={columns} data={filtered} />
+        <DataTable columns={columns} data={filtered} className="[&_td]:py-1.5 [&_th]:h-9" />
       </div>
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>

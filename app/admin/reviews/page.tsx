@@ -2,12 +2,12 @@
 
 import { useState } from "react"
 import { Trash2, FileSpreadsheet, FileText, Users, Calendar, Download, X, ChevronRight } from "lucide-react"
+import { format, subHours, subDays } from "date-fns"
 import { reviews as initialReviews } from "@/lib/mock-data"
 import type { BookReview } from "@/lib/types"
 import { PageHeader } from "@/components/shared/page-header"
 import { DataTable } from "@/components/shared/data-table"
 import { SearchBar } from "@/components/shared/search-bar"
-import { FilterTabs } from "@/components/shared/filter-tabs"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -18,12 +18,6 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog"
 import { cn } from "@/lib/utils"
-
-const filterTabs = [
-  { id: "all", label: "전체" },
-  { id: "program", label: "프로그램 후기" },
-  { id: "ogeoseo", label: "오거서 후기" },
-]
 
 /* ── Mock 학생 데이터 ── */
 const mockStudents = [
@@ -47,7 +41,6 @@ type OutputStyle = "certificate" | "list"
 export default function AdminReviewsPage() {
   const [reviewList, setReviewList] = useState<BookReview[]>(() => [...initialReviews])
   const [search, setSearch] = useState("")
-  const [activeTab, setActiveTab] = useState("all")
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [deletingId, setDeletingId] = useState<number | null>(null)
 
@@ -109,7 +102,6 @@ export default function AdminReviewsPage() {
   }
 
   const filtered = reviewList
-    .filter((r) => activeTab === "all" || r.type === activeTab)
     .filter(
       (r) =>
         r.user.name.toLowerCase().includes(search.toLowerCase()) ||
@@ -163,8 +155,23 @@ export default function AdminReviewsPage() {
     {
       key: "timeAgo",
       label: "작성일",
-      className: "w-24",
+      className: "w-36 whitespace-nowrap",
       hideOnMobile: true,
+      render: (val: string) => {
+        const now = new Date()
+        const hourMatch = val.match(/(\d+)시간/)
+        const dayMatch = val.match(/(\d+)일/)
+        const date = hourMatch
+          ? subHours(now, Number(hourMatch[1]))
+          : dayMatch
+            ? subDays(now, Number(dayMatch[1]))
+            : now
+        return (
+          <span className="text-muted-foreground">
+            {format(date, "yyyy.MM.dd HH:mm")}
+          </span>
+        )
+      },
     },
     {
       key: "actions",
@@ -215,13 +222,12 @@ export default function AdminReviewsPage() {
         </div>
       </div>
 
-      <div className="space-y-4 px-5 sm:px-8">
-        <FilterTabs tabs={filterTabs} activeTab={activeTab} onTabChange={setActiveTab} />
+      <div className="px-5 sm:px-8">
         <SearchBar value={search} onChange={setSearch} placeholder="리뷰 검색..." />
       </div>
 
       <div className="px-5 sm:px-8">
-        <DataTable columns={columns} data={filtered} />
+        <DataTable columns={columns} data={filtered} className="[&_td]:py-1.5 [&_th]:h-9" />
       </div>
 
       <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>

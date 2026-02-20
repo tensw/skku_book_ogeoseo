@@ -54,6 +54,7 @@ export interface Bundok {
   maxMembers: number
   tags: string[]
   status: "recruiting" | "confirmed" | "completed"
+  members?: { nickname: string; realName: string }[]
   aiBooks?: string[]
   discussionQuestions?: string[]
 }

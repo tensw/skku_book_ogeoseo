@@ -650,6 +650,11 @@ export const bundoks: Bundok[] = [
     maxMembers: 5,
     tags: ["문학", "성장소설", "고전"],
     status: "recruiting",
+    members: [
+      { nickname: "책벌레윤", realName: "윤서현" },
+      { nickname: "독서왕", realName: "이도윤" },
+      { nickname: "문학소녀", realName: "박하은" },
+    ],
     aiBooks: ["싯다르타", "수레바퀴 아래서", "나르치스와 골드문트"],
     discussionQuestions: [
       "싱클레어에게 데미안은 어떤 의미인가?",
@@ -674,6 +679,12 @@ export const bundoks: Bundok[] = [
     maxMembers: 5,
     tags: ["인문", "역사", "과학"],
     status: "recruiting",
+    members: [
+      { nickname: "역사탐험가", realName: "김태현" },
+      { nickname: "하라리팬", realName: "정수빈" },
+      { nickname: "사피엔스", realName: "오지훈" },
+      { nickname: "인문학도", realName: "강예진" },
+    ],
     aiBooks: ["호모 데우스", "21세기를 위한 21가지 제언", "총, 균, 쇠"],
     discussionQuestions: [
       "농업혁명이 인류에게 축복이었을까, 재앙이었을까?",
@@ -697,6 +708,10 @@ export const bundoks: Bundok[] = [
     maxMembers: 4,
     tags: ["철학", "사회과학", "토론"],
     status: "recruiting",
+    members: [
+      { nickname: "철학하는곰", realName: "송민재" },
+      { nickname: "생각하는사람", realName: "임채원" },
+    ],
     aiBooks: ["공정하다는 착각", "왜 도덕인가", "자유론"],
     discussionQuestions: [
       "트롤리 딜레마에서 당신의 선택은?",
@@ -720,6 +735,13 @@ export const bundoks: Bundok[] = [
     maxMembers: 5,
     tags: ["문학", "한국문학", "노벨문학상"],
     status: "confirmed",
+    members: [
+      { nickname: "한강러버", realName: "최예린" },
+      { nickname: "소설읽는밤", realName: "김나윤" },
+      { nickname: "문학청년", realName: "이서준" },
+      { nickname: "글쓰는고양이", realName: "박소율" },
+      { nickname: "북마크", realName: "장하린" },
+    ],
     aiBooks: ["소년이 온다", "흰", "작별하지 않는다"],
     discussionQuestions: [
       "영혜의 채식 거부는 어떤 상징인가?",
@@ -743,6 +765,12 @@ export const bundoks: Bundok[] = [
     maxMembers: 4,
     tags: ["과학", "천문학", "교양"],
     status: "confirmed",
+    members: [
+      { nickname: "별보는소년", realName: "정민수" },
+      { nickname: "우주덕후", realName: "한지우" },
+      { nickname: "밤하늘", realName: "류서진" },
+      { nickname: "과학소녀", realName: "백다은" },
+    ],
   },
   {
     id: 6,
@@ -761,6 +789,11 @@ export const bundoks: Bundok[] = [
     maxMembers: 3,
     tags: ["과학", "생물학", "진화론"],
     status: "completed",
+    members: [
+      { nickname: "진화론자", realName: "한소희" },
+      { nickname: "유전자맨", realName: "조현우" },
+      { nickname: "생물학개론", realName: "신예은" },
+    ],
   },
   {
     id: 7,
@@ -779,5 +812,12 @@ export const bundoks: Bundok[] = [
     maxMembers: 5,
     tags: ["경제", "사회과학", "고전"],
     status: "completed",
+    members: [
+      { nickname: "경제학도", realName: "윤태호" },
+      { nickname: "애덤의손", realName: "김하준" },
+      { nickname: "자본론", realName: "이수아" },
+      { nickname: "경영학개론", realName: "박지환" },
+      { nickname: "주식왕", realName: "최서연" },
+    ],
   },
 ]

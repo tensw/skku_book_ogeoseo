@@ -7,7 +7,6 @@ import {
   Users,
   Clock,
   MapPin,
-  Sparkles,
   Heart,
   MessageCircle,
   Star,
@@ -51,11 +50,8 @@ export function HomePage() {
   // 모집 중인 번독
   const recruitingBundoks = bundoks.filter((b) => b.status === "recruiting")
 
-  // 취향 기반 추천 (onboarding 관심분야 기반 - mock: 모든 모집 중 번독 표시)
-  const recommendedBundoks = recruitingBundoks.slice(0, 4)
-
-  // 오늘의 추천 도서
-  const todayBooks = monthlyBooks.map((book, i) => ({
+  // 이달의 추천 도서
+  const monthlyRecommended = monthlyBooks.map((book, i) => ({
     ...book,
     category: i % 3 === 0 ? "에세이" : i % 3 === 1 ? "인문" : "문학",
     color: i % 3 === 0 ? "bg-tangerine/10 text-tangerine" : i % 3 === 1 ? "bg-mint/10 text-mint" : "bg-primary/10 text-primary",
@@ -76,6 +72,44 @@ export function HomePage() {
         <p className="mt-1 text-xs text-muted-foreground">
           번개독서모임으로 함께 읽어보세요
         </p>
+      </section>
+
+      {/* 이달의 추천 도서 */}
+      <section className="mt-6 px-5 sm:px-8">
+        <div className="mb-3 flex items-center justify-between">
+          <h2 className="flex items-center gap-2 text-sm font-bold text-foreground">
+            <Star size={14} className="text-emerald" />
+            이달의 추천 도서
+          </h2>
+          <Link
+            href="/guide"
+            className="rounded-full bg-emerald/10 px-3 py-1 text-[10px] font-semibold text-emerald transition-colors hover:bg-emerald/20"
+          >
+            더보기
+          </Link>
+        </div>
+
+        <div className="flex gap-3 overflow-x-auto pb-2 no-scrollbar">
+          {monthlyRecommended.map((book) => (
+            <div
+              key={book.id}
+              className="group flex w-24 flex-shrink-0 flex-col items-center gap-2"
+            >
+              <div className="relative h-32 w-22 overflow-hidden rounded-2xl shadow-md ring-1 ring-border transition-transform group-hover:scale-105">
+                <img
+                  src={book.cover || "/placeholder.svg"}
+                  alt={book.title}
+                  className="h-full w-full object-cover"
+                  crossOrigin="anonymous"
+                />
+              </div>
+              <span className={cn("rounded-full px-2 py-0.5 text-[9px] font-bold", book.color)}>
+                {book.category}
+              </span>
+              <p className="w-20 truncate text-center text-[10px] font-medium text-foreground">{book.title}</p>
+            </div>
+          ))}
+        </div>
       </section>
 
       {/* 지금 모집 중인 번독 */}
@@ -158,85 +192,6 @@ export function HomePage() {
               <p className="text-sm text-muted-foreground">모집 중인 번독이 없습니다</p>
             </div>
           )}
-        </div>
-      </section>
-
-      {/* 내 취향 기반 추천 모임 */}
-      {recommendedBundoks.length > 0 && (
-        <section className="mt-6 px-5 sm:px-8">
-          <div className="mb-3 flex items-center justify-between">
-            <h2 className="flex items-center gap-2 text-sm font-bold text-foreground">
-              <Sparkles size={14} className="text-tangerine" />
-              내 취향 기반 추천 모임
-            </h2>
-          </div>
-          <div className="flex gap-3 overflow-x-auto pb-2 no-scrollbar">
-            {recommendedBundoks.map((bundok) => (
-              <Link
-                key={bundok.id}
-                href={`/programs/${bundok.id}`}
-                className="flex w-64 flex-shrink-0 items-center gap-3 rounded-2xl border border-border bg-card p-3 shadow-sm transition-all hover:shadow-md"
-              >
-                <div className="h-16 w-11 flex-shrink-0 overflow-hidden rounded-lg shadow-sm">
-                  <img
-                    src={bundok.bookCover || "/placeholder.svg"}
-                    alt={bundok.book}
-                    className="h-full w-full object-cover"
-                    crossOrigin="anonymous"
-                  />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <h3 className="text-xs font-bold text-foreground line-clamp-1">{bundok.title}</h3>
-                  <p className="mt-0.5 text-[10px] text-muted-foreground line-clamp-1">{bundok.book}</p>
-                  <div className="mt-1.5 flex flex-wrap gap-1">
-                    {bundok.tags.slice(0, 2).map((tag) => (
-                      <span key={tag} className="rounded-full bg-primary/10 px-1.5 py-0.5 text-[8px] font-medium text-primary">
-                        {tag}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              </Link>
-            ))}
-          </div>
-        </section>
-      )}
-
-      {/* 오늘의 추천 도서 */}
-      <section className="mt-6 px-5 sm:px-8">
-        <div className="mb-3 flex items-center justify-between">
-          <h2 className="flex items-center gap-2 text-sm font-bold text-foreground">
-            <Star size={14} className="text-emerald" />
-            오늘의 추천 도서
-          </h2>
-          <Link
-            href="/guide"
-            className="rounded-full bg-emerald/10 px-3 py-1 text-[10px] font-semibold text-emerald transition-colors hover:bg-emerald/20"
-          >
-            더보기
-          </Link>
-        </div>
-
-        <div className="flex gap-3 overflow-x-auto pb-2 no-scrollbar">
-          {todayBooks.map((book) => (
-            <div
-              key={book.id}
-              className="group flex w-24 flex-shrink-0 flex-col items-center gap-2"
-            >
-              <div className="relative h-32 w-22 overflow-hidden rounded-2xl shadow-md ring-1 ring-border transition-transform group-hover:scale-105">
-                <img
-                  src={book.cover || "/placeholder.svg"}
-                  alt={book.title}
-                  className="h-full w-full object-cover"
-                  crossOrigin="anonymous"
-                />
-              </div>
-              <span className={cn("rounded-full px-2 py-0.5 text-[9px] font-bold", book.color)}>
-                {book.category}
-              </span>
-              <p className="w-20 truncate text-center text-[10px] font-medium text-foreground">{book.title}</p>
-            </div>
-          ))}
         </div>
       </section>
 

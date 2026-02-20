@@ -28,48 +28,88 @@ const categories = [
     name: "문학/창작",
     icon: BookMarked,
     subcategories: ["소설", "시/에세이", "고전문학", "SF/판타지", "미스터리/스릴러", "외국문학"],
+    books: [
+      { title: "1984", cover: "https://picsum.photos/seed/lit1/120/180" },
+      { title: "데미안", cover: "https://picsum.photos/seed/lit2/120/180" },
+      { title: "미드나이트 라이브러리", cover: "https://picsum.photos/seed/lit3/120/180" },
+    ],
   },
   {
     id: "humanities",
     name: "인문/교양",
     icon: Brain,
     subcategories: ["철학", "역사", "심리학", "언어학", "문화비평", "신화/종교"],
+    books: [
+      { title: "사피엔스", cover: "https://picsum.photos/seed/hum1/120/180" },
+      { title: "총, 균, 쇠", cover: "https://picsum.photos/seed/hum2/120/180" },
+      { title: "생각에 관한 생각", cover: "https://picsum.photos/seed/hum3/120/180" },
+    ],
   },
   {
     id: "society",
     name: "사회/시사",
     icon: Landmark,
     subcategories: ["사회학", "정치", "법", "젠더/페미니즘", "미디어", "국제관계"],
+    books: [
+      { title: "정의란 무엇인가", cover: "https://picsum.photos/seed/soc1/120/180" },
+      { title: "왜 세계의 절반은 굶주리는가", cover: "https://picsum.photos/seed/soc2/120/180" },
+      { title: "국가는 왜 실패하는가", cover: "https://picsum.photos/seed/soc3/120/180" },
+    ],
   },
   {
     id: "business",
     name: "경영/경제",
     icon: Briefcase,
     subcategories: ["경영전략", "마케팅", "창업", "재테크/투자", "경제학", "리더십"],
+    books: [
+      { title: "부의 추월차선", cover: "https://picsum.photos/seed/biz1/120/180" },
+      { title: "린 스타트업", cover: "https://picsum.photos/seed/biz2/120/180" },
+      { title: "넛지", cover: "https://picsum.photos/seed/biz3/120/180" },
+    ],
   },
   {
     id: "science",
     name: "과학/기술",
     icon: Cpu,
     subcategories: ["자연과학", "수학", "IT/컴퓨터", "AI/데이터", "공학", "환경/생태"],
+    books: [
+      { title: "코스모스", cover: "https://picsum.photos/seed/sci1/120/180" },
+      { title: "클린 코드", cover: "https://picsum.photos/seed/sci2/120/180" },
+      { title: "이기적 유전자", cover: "https://picsum.photos/seed/sci3/120/180" },
+    ],
   },
   {
     id: "art",
     name: "예술/문화",
     icon: Palette,
     subcategories: ["미술", "음악", "영화/미디어", "건축", "디자인", "사진"],
+    books: [
+      { title: "미술관에 간 화학자", cover: "https://picsum.photos/seed/art1/120/180" },
+      { title: "음악의 기쁨", cover: "https://picsum.photos/seed/art2/120/180" },
+      { title: "건축, 행복의 예술", cover: "https://picsum.photos/seed/art3/120/180" },
+    ],
   },
   {
     id: "selfdev",
     name: "자기계발",
     icon: Heart,
     subcategories: ["자기계발", "습관/생산성", "진로/커리어", "관계/소통", "글쓰기", "여행"],
+    books: [
+      { title: "미움받을 용기", cover: "https://picsum.photos/seed/self1/120/180" },
+      { title: "아주 작은 습관의 힘", cover: "https://picsum.photos/seed/self2/120/180" },
+      { title: "나미야 잡화점의 기적", cover: "https://picsum.photos/seed/self3/120/180" },
+    ],
   },
   {
     id: "academic",
     name: "학술/전공",
     icon: GraduationCap,
     subcategories: ["논문/학술서", "교양필독서", "동서양 고전", "연구방법론"],
+    books: [
+      { title: "논어", cover: "https://picsum.photos/seed/acad1/120/180" },
+      { title: "군주론", cover: "https://picsum.photos/seed/acad2/120/180" },
+      { title: "국부론", cover: "https://picsum.photos/seed/acad3/120/180" },
+    ],
   },
 ]
 
@@ -390,7 +430,7 @@ export default function OnboardingPage() {
                     className="flex w-full items-center gap-4 p-4"
                   >
                     <div className={cn(
-                      "flex h-12 w-12 items-center justify-center rounded-xl transition-all",
+                      "flex h-12 w-12 shrink-0 items-center justify-center rounded-xl transition-all",
                       isFullySelected
                         ? "bg-brand text-white"
                         : isPartiallySelected
@@ -410,8 +450,28 @@ export default function OnboardingPage() {
                         {category.subcategories.filter(sub => selectedSubcategories.includes(sub)).length} / {category.subcategories.length} 선택
                       </p>
                     </div>
+                    {/* 대표 책 이미지 */}
+                    <div className="flex -space-x-3 shrink-0">
+                      {category.books.map((book, i) => (
+                        <img
+                          key={i}
+                          src={book.cover}
+                          alt={book.title}
+                          crossOrigin="anonymous"
+                          className={cn(
+                            "h-14 w-10 rounded-md object-cover border-2 shadow-sm transition-all",
+                            isFullySelected
+                              ? "border-brand/30"
+                              : isPartiallySelected
+                              ? "border-brand-accent/30"
+                              : "border-white"
+                          )}
+                          style={{ zIndex: 3 - i }}
+                        />
+                      ))}
+                    </div>
                     <div className={cn(
-                      "flex h-6 w-6 items-center justify-center rounded-full transition-all",
+                      "flex h-6 w-6 shrink-0 items-center justify-center rounded-full transition-all",
                       isFullySelected
                         ? "bg-brand text-white"
                         : isPartiallySelected

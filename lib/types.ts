@@ -12,7 +12,7 @@ export interface Notice {
 export interface BookReview {
   id: number
   type: 'program' | 'ogeoseo'
-  user: { name: string; avatar: string; department?: string }
+  user: { name: string; avatar: string; department?: string; studentId?: string }
   book: { title: string; author: string; cover: string }
   rating: number
   text: string
@@ -21,6 +21,7 @@ export interface BookReview {
   timeAgo: string
   category?: string
   program?: string
+  programId?: string
 }
 
 export type BookCategory = '총류' | '철학' | '종교' | '사회과학' | '기술과학' | '예술' | '언어' | '문학' | '역사'
@@ -54,6 +55,7 @@ export interface Bundok {
   maxMembers: number
   tags: string[]
   status: "recruiting" | "confirmed" | "completed"
+  members?: { nickname: string; realName: string }[]
   aiBooks?: string[]
   discussionQuestions?: string[]
 }

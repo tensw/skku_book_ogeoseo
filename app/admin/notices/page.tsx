@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { Plus, Pencil, Trash2 } from "lucide-react"
+import { Plus, Pencil, Trash2, Eye, Pin } from "lucide-react"
 import { notices as initialNotices } from "@/lib/mock-data"
 import type { Notice } from "@/lib/types"
 import { PageHeader } from "@/components/shared/page-header"
@@ -33,11 +33,16 @@ export default function AdminNoticesPage() {
   const [formContent, setFormContent] = useState("")
   const [formImportant, setFormImportant] = useState(false)
 
-  const filtered = noticeList.filter(
-    (n) =>
-      n.title.toLowerCase().includes(search.toLowerCase()) ||
-      n.content.toLowerCase().includes(search.toLowerCase())
-  )
+  const filtered = noticeList
+    .filter(
+      (n) =>
+        n.title.toLowerCase().includes(search.toLowerCase()) ||
+        n.content.toLowerCase().includes(search.toLowerCase())
+    )
+    .sort((a, b) => {
+      if (a.important !== b.important) return a.important ? -1 : 1
+      return 0
+    })
 
   function openCreate() {
     setEditingNotice(null)
@@ -101,24 +106,35 @@ export default function AdminNoticesPage() {
       key: "title",
       label: "제목",
       render: (_: string, row: Notice) => (
-        <span className="flex items-center gap-2">
+        <div className="flex items-center gap-2">
           {row.important && (
-            <span className="inline-flex rounded bg-red-100 px-1.5 py-0.5 text-[10px] font-bold text-red-600">
+            <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-red-100 px-2 py-0.5 text-[11px] font-bold text-red-600">
+              <Pin size={10} />
               중요
             </span>
           )}
-          {row.title}
-        </span>
+          <span className="truncate">{row.title}</span>
+        </div>
       ),
     },
-    { key: "date", label: "작성일", className: "w-28", hideOnMobile: true },
-    { key: "views", label: "조회수", className: "w-20", hideOnMobile: true },
     {
-      key: "important",
-      label: "중요",
-      className: "w-16",
+      key: "author",
+      label: "작성자",
+      className: "w-24 whitespace-nowrap",
       hideOnMobile: true,
-      render: (val: boolean) => (val ? "Y" : "N"),
+    },
+    { key: "date", label: "작성일", className: "w-28", hideOnMobile: true },
+    {
+      key: "views",
+      label: "조회수",
+      className: "w-20",
+      hideOnMobile: true,
+      render: (val: number) => (
+        <span className="inline-flex items-center gap-1 text-muted-foreground">
+          <Eye size={13} />
+          {val.toLocaleString()}
+        </span>
+      ),
     },
     {
       key: "actions",
@@ -141,6 +157,7 @@ export default function AdminNoticesPage() {
     <div className="space-y-6">
       <PageHeader
         title="공지사항 관리"
+        description={`총 ${noticeList.length}건`}
         action={
           <Button onClick={openCreate} size="sm">
             <Plus size={16} />
@@ -154,17 +171,23 @@ export default function AdminNoticesPage() {
       </div>
 
       <div className="px-5 sm:px-8">
-        <DataTable columns={columns} data={filtered} />
+        <DataTable columns={columns} data={filtered} className="[&_td]:py-1.5 [&_th]:h-9" />
       </div>
 
+      {/* Create / Edit Dialog */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent>
+        <DialogContent className="max-w-2xl">
           <DialogHeader>
-            <DialogTitle>{editingNotice ? "공지사항 수정" : "공지사항 등록"}</DialogTitle>
+            <DialogTitle>
+              {editingNotice ? "공지사항 수정" : "공지사항 등록"}
+            </DialogTitle>
             <DialogDescription>
-              {editingNotice ? "공지사항을 수정합니다." : "새 공지사항을 등록합니다."}
+              {editingNotice
+                ? "공지사항을 수정합니다."
+                : "새 공지사항을 등록합니다."}
             </DialogDescription>
           </DialogHeader>
+
           <div className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="notice-title">제목</Label>
@@ -172,44 +195,57 @@ export default function AdminNoticesPage() {
                 id="notice-title"
                 value={formTitle}
                 onChange={(e) => setFormTitle(e.target.value)}
-                placeholder="공지사항 제목"
+                placeholder="공지사항 제목을 입력하세요"
               />
             </div>
+
             <div className="space-y-2">
-              <Label htmlFor="notice-content">내용</Label>
+              <div className="flex items-center justify-between">
+                <Label htmlFor="notice-content">내용</Label>
+                <span className="text-xs text-muted-foreground">
+                  {formContent.length}자
+                </span>
+              </div>
               <Textarea
                 id="notice-content"
                 value={formContent}
                 onChange={(e) => setFormContent(e.target.value)}
-                placeholder="공지사항 내용"
-                rows={5}
+                placeholder="공지사항 내용을 입력하세요"
+                className="min-h-[280px] resize-none"
               />
             </div>
-            <div className="flex items-center gap-2">
+
+            <div className="flex items-center gap-2 rounded-lg border border-border bg-muted/50 p-3">
               <Checkbox
                 id="notice-important"
                 checked={formImportant}
                 onCheckedChange={(checked) => setFormImportant(checked === true)}
               />
-              <Label htmlFor="notice-important">중요 공지</Label>
+              <Label htmlFor="notice-important" className="cursor-pointer text-sm">
+                중요 공지로 설정
+              </Label>
             </div>
           </div>
+
           <DialogFooter>
             <Button variant="outline" onClick={() => setDialogOpen(false)}>
               취소
             </Button>
-            <Button onClick={handleSubmit}>
+            <Button onClick={handleSubmit} disabled={!formTitle.trim()}>
               {editingNotice ? "수정" : "등록"}
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
+      {/* Delete Confirmation Dialog */}
       <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>공지사항 삭제</DialogTitle>
-            <DialogDescription>정말로 이 공지사항을 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.</DialogDescription>
+            <DialogDescription>
+              정말로 이 공지사항을 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.
+            </DialogDescription>
           </DialogHeader>
           <DialogFooter>
             <Button variant="outline" onClick={() => setDeleteDialogOpen(false)}>

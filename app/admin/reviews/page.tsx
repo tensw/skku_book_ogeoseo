@@ -1,9 +1,11 @@
 "use client"
 
-import { useState } from "react"
-import { Trash2, FileSpreadsheet, FileText, Users, Calendar, Download, X, ChevronRight } from "lucide-react"
-import { reviews as initialReviews } from "@/lib/mock-data"
+import { useState, useMemo } from "react"
+import { Trash2, FileSpreadsheet, FileText, Download, Star, Eye, ChevronLeft, List, FileOutput, BookOpen, Users, TrendingUp, BarChart3 } from "lucide-react"
+import { format, subHours, subDays } from "date-fns"
+import { reviews as initialReviews, mockStudents } from "@/lib/mock-data"
 import type { BookReview } from "@/lib/types"
+import { usePrograms } from "@/lib/program-context"
 import { PageHeader } from "@/components/shared/page-header"
 import { DataTable } from "@/components/shared/data-table"
 import { SearchBar } from "@/components/shared/search-bar"
@@ -17,111 +19,92 @@ import {
   DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import { cn } from "@/lib/utils"
 
-const filterTabs = [
-  { id: "all", label: "전체" },
-  { id: "program", label: "프로그램 후기" },
-  { id: "ogeoseo", label: "오거서 후기" },
+type ExportType = "excel" | "pdf"
+
+const tabs = [
+  { id: "student", label: "학생별 서평 조회" },
+  { id: "all", label: "전체 서평 조회" },
+  { id: "program", label: "프로그램별 충족도" },
 ]
 
-/* ── Mock 학생 데이터 ── */
-const mockStudents = [
-  { id: 1, name: "김민수", studentId: "2024123456", department: "컴퓨터공학과", booksRead: 12 },
-  { id: 2, name: "이수진", studentId: "2024234567", department: "경영학과", booksRead: 8 },
-  { id: 3, name: "박지훈", studentId: "2023345678", department: "국어국문학과", booksRead: 15 },
-  { id: 4, name: "최하연", studentId: "2024456789", department: "심리학과", booksRead: 10 },
-  { id: 5, name: "정서연", studentId: "2023567890", department: "철학과", booksRead: 20 },
-]
+function getProgramLabel(programId?: string, programOptions?: { id: string; label: string }[]) {
+  if (!programId) return "-"
+  const opt = programOptions?.find((o) => o.id === programId)
+  return opt?.label ?? programId
+}
 
-const mockStudentBooks = [
-  { id: 1, title: "사피엔스", author: "유발 하라리", readDate: "2026-01-15", program: "번독" },
-  { id: 2, title: "채식주의자", author: "한강", readDate: "2026-01-22", program: "자유 서평" },
-  { id: 3, title: "1984", author: "조지 오웰", readDate: "2026-02-01", program: "일반" },
-  { id: 4, title: "미드나이트 라이브러리", author: "매트 헤이그", readDate: "2026-02-08", program: "번독" },
-]
-
-type ExportType = "excel" | "pdf" | "student"
-type OutputStyle = "certificate" | "list"
+function resolveDate(timeAgo: string): Date {
+  const now = new Date()
+  const hourMatch = timeAgo.match(/(\d+)시간/)
+  const dayMatch = timeAgo.match(/(\d+)일/)
+  if (hourMatch) return subHours(now, Number(hourMatch[1]))
+  if (dayMatch) return subDays(now, Number(dayMatch[1]))
+  return now
+}
 
 export default function AdminReviewsPage() {
   const [reviewList, setReviewList] = useState<BookReview[]>(() => [...initialReviews])
-  const [search, setSearch] = useState("")
-  const [activeTab, setActiveTab] = useState("all")
+  const [activeTab, setActiveTab] = useState("student")
+  const { getAllProgramOptions } = usePrograms()
+  const programOptions = getAllProgramOptions()
+
+  /* ── 대시보드 통계 ── */
+  const dashboardStats = useMemo(() => {
+    const total = reviewList.length
+    const avgRating = total > 0 ? reviewList.reduce((s, r) => s + r.rating, 0) / total : 0
+    const uniqueStudents = new Set(reviewList.map((r) => r.user.studentId).filter(Boolean)).size
+    const programCount = reviewList.filter((r) => r.type === "program").length
+
+    // 프로그램별 분포
+    const programDist = new Map<string, number>()
+    for (const r of reviewList) {
+      const pid = r.programId ?? "unknown"
+      programDist.set(pid, (programDist.get(pid) ?? 0) + 1)
+    }
+    const programDistArr = Array.from(programDist.entries())
+      .map(([id, count]) => ({ id, label: getProgramLabel(id, programOptions), count }))
+      .sort((a, b) => b.count - a.count)
+
+    return { total, avgRating, uniqueStudents, programCount, programDistArr }
+  }, [reviewList, programOptions])
+
+  // 공통: 삭제
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [deletingId, setDeletingId] = useState<number | null>(null)
 
-  // 데이터 추출 관련 상태
+  // 공통: export
   const [exportDialogOpen, setExportDialogOpen] = useState(false)
-  const [exportType, setExportType] = useState<ExportType | null>(null)
+  const [exportType, setExportType] = useState<ExportType>("excel")
   const [dateRange, setDateRange] = useState({ start: "2026-01-01", end: "2026-12-31" })
+  const [exportContext, setExportContext] = useState<string>("")
 
-  // 학생 데이터 추출 관련 상태
-  const [studentDataStep, setStudentDataStep] = useState<"select" | "style">("select")
-  const [selectedStudents, setSelectedStudents] = useState<number[]>([])
-  const [outputStyle, setOutputStyle] = useState<OutputStyle>("certificate")
+  // 탭1: 학생별
   const [studentSearch, setStudentSearch] = useState("")
+  const [selectedStudent, setSelectedStudent] = useState<typeof mockStudents[number] | null>(null)
+  const [viewingReview, setViewingReview] = useState<BookReview | null>(null)
 
-  const filteredStudents = mockStudents.filter(
-    (s) =>
-      s.name.includes(studentSearch) ||
-      s.studentId.includes(studentSearch) ||
-      s.department.includes(studentSearch)
-  )
+  // 탭2: 전체
+  const [allSearch, setAllSearch] = useState("")
 
-  function openExportDialog(type: ExportType) {
-    setExportType(type)
-    setExportDialogOpen(true)
-    if (type === "student") {
-      setStudentDataStep("select")
-      setSelectedStudents([])
-    }
-  }
+  // 탭3: 프로그램별 충족도
+  const [selectedProgramId, setSelectedProgramId] = useState("")
+  const [minReviews, setMinReviews] = useState(1)
+  const [detailStudent, setDetailStudent] = useState<{ name: string; studentId: string } | null>(null)
 
-  function handleExport() {
-    // 실제로는 API 호출하여 파일 다운로드
-    alert(`${exportType === "excel" ? "엑셀" : exportType === "pdf" ? "PDF" : "학생 데이터"} 추출이 시작됩니다.\n기간: ${dateRange.start} ~ ${dateRange.end}`)
-    setExportDialogOpen(false)
-    setExportType(null)
-  }
-
-  function handleStudentDataExport() {
-    const styleLabel = outputStyle === "certificate" ? "독서인증서" : "독서목록"
-    alert(`학생 데이터 PDF 추출 (${styleLabel})\n선택된 학생: ${selectedStudents.length}명\n기간: ${dateRange.start} ~ ${dateRange.end}`)
-    setExportDialogOpen(false)
-    setExportType(null)
-    setStudentDataStep("select")
-    setSelectedStudents([])
-  }
-
-  function toggleStudentSelection(id: number) {
-    setSelectedStudents((prev) =>
-      prev.includes(id) ? prev.filter((s) => s !== id) : [...prev, id]
-    )
-  }
-
-  function selectAllStudents() {
-    if (selectedStudents.length === filteredStudents.length) {
-      setSelectedStudents([])
-    } else {
-      setSelectedStudents(filteredStudents.map((s) => s.id))
-    }
-  }
-
-  const filtered = reviewList
-    .filter((r) => activeTab === "all" || r.type === activeTab)
-    .filter(
-      (r) =>
-        r.user.name.toLowerCase().includes(search.toLowerCase()) ||
-        r.book.title.toLowerCase().includes(search.toLowerCase()) ||
-        r.text.toLowerCase().includes(search.toLowerCase())
-    )
-
+  /* ── 삭제 ── */
   function confirmDelete(id: number) {
     setDeletingId(id)
     setDeleteDialogOpen(true)
   }
-
   function handleDelete() {
     if (deletingId !== null) {
       setReviewList((prev) => prev.filter((r) => r.id !== deletingId))
@@ -130,13 +113,112 @@ export default function AdminReviewsPage() {
     setDeletingId(null)
   }
 
-  const columns = [
-    { key: "id", label: "번호", className: "w-16", hideOnMobile: true },
+  /* ── Export ── */
+  function openExportDialog(type: ExportType, context: string) {
+    setExportType(type)
+    setExportContext(context)
+    setExportDialogOpen(true)
+  }
+  function handleExport() {
+    alert(`${exportType === "excel" ? "엑셀" : "PDF"} 추출이 시작됩니다.\n기간: ${dateRange.start} ~ ${dateRange.end}\n범위: ${exportContext}`)
+    setExportDialogOpen(false)
+  }
+
+  /* ── 탭1: 학생별 데이터 ── */
+  const filteredStudents = useMemo(() => {
+    if (!studentSearch.trim()) return mockStudents
+    return mockStudents.filter(
+      (s) =>
+        s.name.includes(studentSearch) ||
+        s.studentId.includes(studentSearch) ||
+        s.department.includes(studentSearch)
+    )
+  }, [studentSearch])
+
+  const studentReviews = useMemo(() => {
+    if (!selectedStudent) return []
+    return reviewList.filter((r) => r.user.studentId === selectedStudent.studentId)
+  }, [selectedStudent, reviewList])
+
+  const studentReviewColumns = [
+    {
+      key: "book",
+      label: "도서명",
+      render: (_: unknown, row: BookReview) => (
+        <button
+          onClick={() => setViewingReview(row)}
+          className="text-left font-medium text-primary hover:underline"
+        >
+          {row.book.title}
+        </button>
+      ),
+    },
+    {
+      key: "programId",
+      label: "프로그램",
+      className: "w-28",
+      hideOnMobile: true,
+      render: (_: unknown, row: BookReview) => (
+        <span className="inline-flex rounded-full bg-blue-50 px-2 py-0.5 text-[11px] font-semibold text-blue-600">
+          {getProgramLabel(row.programId, programOptions)}
+        </span>
+      ),
+    },
+    {
+      key: "rating",
+      label: "평점",
+      className: "w-20",
+      render: (val: number) => (
+        <span className="flex items-center gap-1 text-amber-500">
+          <Star size={12} fill="currentColor" /> {val}
+        </span>
+      ),
+    },
+    {
+      key: "timeAgo",
+      label: "작성일",
+      className: "w-32 whitespace-nowrap",
+      hideOnMobile: true,
+      render: (val: string) => (
+        <span className="text-muted-foreground">{format(resolveDate(val), "yyyy.MM.dd")}</span>
+      ),
+    },
+    {
+      key: "view",
+      label: "보기",
+      className: "w-16",
+      render: (_: unknown, row: BookReview) => (
+        <Button variant="ghost" size="sm" onClick={() => setViewingReview(row)}>
+          <Eye size={14} />
+        </Button>
+      ),
+    },
+  ]
+
+  /* ── 탭2: 전체 데이터 ── */
+  const filteredAll = useMemo(() => {
+    return reviewList.filter(
+      (r) =>
+        r.user.name.toLowerCase().includes(allSearch.toLowerCase()) ||
+        r.book.title.toLowerCase().includes(allSearch.toLowerCase()) ||
+        (r.user.studentId && r.user.studentId.includes(allSearch))
+    )
+  }, [allSearch, reviewList])
+
+  const allColumns = [
+    { key: "id", label: "번호", className: "w-14", hideOnMobile: true },
     {
       key: "user",
       label: "작성자",
-      className: "w-28",
-      render: (_: unknown, row: BookReview) => row.user.name,
+      className: "w-36",
+      render: (_: unknown, row: BookReview) => (
+        <div>
+          <span className="font-medium">{row.user.name}</span>
+          {row.user.studentId && (
+            <span className="ml-1 text-xs text-muted-foreground">({row.user.studentId})</span>
+          )}
+        </div>
+      ),
     },
     {
       key: "book",
@@ -144,17 +226,29 @@ export default function AdminReviewsPage() {
       render: (_: unknown, row: BookReview) => row.book.title,
     },
     {
+      key: "programId",
+      label: "프로그램",
+      className: "w-28",
+      hideOnMobile: true,
+      render: (_: unknown, row: BookReview) => (
+        <span className="inline-flex rounded-full bg-blue-50 px-2 py-0.5 text-[11px] font-semibold text-blue-600">
+          {getProgramLabel(row.programId, programOptions)}
+        </span>
+      ),
+    },
+    {
       key: "type",
       label: "유형",
-      className: "w-28",
+      className: "w-24",
       hideOnMobile: true,
       render: (val: string) => (
         <span
-          className={`inline-flex rounded-full px-2 py-0.5 text-[11px] font-semibold ${
+          className={cn(
+            "inline-flex rounded-full px-2 py-0.5 text-[11px] font-semibold",
             val === "program"
               ? "bg-blue-50 text-blue-600"
               : "bg-emerald-50 text-emerald-600"
-          }`}
+          )}
         >
           {val === "program" ? "프로그램" : "오거서"}
         </span>
@@ -163,13 +257,16 @@ export default function AdminReviewsPage() {
     {
       key: "timeAgo",
       label: "작성일",
-      className: "w-24",
+      className: "w-32 whitespace-nowrap",
       hideOnMobile: true,
+      render: (val: string) => (
+        <span className="text-muted-foreground">{format(resolveDate(val), "yyyy.MM.dd HH:mm")}</span>
+      ),
     },
     {
       key: "actions",
       label: "관리",
-      className: "w-20",
+      className: "w-16",
       render: (_: unknown, row: BookReview) => (
         <Button variant="ghost" size="sm" onClick={() => confirmDelete(row.id)}>
           <Trash2 size={14} className="text-destructive" />
@@ -178,52 +275,343 @@ export default function AdminReviewsPage() {
     },
   ]
 
+  /* ── 탭3: 프로그램별 충족도 ── */
+  const fulfillmentData = useMemo(() => {
+    if (!selectedProgramId) return []
+    const programReviews = reviewList.filter((r) => r.programId === selectedProgramId)
+    const studentMap = new Map<string, { name: string; studentId: string; department: string; count: number }>()
+    for (const r of programReviews) {
+      const sid = r.user.studentId ?? "unknown"
+      const existing = studentMap.get(sid)
+      if (existing) {
+        existing.count++
+      } else {
+        studentMap.set(sid, {
+          name: r.user.name,
+          studentId: sid,
+          department: r.user.department ?? "-",
+          count: 1,
+        })
+      }
+    }
+    return Array.from(studentMap.values()).filter((s) => s.count >= minReviews)
+  }, [selectedProgramId, minReviews, reviewList])
+
+  const fulfillmentColumns = [
+    { key: "name", label: "이름", className: "w-24" },
+    { key: "studentId", label: "학번", className: "w-32", hideOnMobile: true },
+    { key: "department", label: "학과", hideOnMobile: true },
+    { key: "count", label: "서평 수", className: "w-20" },
+    {
+      key: "detail",
+      label: "상세보기",
+      className: "w-24",
+      render: (_: unknown, row: { name: string; studentId: string }) => (
+        <Button variant="ghost" size="sm" onClick={() => setDetailStudent(row)}>
+          <Eye size={14} className="mr-1" /> 보기
+        </Button>
+      ),
+    },
+  ]
+
+  const detailReviews = useMemo(() => {
+    if (!detailStudent || !selectedProgramId) return []
+    return reviewList.filter(
+      (r) => r.user.studentId === detailStudent.studentId && r.programId === selectedProgramId
+    )
+  }, [detailStudent, selectedProgramId, reviewList])
+
+  /* ── Render ── */
   return (
     <div className="space-y-6">
       <PageHeader title="서평 관리" />
 
-      {/* 데이터 추출 버튼들 */}
+      {/* ───────── 대시보드 ───────── */}
       <div className="px-5 sm:px-8">
-        <div className="flex flex-wrap gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => openExportDialog("excel")}
-            className="gap-2"
-          >
-            <FileSpreadsheet size={16} className="text-emerald-600" />
-            엑셀 추출
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => openExportDialog("pdf")}
-            className="gap-2"
-          >
-            <FileText size={16} className="text-red-500" />
-            PDF 추출
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => openExportDialog("student")}
-            className="gap-2 border-primary/30 bg-primary/5 hover:bg-primary/10"
-          >
-            <Users size={16} className="text-primary" />
-            학생 데이터
-          </Button>
+        {/* 요약 카드 */}
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+          <div className="rounded-xl border border-border bg-card p-4">
+            <div className="flex items-center gap-2 text-muted-foreground">
+              <BookOpen size={16} />
+              <span className="text-xs">총 서평</span>
+            </div>
+            <p className="mt-2 text-2xl font-bold text-foreground">{dashboardStats.total}</p>
+          </div>
+          <div className="rounded-xl border border-border bg-card p-4">
+            <div className="flex items-center gap-2 text-amber-500">
+              <Star size={16} />
+              <span className="text-xs">평균 평점</span>
+            </div>
+            <p className="mt-2 text-2xl font-bold text-amber-500">{dashboardStats.avgRating.toFixed(1)}</p>
+          </div>
+          <div className="rounded-xl border border-border bg-card p-4">
+            <div className="flex items-center gap-2 text-blue-600">
+              <Users size={16} />
+              <span className="text-xs">참여 학생</span>
+            </div>
+            <p className="mt-2 text-2xl font-bold text-blue-600">{dashboardStats.uniqueStudents}</p>
+          </div>
+          <div className="rounded-xl border border-border bg-card p-4">
+            <div className="flex items-center gap-2 text-emerald-600">
+              <TrendingUp size={16} />
+              <span className="text-xs">프로그램 서평</span>
+            </div>
+            <p className="mt-2 text-2xl font-bold text-emerald-600">
+              {dashboardStats.programCount}
+              <span className="ml-1 text-sm font-normal text-muted-foreground">
+                / {dashboardStats.total}
+              </span>
+            </p>
+          </div>
+        </div>
+
+        {/* 프로그램별 분포 */}
+        <div className="mt-4">
+          <div className="rounded-xl border border-border bg-card p-4">
+            <h3 className="mb-3 flex items-center gap-2 text-xs font-bold text-muted-foreground">
+              <BarChart3 size={14} />
+              프로그램별 서평 분포
+            </h3>
+            <div className="space-y-2.5">
+              {dashboardStats.programDistArr.map((p) => (
+                <div key={p.id}>
+                  <div className="mb-1 flex items-center justify-between text-xs">
+                    <span className="font-medium text-foreground">{p.label}</span>
+                    <span className="text-muted-foreground">{p.count}편</span>
+                  </div>
+                  <div className="h-2 overflow-hidden rounded-full bg-muted">
+                    <div
+                      className="h-full rounded-full bg-primary transition-all"
+                      style={{ width: `${(p.count / dashboardStats.total) * 100}%` }}
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
       </div>
 
-      <div className="space-y-4 px-5 sm:px-8">
-        <FilterTabs tabs={filterTabs} activeTab={activeTab} onTabChange={setActiveTab} />
-        <SearchBar value={search} onChange={setSearch} placeholder="리뷰 검색..." />
-      </div>
-
       <div className="px-5 sm:px-8">
-        <DataTable columns={columns} data={filtered} />
+        <FilterTabs tabs={tabs} activeTab={activeTab} onTabChange={setActiveTab} />
       </div>
 
+      {/* ───────── 탭1: 학생별 서평 조회 ───────── */}
+      {activeTab === "student" && (
+        <div className="space-y-4">
+          {!selectedStudent ? (
+            <>
+              <div className="px-5 sm:px-8">
+                <SearchBar
+                  value={studentSearch}
+                  onChange={setStudentSearch}
+                  placeholder="학생 이름, 학번으로 검색..."
+                />
+              </div>
+              <div className="px-5 sm:px-8">
+                <div className="space-y-2">
+                  {filteredStudents.map((student) => {
+                    const reviewCount = reviewList.filter((r) => r.user.studentId === student.studentId).length
+                    return (
+                      <button
+                        key={student.id}
+                        onClick={() => setSelectedStudent(student)}
+                        className="flex w-full items-center justify-between rounded-xl border border-border bg-card p-4 text-left transition-colors hover:bg-muted/50"
+                      >
+                        <div>
+                          <p className="font-semibold text-foreground">{student.name}</p>
+                          <p className="text-xs text-muted-foreground">
+                            {student.studentId} · {student.department}
+                          </p>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="rounded-full bg-primary/10 px-2.5 py-1 text-xs font-semibold text-primary">
+                            서평 {reviewCount}편
+                          </span>
+                          <ChevronLeft size={16} className="rotate-180 text-muted-foreground" />
+                        </div>
+                      </button>
+                    )
+                  })}
+                  {filteredStudents.length === 0 && (
+                    <p className="py-8 text-center text-sm text-muted-foreground">검색 결과가 없습니다.</p>
+                  )}
+                </div>
+              </div>
+            </>
+          ) : (
+            <>
+              <div className="px-5 sm:px-8">
+                <button
+                  onClick={() => setSelectedStudent(null)}
+                  className="mb-3 flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
+                >
+                  <ChevronLeft size={16} /> 학생 목록으로
+                </button>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h2 className="text-lg font-bold">{selectedStudent.name}</h2>
+                    <p className="text-xs text-muted-foreground">
+                      {selectedStudent.studentId} · {selectedStudent.department} · 서평 {studentReviews.length}편
+                    </p>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => openExportDialog("excel", `${selectedStudent.name} 학생 서평 리스트`)}
+                      className="gap-1.5"
+                    >
+                      <List size={14} className="text-blue-600" />
+                      리스트 출력
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => openExportDialog("pdf", `${selectedStudent.name} 학생 서평 전체 (본문 포함)`)}
+                      className="gap-1.5"
+                    >
+                      <FileOutput size={14} className="text-violet-600" />
+                      전체 출력
+                    </Button>
+                  </div>
+                </div>
+              </div>
+              <div className="px-5 sm:px-8">
+                <DataTable
+                  columns={studentReviewColumns}
+                  data={studentReviews}
+                  className="[&_td]:py-1.5 [&_th]:h-9"
+                />
+              </div>
+            </>
+          )}
+        </div>
+      )}
+
+      {/* ───────── 탭2: 전체 서평 조회 ───────── */}
+      {activeTab === "all" && (
+        <div className="space-y-4">
+          <div className="px-5 sm:px-8">
+            <div className="flex flex-wrap items-center gap-2">
+              <div className="flex-1">
+                <SearchBar value={allSearch} onChange={setAllSearch} placeholder="작성자, 학번, 도서명으로 검색..." />
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => openExportDialog("excel", "전체 서평")}
+                className="gap-1.5"
+              >
+                <FileSpreadsheet size={14} className="text-emerald-600" />
+                엑셀
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => openExportDialog("pdf", "전체 서평")}
+                className="gap-1.5"
+              >
+                <FileText size={14} className="text-red-500" />
+                PDF
+              </Button>
+            </div>
+          </div>
+          <div className="px-5 sm:px-8">
+            <DataTable columns={allColumns} data={filteredAll} className="[&_td]:py-1.5 [&_th]:h-9" />
+          </div>
+        </div>
+      )}
+
+      {/* ───────── 탭3: 프로그램별 충족도 확인 ───────── */}
+      {activeTab === "program" && (
+        <div className="space-y-4">
+          <div className="px-5 sm:px-8">
+            <div className="flex flex-wrap items-end gap-3">
+              <div className="flex-1 min-w-[180px]">
+                <label className="mb-1.5 block text-xs font-medium text-muted-foreground">프로그램 선택</label>
+                <Select value={selectedProgramId} onValueChange={setSelectedProgramId}>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="프로그램을 선택하세요" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {programOptions.map((opt) => (
+                      <SelectItem key={opt.id} value={opt.id}>
+                        {opt.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="w-36">
+                <label className="mb-1.5 block text-xs font-medium text-muted-foreground">서평 N편 이상</label>
+                <input
+                  type="number"
+                  min={1}
+                  value={minReviews}
+                  onChange={(e) => setMinReviews(Math.max(1, Number(e.target.value)))}
+                  className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm"
+                />
+              </div>
+              {selectedProgramId && (
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() =>
+                      openExportDialog(
+                        "excel",
+                        `${getProgramLabel(selectedProgramId, programOptions)} 충족 학생`
+                      )
+                    }
+                    className="gap-1.5"
+                  >
+                    <FileSpreadsheet size={14} className="text-emerald-600" />
+                    엑셀
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() =>
+                      openExportDialog(
+                        "pdf",
+                        `${getProgramLabel(selectedProgramId, programOptions)} 충족 학생`
+                      )
+                    }
+                    className="gap-1.5"
+                  >
+                    <FileText size={14} className="text-red-500" />
+                    PDF
+                  </Button>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {selectedProgramId ? (
+            <div className="px-5 sm:px-8">
+              <p className="mb-3 text-sm text-muted-foreground">
+                <span className="font-semibold text-foreground">{getProgramLabel(selectedProgramId, programOptions)}</span> 프로그램에서
+                서평 <span className="font-semibold text-foreground">{minReviews}편 이상</span> 작성한 학생:{" "}
+                <span className="font-semibold text-primary">{fulfillmentData.length}명</span>
+              </p>
+              <DataTable
+                columns={fulfillmentColumns}
+                data={fulfillmentData}
+                className="[&_td]:py-1.5 [&_th]:h-9"
+              />
+            </div>
+          ) : (
+            <div className="px-5 sm:px-8">
+              <p className="py-12 text-center text-sm text-muted-foreground">
+                프로그램을 선택하면 충족도를 확인할 수 있습니다.
+              </p>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ───────── 삭제 다이얼로그 ───────── */}
       <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <DialogContent>
           <DialogHeader>
@@ -241,249 +629,169 @@ export default function AdminReviewsPage() {
         </DialogContent>
       </Dialog>
 
-      {/* 데이터 추출 다이얼로그 */}
+      {/* ───────── Export 다이얼로그 ───────── */}
       <Dialog open={exportDialogOpen} onOpenChange={setExportDialogOpen}>
         <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              {exportType === "excel" && <FileSpreadsheet size={20} className="text-emerald-600" />}
-              {exportType === "pdf" && <FileText size={20} className="text-red-500" />}
-              {exportType === "student" && <Users size={20} className="text-primary" />}
-              {exportType === "excel" ? "엑셀 추출" : exportType === "pdf" ? "PDF 추출" : "학생 데이터 추출"}
+              {exportContext.includes("리스트") ? (
+                <List size={20} className="text-blue-600" />
+              ) : exportContext.includes("전체") ? (
+                <FileOutput size={20} className="text-violet-600" />
+              ) : exportType === "excel" ? (
+                <FileSpreadsheet size={20} className="text-emerald-600" />
+              ) : (
+                <FileText size={20} className="text-red-500" />
+              )}
+              {exportContext.includes("리스트")
+                ? "리스트 출력"
+                : exportContext.includes("전체")
+                  ? "전체 출력"
+                  : exportType === "excel"
+                    ? "엑셀 추출"
+                    : "PDF 추출"}
             </DialogTitle>
           </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <label className="mb-2 block text-sm font-medium">기간 설정</label>
+              <div className="flex items-center gap-2">
+                <input
+                  type="date"
+                  value={dateRange.start}
+                  onChange={(e) => setDateRange((prev) => ({ ...prev, start: e.target.value }))}
+                  className="flex-1 rounded-lg border border-input bg-background px-3 py-2 text-sm"
+                />
+                <span className="text-muted-foreground">~</span>
+                <input
+                  type="date"
+                  value={dateRange.end}
+                  onChange={(e) => setDateRange((prev) => ({ ...prev, end: e.target.value }))}
+                  className="flex-1 rounded-lg border border-input bg-background px-3 py-2 text-sm"
+                />
+              </div>
+            </div>
+            <div className="rounded-lg bg-muted/50 p-3">
+              <p className="text-xs font-medium text-foreground">추출 범위</p>
+              <p className="mt-1 text-xs text-muted-foreground">{exportContext}</p>
+            </div>
+            {exportContext.includes("리스트") && (
+              <div className="rounded-lg bg-muted/50 p-3">
+                <p className="text-xs font-medium text-foreground">포함 항목</p>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  도서명, 저자, 프로그램, 평점, 작성일
+                </p>
+              </div>
+            )}
+            {exportContext.includes("전체") && (
+              <div className="rounded-lg bg-muted/50 p-3">
+                <p className="text-xs font-medium text-foreground">포함 항목</p>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  도서명, 저자, 프로그램, 평점, 작성일, 서평 본문 전체
+                </p>
+              </div>
+            )}
+            {!exportContext.includes("리스트") && !exportContext.includes("전체") && exportType === "excel" && (
+              <div className="rounded-lg bg-muted/50 p-3">
+                <p className="text-xs font-medium text-foreground">추출 항목</p>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  아이디(학번), 전공, 이름, 글제목, 서지사항, 글자수, 글쓴 날짜
+                </p>
+              </div>
+            )}
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setExportDialogOpen(false)}>
+                취소
+              </Button>
+              <Button onClick={handleExport} className="gap-2">
+                <Download size={16} />
+                다운로드
+              </Button>
+            </DialogFooter>
+          </div>
+        </DialogContent>
+      </Dialog>
 
-          {/* 엑셀/PDF 추출 */}
-          {(exportType === "excel" || exportType === "pdf") && (
-            <div className="space-y-4">
-              <div>
-                <label className="mb-2 block text-sm font-medium">기간 설정</label>
-                <div className="flex items-center gap-2">
-                  <input
-                    type="date"
-                    value={dateRange.start}
-                    onChange={(e) => setDateRange((prev) => ({ ...prev, start: e.target.value }))}
-                    className="flex-1 rounded-lg border border-input bg-background px-3 py-2 text-sm"
-                  />
-                  <span className="text-muted-foreground">~</span>
-                  <input
-                    type="date"
-                    value={dateRange.end}
-                    onChange={(e) => setDateRange((prev) => ({ ...prev, end: e.target.value }))}
-                    className="flex-1 rounded-lg border border-input bg-background px-3 py-2 text-sm"
-                  />
+      {/* ───────── 탭1 서평 내용 다이얼로그 ───────── */}
+      <Dialog open={!!viewingReview} onOpenChange={(open) => !open && setViewingReview(null)}>
+        <DialogContent className="max-w-lg">
+          {viewingReview && (
+            <>
+              <DialogHeader>
+                <DialogTitle>{viewingReview.book.title}</DialogTitle>
+                <DialogDescription>
+                  {viewingReview.book.author} · {getProgramLabel(viewingReview.programId, programOptions)} · {format(resolveDate(viewingReview.timeAgo), "yyyy.MM.dd")}
+                </DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4">
+                <div className="flex items-center gap-3">
+                  <span className="flex items-center gap-1 text-amber-500">
+                    {Array.from({ length: 5 }).map((_, i) => (
+                      <Star
+                        key={i}
+                        size={16}
+                        fill={i < viewingReview.rating ? "currentColor" : "none"}
+                        className={i < viewingReview.rating ? "text-amber-500" : "text-muted-foreground/30"}
+                      />
+                    ))}
+                  </span>
+                  <span className="text-sm font-semibold">{viewingReview.rating}/5</span>
+                </div>
+                <div className="rounded-lg bg-muted/50 p-4">
+                  <p className="text-sm leading-relaxed whitespace-pre-wrap">{viewingReview.text}</p>
+                </div>
+                <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                  <span>글자수: {viewingReview.text.length}자</span>
+                  <span>좋아요: {viewingReview.likes}</span>
+                  <span>댓글: {viewingReview.comments}</span>
                 </div>
               </div>
-
-              {exportType === "excel" && (
-                <div className="rounded-lg bg-muted/50 p-3">
-                  <p className="text-xs font-medium text-foreground">추출 항목</p>
-                  <p className="mt-1 text-xs text-muted-foreground">
-                    아이디(학번), 전공, 이름, 글제목, 서지사항, 글자수, 글쓴 날짜
-                  </p>
-                </div>
-              )}
-
               <DialogFooter>
-                <Button variant="outline" onClick={() => setExportDialogOpen(false)}>
-                  취소
-                </Button>
-                <Button onClick={handleExport} className="gap-2">
-                  <Download size={16} />
-                  다운로드
+                <Button variant="outline" onClick={() => setViewingReview(null)}>
+                  닫기
                 </Button>
               </DialogFooter>
-            </div>
+            </>
           )}
+        </DialogContent>
+      </Dialog>
 
-          {/* 학생 데이터 추출 */}
-          {exportType === "student" && (
-            <div className="space-y-4">
-              {/* Step 1: 학생 선택 */}
-              {studentDataStep === "select" && (
-                <>
-                  <div>
-                    <label className="mb-2 block text-sm font-medium">기간 설정</label>
-                    <div className="flex items-center gap-2">
-                      <input
-                        type="date"
-                        value={dateRange.start}
-                        onChange={(e) => setDateRange((prev) => ({ ...prev, start: e.target.value }))}
-                        className="flex-1 rounded-lg border border-input bg-background px-3 py-2 text-sm"
-                      />
-                      <span className="text-muted-foreground">~</span>
-                      <input
-                        type="date"
-                        value={dateRange.end}
-                        onChange={(e) => setDateRange((prev) => ({ ...prev, end: e.target.value }))}
-                        className="flex-1 rounded-lg border border-input bg-background px-3 py-2 text-sm"
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <div className="mb-2 flex items-center justify-between">
-                      <label className="text-sm font-medium">학생 선택</label>
-                      <button
-                        onClick={selectAllStudents}
-                        className="text-xs text-primary hover:underline"
-                      >
-                        {selectedStudents.length === filteredStudents.length ? "전체 해제" : "전체 선택"}
-                      </button>
-                    </div>
-                    <input
-                      type="text"
-                      placeholder="학생 검색 (이름, 학번, 학과)"
-                      value={studentSearch}
-                      onChange={(e) => setStudentSearch(e.target.value)}
-                      className="mb-2 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm"
-                    />
-                    <div className="max-h-48 space-y-1 overflow-y-auto rounded-lg border border-border p-2">
-                      {filteredStudents.map((student) => (
-                        <button
-                          key={student.id}
-                          onClick={() => toggleStudentSelection(student.id)}
-                          className={cn(
-                            "flex w-full items-center gap-3 rounded-lg p-2 text-left transition-colors",
-                            selectedStudents.includes(student.id)
-                              ? "bg-primary/10"
-                              : "hover:bg-muted"
-                          )}
-                        >
-                          <div
-                            className={cn(
-                              "flex h-5 w-5 items-center justify-center rounded border-2 transition-colors",
-                              selectedStudents.includes(student.id)
-                                ? "border-primary bg-primary"
-                                : "border-muted-foreground/30"
-                            )}
-                          >
-                            {selectedStudents.includes(student.id) && (
-                              <svg className="h-3 w-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                              </svg>
-                            )}
-                          </div>
-                          <div className="flex-1">
-                            <p className="text-sm font-medium">{student.name}</p>
-                            <p className="text-xs text-muted-foreground">
-                              {student.studentId} · {student.department} · {student.booksRead}권 읽음
-                            </p>
-                          </div>
-                        </button>
-                      ))}
-                    </div>
-                    <p className="mt-2 text-xs text-muted-foreground">
-                      {selectedStudents.length}명 선택됨
-                    </p>
-                  </div>
-
-                  <DialogFooter>
-                    <Button variant="outline" onClick={() => setExportDialogOpen(false)}>
-                      취소
-                    </Button>
-                    <Button
-                      onClick={() => setStudentDataStep("style")}
-                      disabled={selectedStudents.length === 0}
-                      className="gap-2"
-                    >
-                      다음
-                      <ChevronRight size={16} />
-                    </Button>
-                  </DialogFooter>
-                </>
-              )}
-
-              {/* Step 2: 출력 스타일 선택 */}
-              {studentDataStep === "style" && (
-                <>
-                  <div>
-                    <label className="mb-3 block text-sm font-medium">출력 스타일 선택</label>
-                    <div className="space-y-2">
-                      <button
-                        onClick={() => setOutputStyle("certificate")}
-                        className={cn(
-                          "flex w-full items-start gap-3 rounded-xl border-2 p-4 text-left transition-all",
-                          outputStyle === "certificate"
-                            ? "border-primary bg-primary/5"
-                            : "border-border hover:border-primary/50"
-                        )}
-                      >
-                        <div
-                          className={cn(
-                            "mt-0.5 flex h-5 w-5 items-center justify-center rounded-full border-2",
-                            outputStyle === "certificate"
-                              ? "border-primary bg-primary"
-                              : "border-muted-foreground/30"
-                          )}
-                        >
-                          {outputStyle === "certificate" && (
-                            <div className="h-2 w-2 rounded-full bg-white" />
-                          )}
-                        </div>
-                        <div className="flex-1">
-                          <p className="font-medium">독서인증서</p>
-                          <p className="mt-1 text-xs text-muted-foreground">
-                            학생별 공식 독서 인증서 형식으로 출력됩니다.<br />
-                            학교 로고, 학생 정보, 읽은 도서 목록이 포함됩니다.
-                          </p>
-                        </div>
-                      </button>
-
-                      <button
-                        onClick={() => setOutputStyle("list")}
-                        className={cn(
-                          "flex w-full items-start gap-3 rounded-xl border-2 p-4 text-left transition-all",
-                          outputStyle === "list"
-                            ? "border-primary bg-primary/5"
-                            : "border-border hover:border-primary/50"
-                        )}
-                      >
-                        <div
-                          className={cn(
-                            "mt-0.5 flex h-5 w-5 items-center justify-center rounded-full border-2",
-                            outputStyle === "list"
-                              ? "border-primary bg-primary"
-                              : "border-muted-foreground/30"
-                          )}
-                        >
-                          {outputStyle === "list" && (
-                            <div className="h-2 w-2 rounded-full bg-white" />
-                          )}
-                        </div>
-                        <div className="flex-1">
-                          <p className="font-medium">독서목록</p>
-                          <p className="mt-1 text-xs text-muted-foreground">
-                            학생이 읽은 도서 목록을 표 형식으로 출력합니다.<br />
-                            도서명, 저자, 읽은 날짜, 프로그램 정보가 포함됩니다.
-                          </p>
-                        </div>
-                      </button>
-                    </div>
-                  </div>
-
-                  <div className="rounded-lg bg-muted/50 p-3">
-                    <p className="text-xs font-medium text-foreground">추출 정보</p>
-                    <p className="mt-1 text-xs text-muted-foreground">
-                      선택된 학생: {selectedStudents.length}명<br />
-                      기간: {dateRange.start} ~ {dateRange.end}<br />
-                      출력형식: PDF
-                    </p>
-                  </div>
-
-                  <DialogFooter>
-                    <Button variant="outline" onClick={() => setStudentDataStep("select")}>
-                      이전
-                    </Button>
-                    <Button onClick={handleStudentDataExport} className="gap-2">
-                      <Download size={16} />
-                      PDF 다운로드
-                    </Button>
-                  </DialogFooter>
-                </>
-              )}
-            </div>
-          )}
+      {/* ───────── 탭3 상세보기 다이얼로그 ───────── */}
+      <Dialog open={!!detailStudent} onOpenChange={(open) => !open && setDetailStudent(null)}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>
+              {detailStudent?.name} 학생 서평 ({getProgramLabel(selectedProgramId, programOptions)})
+            </DialogTitle>
+            <DialogDescription>
+              학번: {detailStudent?.studentId}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="max-h-80 space-y-3 overflow-y-auto">
+            {detailReviews.map((r) => (
+              <div key={r.id} className="rounded-lg border border-border p-3">
+                <div className="flex items-center justify-between">
+                  <p className="font-medium text-sm">{r.book.title}</p>
+                  <span className="flex items-center gap-1 text-xs text-amber-500">
+                    <Star size={10} fill="currentColor" /> {r.rating}
+                  </span>
+                </div>
+                <p className="mt-1 text-xs text-muted-foreground">{r.book.author}</p>
+                <p className="mt-2 text-xs leading-relaxed text-foreground/80 line-clamp-3">{r.text}</p>
+                <p className="mt-2 text-[11px] text-muted-foreground">
+                  {format(resolveDate(r.timeAgo), "yyyy.MM.dd")}
+                </p>
+              </div>
+            ))}
+            {detailReviews.length === 0 && (
+              <p className="py-6 text-center text-sm text-muted-foreground">서평이 없습니다.</p>
+            )}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDetailStudent(null)}>
+              닫기
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>

@@ -6,21 +6,21 @@ import {
   Search,
   Award,
   BookOpen,
-  Shield,
   ShieldCheck,
   GraduationCap,
-  MoreHorizontal,
   ChevronDown,
   Plus,
   Minus,
-  AlertTriangle,
-  Ban,
-  CheckCircle,
   X,
   Calendar,
   MessageCircle,
   Star,
+  Zap,
+  ChevronLeft,
 } from "lucide-react"
+import { format, subHours, subDays } from "date-fns"
+import { reviews as allReviews } from "@/lib/mock-data"
+import { usePrograms } from "@/lib/program-context"
 import { cn } from "@/lib/utils"
 
 // Mock user data
@@ -28,6 +28,7 @@ const mockUsers = [
   {
     id: 1,
     name: "김민준",
+    nickname: "책벌레민준",
     email: "minjun.kim@skku.edu",
     studentId: "2021310001",
     department: "국어국문학과",
@@ -39,11 +40,11 @@ const mockUsers = [
     programs: { dokmo: 5, dokto: 3 },
     joinedAt: "2024-03-15",
     lastActive: "2025-02-12",
-    status: "active" as const,
   },
   {
     id: 2,
     name: "이서연",
+    nickname: "철학하는곰",
     email: "seoyeon.lee@skku.edu",
     studentId: "2020310042",
     department: "철학과",
@@ -55,11 +56,11 @@ const mockUsers = [
     programs: { dokmo: 12, dokto: 8 },
     joinedAt: "2024-01-10",
     lastActive: "2025-02-12",
-    status: "active" as const,
   },
   {
     id: 3,
     name: "박지훈",
+    nickname: "코딩독서가",
     email: "jihun.park@skku.edu",
     studentId: "2022310088",
     department: "컴퓨터공학과",
@@ -71,11 +72,11 @@ const mockUsers = [
     programs: { dokmo: 2, dokto: 1 },
     joinedAt: "2024-09-01",
     lastActive: "2025-02-10",
-    status: "warning" as const,
   },
   {
     id: 4,
     name: "최수아",
+    nickname: "경영학멘토",
     email: "sua.choi@skku.edu",
     studentId: "P2019001",
     department: "경영학과",
@@ -87,11 +88,11 @@ const mockUsers = [
     programs: { dokmo: 0, dokto: 15 },
     joinedAt: "2024-02-20",
     lastActive: "2025-02-12",
-    status: "active" as const,
   },
   {
     id: 5,
     name: "정도윤",
+    nickname: "역사탐험가",
     email: "doyun.jung@skku.edu",
     studentId: "2023310156",
     department: "역사학과",
@@ -103,11 +104,11 @@ const mockUsers = [
     programs: { dokmo: 1, dokto: 0 },
     joinedAt: "2024-11-05",
     lastActive: "2025-02-08",
-    status: "suspended" as const,
   },
   {
     id: 6,
     name: "한예진",
+    nickname: "영문학소녀",
     email: "yejin.han@skku.edu",
     studentId: "2021310234",
     department: "영어영문학과",
@@ -119,11 +120,11 @@ const mockUsers = [
     programs: { dokmo: 8, dokto: 6 },
     joinedAt: "2024-04-12",
     lastActive: "2025-02-11",
-    status: "active" as const,
   },
   {
     id: 7,
     name: "오관리",
+    nickname: "관리자",
     email: "admin@skku.edu",
     studentId: "A0001",
     department: "도서관",
@@ -135,12 +136,10 @@ const mockUsers = [
     programs: { dokmo: 0, dokto: 0 },
     joinedAt: "2024-01-01",
     lastActive: "2025-02-12",
-    status: "active" as const,
   },
 ]
 
 type UserRole = "student" | "professor" | "admin"
-type UserStatus = "active" | "warning" | "suspended"
 type FilterType = "all" | "student" | "professor" | "admin"
 
 const roleLabels: Record<UserRole, string> = {
@@ -155,16 +154,13 @@ const roleColors: Record<UserRole, { bg: string; text: string }> = {
   admin: { bg: "bg-purple-100", text: "text-purple-700" },
 }
 
-const statusLabels: Record<UserStatus, string> = {
-  active: "정상",
-  warning: "경고",
-  suspended: "정지",
-}
-
-const statusColors: Record<UserStatus, { bg: string; text: string }> = {
-  active: { bg: "bg-emerald-100", text: "text-emerald-700" },
-  warning: { bg: "bg-amber-100", text: "text-amber-700" },
-  suspended: { bg: "bg-red-100", text: "text-red-700" },
+function resolveDate(timeAgo: string): Date {
+  const now = new Date()
+  const hourMatch = timeAgo.match(/(\d+)시간/)
+  const dayMatch = timeAgo.match(/(\d+)일/)
+  if (hourMatch) return subHours(now, Number(hourMatch[1]))
+  if (dayMatch) return subDays(now, Number(dayMatch[1]))
+  return now
 }
 
 export default function AdminUsersPage() {
@@ -175,6 +171,10 @@ export default function AdminUsersPage() {
   const [stampModal, setStampModal] = useState<{ userId: number; type: "add" | "remove" } | null>(null)
   const [stampAmount, setStampAmount] = useState(1)
   const [roleChangeModal, setRoleChangeModal] = useState<number | null>(null)
+  const [showingReviews, setShowingReviews] = useState(false)
+  const [viewingReview, setViewingReview] = useState<typeof allReviews[number] | null>(null)
+  const { getAllProgramOptions } = usePrograms()
+  const programOptions = getAllProgramOptions()
 
   const filteredUsers = useMemo(() => {
     let result = users
@@ -202,9 +202,13 @@ export default function AdminUsersPage() {
     students: users.filter((u) => u.role === "student").length,
     professors: users.filter((u) => u.role === "professor").length,
     admins: users.filter((u) => u.role === "admin").length,
-    suspended: users.filter((u) => u.status === "suspended").length,
     totalStamps: users.reduce((sum, u) => sum + u.stamps, 0),
   }
+
+  const userReviews = useMemo(() => {
+    if (!selectedUser) return []
+    return allReviews.filter((r) => r.user.name === selectedUser.name)
+  }, [selectedUser])
 
   const handleStampChange = () => {
     if (!stampModal) return
@@ -229,12 +233,10 @@ export default function AdminUsersPage() {
     setRoleChangeModal(null)
   }
 
-  const handleStatusChange = (userId: number, newStatus: UserStatus) => {
-    setUsers((prev) =>
-      prev.map((u) =>
-        u.id === userId ? { ...u, status: newStatus } : u
-      )
-    )
+  function getProgramLabel(programId?: string) {
+    if (!programId) return "-"
+    const opt = programOptions.find((o) => o.id === programId)
+    return opt?.label ?? programId
   }
 
   return (
@@ -248,7 +250,7 @@ export default function AdminUsersPage() {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
         <div className="rounded-xl border border-border bg-card p-4">
           <div className="flex items-center gap-2 text-muted-foreground">
             <Users size={16} />
@@ -283,13 +285,6 @@ export default function AdminUsersPage() {
             <span className="text-xs">총 스탬프</span>
           </div>
           <p className="mt-2 text-2xl font-bold text-amber-600">{stats.totalStamps}</p>
-        </div>
-        <div className="rounded-xl border border-border bg-card p-4">
-          <div className="flex items-center gap-2 text-red-500">
-            <Ban size={16} />
-            <span className="text-xs">정지 회원</span>
-          </div>
-          <p className="mt-2 text-2xl font-bold text-red-500">{stats.suspended}</p>
         </div>
       </div>
 
@@ -350,9 +345,6 @@ export default function AdminUsersPage() {
                   활동
                 </th>
                 <th className="px-4 py-3 text-center text-xs font-medium text-muted-foreground">
-                  상태
-                </th>
-                <th className="px-4 py-3 text-center text-xs font-medium text-muted-foreground">
                   관리
                 </th>
               </tr>
@@ -361,10 +353,7 @@ export default function AdminUsersPage() {
               {filteredUsers.map((user) => (
                 <tr
                   key={user.id}
-                  className={cn(
-                    "transition-colors hover:bg-muted/30",
-                    user.status === "suspended" && "bg-red-50/50"
-                  )}
+                  className="transition-colors hover:bg-muted/30"
                 >
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-3">
@@ -375,13 +364,11 @@ export default function AdminUsersPage() {
                         crossOrigin="anonymous"
                       />
                       <div>
-                        <p className="text-sm font-medium text-foreground">
-                          {user.name}
+                        <p className="text-sm text-foreground">
+                          <span className="font-medium">{user.name}</span>
+                          <span className="ml-1.5 text-[11px] text-muted-foreground">@{user.nickname}</span>
                         </p>
                         <p className="text-[11px] text-muted-foreground">
-                          {user.email}
-                        </p>
-                        <p className="text-[10px] text-muted-foreground">
                           {user.department} · {user.studentId}
                         </p>
                       </div>
@@ -437,55 +424,12 @@ export default function AdminUsersPage() {
                     </div>
                   </td>
                   <td className="px-4 py-3 text-center">
-                    <span
-                      className={cn(
-                        "inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-medium",
-                        statusColors[user.status].bg,
-                        statusColors[user.status].text
-                      )}
+                    <button
+                      onClick={() => { setSelectedUser(user); setShowingReviews(false) }}
+                      className="rounded-lg px-3 py-1.5 text-xs font-medium text-primary transition-colors hover:bg-primary/10"
                     >
-                      {user.status === "active" && <CheckCircle size={10} />}
-                      {user.status === "warning" && <AlertTriangle size={10} />}
-                      {user.status === "suspended" && <Ban size={10} />}
-                      {statusLabels[user.status]}
-                    </span>
-                  </td>
-                  <td className="px-4 py-3 text-center">
-                    <div className="flex items-center justify-center gap-1">
-                      <button
-                        onClick={() => setSelectedUser(user)}
-                        className="rounded-lg px-3 py-1.5 text-xs font-medium text-primary transition-colors hover:bg-primary/10"
-                      >
-                        상세
-                      </button>
-                      {user.status === "active" && (
-                        <button
-                          onClick={() => handleStatusChange(user.id, "warning")}
-                          className="rounded-lg p-1.5 text-amber-500 transition-colors hover:bg-amber-100"
-                          title="경고"
-                        >
-                          <AlertTriangle size={14} />
-                        </button>
-                      )}
-                      {user.status === "warning" && (
-                        <button
-                          onClick={() => handleStatusChange(user.id, "suspended")}
-                          className="rounded-lg p-1.5 text-red-500 transition-colors hover:bg-red-100"
-                          title="정지"
-                        >
-                          <Ban size={14} />
-                        </button>
-                      )}
-                      {user.status === "suspended" && (
-                        <button
-                          onClick={() => handleStatusChange(user.id, "active")}
-                          className="rounded-lg p-1.5 text-emerald-500 transition-colors hover:bg-emerald-100"
-                          title="해제"
-                        >
-                          <CheckCircle size={14} />
-                        </button>
-                      )}
-                    </div>
+                      상세
+                    </button>
                   </td>
                 </tr>
               ))}
@@ -505,95 +449,178 @@ export default function AdminUsersPage() {
       {selectedUser && (
         <div
           className="fixed inset-0 z-[100] flex items-center justify-center bg-foreground/50 p-4 backdrop-blur-sm"
-          onClick={() => setSelectedUser(null)}
+          onClick={() => { setSelectedUser(null); setShowingReviews(false); setViewingReview(null) }}
         >
           <div
             className="w-full max-w-lg overflow-hidden rounded-2xl border border-border bg-card shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between border-b border-border px-6 py-4">
-              <h3 className="text-lg font-bold text-foreground">회원 상세 정보</h3>
+              <div className="flex items-center gap-2">
+                {showingReviews && (
+                  <button
+                    onClick={() => { setShowingReviews(false); setViewingReview(null) }}
+                    className="rounded-full p-1 text-muted-foreground transition-colors hover:bg-muted"
+                  >
+                    <ChevronLeft size={18} />
+                  </button>
+                )}
+                <h3 className="text-lg font-bold text-foreground">
+                  {showingReviews ? `${selectedUser.name}의 서평` : "회원 상세 정보"}
+                </h3>
+              </div>
               <button
-                onClick={() => setSelectedUser(null)}
+                onClick={() => { setSelectedUser(null); setShowingReviews(false); setViewingReview(null) }}
                 className="rounded-full p-2 text-muted-foreground transition-colors hover:bg-muted"
               >
                 <X size={18} />
               </button>
             </div>
-            <div className="p-6">
-              {/* Profile */}
-              <div className="flex items-center gap-4">
-                <img
-                  src={selectedUser.avatar}
-                  alt={selectedUser.name}
-                  className="h-16 w-16 rounded-full object-cover"
-                  crossOrigin="anonymous"
-                />
-                <div>
-                  <h4 className="text-lg font-bold text-foreground">{selectedUser.name}</h4>
-                  <p className="text-sm text-muted-foreground">{selectedUser.email}</p>
-                  <p className="text-xs text-muted-foreground">
-                    {selectedUser.department} · {selectedUser.studentId}
-                  </p>
-                </div>
-              </div>
 
-              {/* Stats Grid */}
-              <div className="mt-6 grid grid-cols-3 gap-3">
-                <div className="rounded-xl bg-amber-50 p-3 text-center">
-                  <Award size={20} className="mx-auto text-amber-600" />
-                  <p className="mt-1 text-lg font-bold text-amber-600">{selectedUser.stamps}</p>
-                  <p className="text-[10px] text-amber-700">스탬프</p>
-                </div>
-                <div className="rounded-xl bg-emerald-50 p-3 text-center">
-                  <MessageCircle size={20} className="mx-auto text-emerald-600" />
-                  <p className="mt-1 text-lg font-bold text-emerald-600">{selectedUser.reviews}</p>
-                  <p className="text-[10px] text-emerald-700">서평</p>
-                </div>
-                <div className="rounded-xl bg-purple-50 p-3 text-center">
-                  <Star size={20} className="mx-auto text-purple-600" />
-                  <p className="mt-1 text-lg font-bold text-purple-600">{selectedUser.badges}</p>
-                  <p className="text-[10px] text-purple-700">뱃지</p>
-                </div>
-              </div>
-
-              {/* Program Participation */}
-              <div className="mt-4 rounded-xl border border-border p-4">
-                <h5 className="mb-3 text-xs font-bold text-muted-foreground">프로그램 참여</h5>
-                <div className="flex gap-4">
-                  <div className="flex items-center gap-2">
-                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-100">
-                      <BookOpen size={14} className="text-emerald-600" />
-                    </div>
-                    <div>
-                      <p className="text-sm font-bold text-foreground">{selectedUser.programs.dokmo}</p>
-                      <p className="text-[10px] text-muted-foreground">번독 참여</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-tangerine/20">
-                      <GraduationCap size={14} className="text-tangerine" />
-                    </div>
-                    <div>
-                      <p className="text-sm font-bold text-foreground">{selectedUser.programs.dokto}</p>
-                      <p className="text-[10px] text-muted-foreground">고전100선 참여</p>
-                    </div>
+            {!showingReviews ? (
+              <div className="p-6">
+                {/* Profile */}
+                <div className="flex items-center gap-4">
+                  <img
+                    src={selectedUser.avatar}
+                    alt={selectedUser.name}
+                    className="h-16 w-16 rounded-full object-cover"
+                    crossOrigin="anonymous"
+                  />
+                  <div>
+                    <p className="text-lg font-bold text-foreground">
+                      {selectedUser.name}
+                      <span className="ml-2 text-sm font-normal text-muted-foreground">@{selectedUser.nickname}</span>
+                    </p>
+                    <p className="text-sm text-muted-foreground">{selectedUser.email}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {selectedUser.department} · {selectedUser.studentId}
+                    </p>
                   </div>
                 </div>
-              </div>
 
-              {/* Dates */}
-              <div className="mt-4 flex gap-4 text-xs text-muted-foreground">
-                <div className="flex items-center gap-1">
-                  <Calendar size={12} />
-                  가입일: {selectedUser.joinedAt}
+                {/* Stats Grid */}
+                <div className="mt-6 grid grid-cols-3 gap-3">
+                  <div className="rounded-xl bg-amber-50 p-3 text-center">
+                    <Award size={20} className="mx-auto text-amber-600" />
+                    <p className="mt-1 text-lg font-bold text-amber-600">{selectedUser.stamps}</p>
+                    <p className="text-[10px] text-amber-700">스탬프</p>
+                  </div>
+                  <button
+                    onClick={() => setShowingReviews(true)}
+                    className="rounded-xl bg-emerald-50 p-3 text-center transition-colors hover:bg-emerald-100"
+                  >
+                    <MessageCircle size={20} className="mx-auto text-emerald-600" />
+                    <p className="mt-1 text-lg font-bold text-emerald-600">{selectedUser.reviews}</p>
+                    <p className="text-[10px] text-emerald-700">서평 보기 &rarr;</p>
+                  </button>
+                  <div className="rounded-xl bg-purple-50 p-3 text-center">
+                    <Star size={20} className="mx-auto text-purple-600" />
+                    <p className="mt-1 text-lg font-bold text-purple-600">{selectedUser.badges}</p>
+                    <p className="text-[10px] text-purple-700">뱃지</p>
+                  </div>
                 </div>
-                <div className="flex items-center gap-1">
-                  <Calendar size={12} />
-                  최근 활동: {selectedUser.lastActive}
+
+                {/* Program Participation */}
+                <div className="mt-4 rounded-xl border border-border p-4">
+                  <h5 className="mb-3 text-xs font-bold text-muted-foreground">프로그램 참여</h5>
+                  <div className="flex gap-4">
+                    <div className="flex items-center gap-2">
+                      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-amber-100">
+                        <Zap size={14} className="text-amber-600" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-bold text-foreground">{selectedUser.programs.dokmo}</p>
+                        <p className="text-[10px] text-muted-foreground">번독 참여</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-tangerine/20">
+                        <GraduationCap size={14} className="text-tangerine" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-bold text-foreground">{selectedUser.programs.dokto}</p>
+                        <p className="text-[10px] text-muted-foreground">고전100선 참여</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Dates */}
+                <div className="mt-4 flex gap-4 text-xs text-muted-foreground">
+                  <div className="flex items-center gap-1">
+                    <Calendar size={12} />
+                    가입일: {selectedUser.joinedAt}
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <Calendar size={12} />
+                    최근 활동: {selectedUser.lastActive}
+                  </div>
                 </div>
               </div>
-            </div>
+            ) : (
+              <div className="p-6">
+                {!viewingReview ? (
+                  <div className="max-h-80 space-y-2 overflow-y-auto">
+                    {userReviews.length === 0 && (
+                      <p className="py-8 text-center text-sm text-muted-foreground">작성한 서평이 없습니다.</p>
+                    )}
+                    {userReviews.map((r) => (
+                      <button
+                        key={r.id}
+                        onClick={() => setViewingReview(r)}
+                        className="flex w-full items-center justify-between rounded-lg border border-border p-3 text-left transition-colors hover:bg-muted/50"
+                      >
+                        <div className="flex-1">
+                          <p className="text-sm font-medium text-foreground">{r.book.title}</p>
+                          <p className="mt-0.5 text-xs text-muted-foreground">
+                            {r.book.author} · {getProgramLabel(r.programId)} · {format(resolveDate(r.timeAgo), "yyyy.MM.dd")}
+                          </p>
+                        </div>
+                        <div className="flex items-center gap-1 text-amber-500">
+                          <Star size={12} fill="currentColor" />
+                          <span className="text-xs font-semibold">{r.rating}</span>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    <button
+                      onClick={() => setViewingReview(null)}
+                      className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
+                    >
+                      <ChevronLeft size={16} /> 서평 목록으로
+                    </button>
+                    <div>
+                      <h4 className="text-base font-bold text-foreground">{viewingReview.book.title}</h4>
+                      <p className="text-xs text-muted-foreground">
+                        {viewingReview.book.author} · {getProgramLabel(viewingReview.programId)} · {format(resolveDate(viewingReview.timeAgo), "yyyy.MM.dd")}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      {Array.from({ length: 5 }).map((_, i) => (
+                        <Star
+                          key={i}
+                          size={16}
+                          fill={i < viewingReview.rating ? "currentColor" : "none"}
+                          className={i < viewingReview.rating ? "text-amber-500" : "text-muted-foreground/30"}
+                        />
+                      ))}
+                      <span className="ml-1 text-sm font-semibold">{viewingReview.rating}/5</span>
+                    </div>
+                    <div className="max-h-48 overflow-y-auto rounded-lg bg-muted/50 p-4">
+                      <p className="text-sm leading-relaxed whitespace-pre-wrap">{viewingReview.text}</p>
+                    </div>
+                    <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                      <span>글자수: {viewingReview.text.length}자</span>
+                      <span>좋아요: {viewingReview.likes}</span>
+                      <span>댓글: {viewingReview.comments}</span>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </div>
       )}

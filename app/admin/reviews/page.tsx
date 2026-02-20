@@ -74,14 +74,7 @@ export default function AdminReviewsPage() {
       .map(([id, count]) => ({ id, label: getProgramLabel(id, programOptions), count }))
       .sort((a, b) => b.count - a.count)
 
-    // 평점 분포
-    const ratingDist = [0, 0, 0, 0, 0]
-    for (const r of reviewList) {
-      if (r.rating >= 1 && r.rating <= 5) ratingDist[r.rating - 1]++
-    }
-    const maxRating = Math.max(...ratingDist, 1)
-
-    return { total, avgRating, uniqueStudents, programCount, programDistArr, ratingDist, maxRating }
+    return { total, avgRating, uniqueStudents, programCount, programDistArr }
   }, [reviewList, programOptions])
 
   // 공통: 삭제
@@ -372,9 +365,8 @@ export default function AdminReviewsPage() {
           </div>
         </div>
 
-        {/* 프로그램별 분포 + 평점 분포 */}
-        <div className="mt-4 grid gap-4 sm:grid-cols-2">
-          {/* 프로그램별 분포 */}
+        {/* 프로그램별 분포 */}
+        <div className="mt-4">
           <div className="rounded-xl border border-border bg-card p-4">
             <h3 className="mb-3 flex items-center gap-2 text-xs font-bold text-muted-foreground">
               <BarChart3 size={14} />
@@ -395,33 +387,6 @@ export default function AdminReviewsPage() {
                   </div>
                 </div>
               ))}
-            </div>
-          </div>
-
-          {/* 평점 분포 */}
-          <div className="rounded-xl border border-border bg-card p-4">
-            <h3 className="mb-3 flex items-center gap-2 text-xs font-bold text-muted-foreground">
-              <Star size={14} />
-              평점 분포
-            </h3>
-            <div className="space-y-2">
-              {[5, 4, 3, 2, 1].map((rating) => {
-                const count = dashboardStats.ratingDist[rating - 1]
-                return (
-                  <div key={rating} className="flex items-center gap-2">
-                    <span className="flex w-10 items-center gap-0.5 text-xs font-medium text-amber-500">
-                      {rating} <Star size={10} fill="currentColor" />
-                    </span>
-                    <div className="h-2 flex-1 overflow-hidden rounded-full bg-muted">
-                      <div
-                        className="h-full rounded-full bg-amber-400 transition-all"
-                        style={{ width: `${(count / dashboardStats.maxRating) * 100}%` }}
-                      />
-                    </div>
-                    <span className="w-6 text-right text-xs text-muted-foreground">{count}</span>
-                  </div>
-                )
-              })}
             </div>
           </div>
         </div>

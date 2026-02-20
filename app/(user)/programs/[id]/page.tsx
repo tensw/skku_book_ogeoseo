@@ -149,12 +149,12 @@ export default function BundokDetailPage() {
           <h2 className="text-sm font-bold text-foreground mb-3">모임 정보</h2>
           <div className="flex flex-col gap-2.5">
             <div className="flex items-center gap-3">
-              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10">
-                <Clock size={14} className="text-primary" />
+              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-amber-100">
+                <Clock size={14} className="text-amber-600" />
               </div>
               <div>
-                <p className="text-xs font-medium text-foreground">{formatDate(bundok.date)} {bundok.time}</p>
-                <p className="text-[10px] text-muted-foreground">{bundok.duration}분 소요</p>
+                <p className="text-xs font-semibold text-amber-700">{formatDate(bundok.date)} {bundok.time}</p>
+                <p className="text-[10px] text-amber-500">{bundok.duration}분 소요</p>
               </div>
             </div>
 
@@ -194,7 +194,10 @@ export default function BundokDetailPage() {
             crossOrigin="anonymous"
           />
           <div>
-            <p className="text-xs font-bold text-foreground">{bundok.host}</p>
+            <p className="text-xs font-bold text-foreground">
+              {bundok.hostNickname}
+              <span className="ml-1 text-[10px] font-normal text-muted-foreground">{bundok.host}</span>
+            </p>
             <p className="text-[10px] text-muted-foreground">모임 개설자</p>
           </div>
         </div>

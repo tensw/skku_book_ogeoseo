@@ -10,9 +10,9 @@ import {
   Heart,
   MessageCircle,
   Star,
-  Plus,
   Wifi,
   Monitor,
+  Zap,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useAuth } from "@/lib/auth-context"
@@ -93,9 +93,9 @@ export function HomePage() {
           {monthlyRecommended.map((book) => (
             <div
               key={book.id}
-              className="group flex w-24 flex-shrink-0 flex-col items-center gap-2"
+              className="group flex w-[100px] flex-shrink-0 flex-col items-center gap-1.5"
             >
-              <div className="relative h-32 w-22 overflow-hidden rounded-2xl shadow-md ring-1 ring-border transition-transform group-hover:scale-105">
+              <div className="relative aspect-[2/3] w-full overflow-hidden rounded-md shadow-md ring-1 ring-border transition-transform group-hover:scale-105">
                 <img
                   src={book.cover || "/placeholder.svg"}
                   alt={book.title}
@@ -106,7 +106,7 @@ export function HomePage() {
               <span className={cn("rounded-full px-2 py-0.5 text-[9px] font-bold", book.color)}>
                 {book.category}
               </span>
-              <p className="w-20 truncate text-center text-[10px] font-medium text-foreground">{book.title}</p>
+              <p className="w-full truncate text-center text-[10px] font-medium text-foreground">{book.title}</p>
             </div>
           ))}
         </div>
@@ -116,12 +116,14 @@ export function HomePage() {
       <section className="mt-6 px-5 sm:px-8">
         <div className="mb-3 flex items-center justify-between">
           <h2 className="flex items-center gap-2 text-sm font-bold text-foreground">
-            <Users size={14} className="text-primary" />
-            지금 모집 중인 번독
+            <div className="flex h-5 w-5 items-center justify-center rounded-md bg-gradient-to-br from-amber-400 to-orange-500">
+              <Zap size={11} className="text-white" fill="white" />
+            </div>
+            지금 모집 중인 <span className="bg-gradient-to-r from-amber-500 to-orange-500 bg-clip-text text-transparent">번독</span>
           </h2>
           <Link
             href="/programs"
-            className="rounded-full bg-primary/10 px-3 py-1 text-[10px] font-semibold text-primary transition-colors hover:bg-primary/20"
+            className="rounded-full bg-amber-50 px-3 py-1 text-[10px] font-semibold text-amber-600 transition-colors hover:bg-amber-100"
           >
             전체 보기
           </Link>
@@ -136,10 +138,13 @@ export function HomePage() {
               <Link
                 key={bundok.id}
                 href={`/programs/${bundok.id}`}
-                className="group relative w-56 flex-shrink-0 overflow-hidden rounded-2xl border border-border bg-card shadow-sm transition-all hover:shadow-md hover:scale-[1.02]"
+                className="group relative w-56 flex-shrink-0 overflow-hidden rounded-2xl border border-amber-200/80 bg-card shadow-sm transition-all hover:shadow-md hover:shadow-amber-100/50 hover:border-amber-400 hover:scale-[1.02]"
               >
+                {/* 번개 accent top bar */}
+                <div className="absolute left-4 right-4 top-0 h-[3px] rounded-b-full bg-gradient-to-r from-amber-400 to-orange-500" />
+
                 {/* 도서 커버 배경 */}
-                <div className="relative h-28 overflow-hidden bg-gradient-to-br from-primary/20 to-emerald/10">
+                <div className="relative h-28 overflow-hidden bg-gradient-to-br from-amber-50 to-orange-50">
                   <img
                     src={bundok.bookCover || "/placeholder.svg"}
                     alt={bundok.book}
@@ -150,6 +155,12 @@ export function HomePage() {
                     <span className="inline-flex items-center gap-1 rounded-full bg-white/90 px-2 py-0.5 text-[9px] font-bold text-foreground shadow-sm backdrop-blur-sm">
                       <FormatIcon size={10} />
                       {formatLabels[bundok.format]}
+                    </span>
+                  </div>
+                  <div className="absolute left-3 bottom-2">
+                    <span className="inline-flex items-center gap-0.5 rounded-full bg-amber-500 px-2 py-0.5 text-[9px] font-bold text-white shadow-sm">
+                      <Zap size={8} fill="currentColor" />
+                      모집 중
                     </span>
                   </div>
                   {isJoined && (
@@ -163,24 +174,29 @@ export function HomePage() {
                 <div className="p-3">
                   <h3 className="text-sm font-bold text-foreground line-clamp-1">{bundok.title}</h3>
                   <p className="mt-0.5 text-[10px] text-muted-foreground">{bundok.book} · {bundok.bookAuthor}</p>
-                  <div className="mt-2 flex items-center gap-3 text-[10px] text-muted-foreground">
-                    <span className="flex items-center gap-0.5">
-                      <Clock size={10} />
+                  {/* 날짜/시간 하이라이트 */}
+                  <div className="mt-2 inline-flex items-center gap-1.5 rounded-lg bg-amber-50 px-2 py-1">
+                    <Clock size={11} className="text-amber-600" />
+                    <span className="text-[11px] font-semibold text-amber-700">
                       {bundok.date.slice(5)} {bundok.time}
                     </span>
-                    <span className="flex items-center gap-0.5">
+                    <span className="text-[9px] text-amber-500">({bundok.duration}분)</span>
+                  </div>
+                  <div className="mt-1.5 flex items-center justify-between">
+                    <div className="flex items-center gap-1.5">
+                      <img
+                        src={bundok.hostAvatar || "/placeholder.svg"}
+                        alt={bundok.hostNickname}
+                        className="h-4 w-4 rounded-full object-cover"
+                        crossOrigin="anonymous"
+                      />
+                      <span className="text-[10px] font-medium text-foreground">{bundok.hostNickname}</span>
+                      <span className="text-[9px] text-muted-foreground">{bundok.host}</span>
+                    </div>
+                    <span className="flex items-center gap-0.5 text-[10px] text-muted-foreground">
                       <Users size={10} />
                       {bundok.currentMembers}/{bundok.maxMembers}
                     </span>
-                  </div>
-                  <div className="mt-2 flex items-center gap-1.5">
-                    <img
-                      src={bundok.hostAvatar || "/placeholder.svg"}
-                      alt={bundok.host}
-                      className="h-4 w-4 rounded-full object-cover"
-                      crossOrigin="anonymous"
-                    />
-                    <span className="text-[10px] text-muted-foreground">{bundok.host}</span>
                   </div>
                 </div>
               </Link>
@@ -188,8 +204,9 @@ export function HomePage() {
           })}
 
           {recruitingBundoks.length === 0 && (
-            <div className="flex w-full items-center justify-center rounded-2xl border-2 border-dashed border-border py-10">
-              <p className="text-sm text-muted-foreground">모집 중인 번독이 없습니다</p>
+            <div className="flex w-full items-center justify-center rounded-2xl border-2 border-dashed border-amber-200 bg-amber-50/30 py-10">
+              <Zap size={24} className="text-amber-400" />
+              <p className="ml-2 text-sm text-muted-foreground">모집 중인 번독이 없습니다</p>
             </div>
           )}
         </div>
@@ -210,7 +227,7 @@ export function HomePage() {
           </Link>
         </div>
 
-        <div className="flex flex-col gap-3">
+        <div className="grid grid-cols-1 gap-3 lg:grid-cols-3">
           {latestReviews.map((review) => (
             <Link
               key={review.id}
@@ -259,18 +276,6 @@ export function HomePage() {
         </div>
       </section>
 
-      {/* FAB 번독 개설하기 */}
-      <Link
-        href="/programs/create"
-        className="fixed bottom-20 right-5 z-40 flex h-14 w-14 items-center justify-center rounded-full bg-primary text-white shadow-lg transition-transform hover:scale-110 active:scale-95 sm:bottom-8 sm:right-8 sm:h-auto sm:w-auto sm:rounded-full sm:px-5 sm:py-3"
-        aria-label="번독 개설하기"
-      >
-        <Plus size={24} className="sm:hidden" />
-        <span className="hidden items-center gap-2 text-sm font-bold sm:flex">
-          <Plus size={16} />
-          번독 개설
-        </span>
-      </Link>
     </div>
   )
 }
